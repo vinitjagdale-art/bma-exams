@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bright Minds Academy - 10th Arithmetic Progression 2</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root { --primary-bg: #1b3022; --text-color: #ffffff; --accent-color: #4CAF50; --error: #ff5252; --correct: #81c784; --answered: #ff9800; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--primary-bg); color: var(--text-color); margin: 0; padding: 10px; display: flex; justify-content: center; }
+        #exam-container { width: 100%; max-width: 850px; background: rgba(255, 255, 255, 0.1); padding: 1.5rem; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+        .page { display: none; }
+        .active { display: block; }
+        #nav-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 8px; margin-bottom: 20px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; }
+        .nav-box { height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 4px; background: #555; cursor: pointer; font-weight: bold; font-size: 0.9rem; }
+        .nav-box.current { background: var(--accent-color); border: 2px solid #fff; }
+        .nav-box.answered { background: var(--answered); }
+        .info-box { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 0.9rem; }
+        .header-main { text-align: center; border-bottom: 2px solid var(--accent-color); margin-bottom: 15px; padding-bottom: 10px; }
+        #question-scroll-area { max-height: 60vh; overflow-y: auto; padding-right: 10px; margin-top: 10px; }
+        .option-label { display: block; background: rgba(255,255,255,0.05); margin: 10px 0; padding: 15px; border-radius: 8px; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
+        .option-label:hover { background: rgba(255,255,255,0.12); }
+        input[type="radio"] { margin-right: 12px; transform: scale(1.2); }
+        .btn-container { margin-top: 20px; display: flex; justify-content: space-between; }
+        button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; background: var(--accent-color); color: white; font-weight: bold; }
+        .review-card { background: rgba(0,0,0,0.3); padding: 15px; margin: 15px 0; border-radius: 8px; border-left: 5px solid var(--error); }
+        .review-card.status-correct { border-left-color: var(--correct); }
+    </style>
+</head>
+<body>
+
+<div id="exam-container">
+    <div id="page-landing" class="page active">
+        <h1 class="header-main">Bright Minds Academy</h1>
+        <div class="info-box" style="display: block;">
+            <p><strong>Exam:</strong> Arithmetic Progression 2</p>
+            <p><strong>Standard:</strong> 10th | <strong>Marks:</strong> 20 | <strong>Time:</strong> 30 Mins</p>
+        </div>
+        <div style="margin: 30px 0; text-align: center;">
+            <input type="text" id="student-name" placeholder="Enter Full Student Name" style="width: 80%; padding: 12px; border-radius: 6px; border: none;">
+        </div>
+        <div style="text-align: center;"><button onclick="startExam()">Start Assignment</button></div>
+    </div>
+
+    <div id="page-exam" class="page">
+        <div id="nav-grid"></div>
+        <div class="header-main" style="font-size: 1.2rem;">Bright Minds Academy</div>
+        <div class="info-box">
+            <span><strong>Time Left:</strong> <span id="timer-display">30:00</span></span>
+            <span><strong>Marks:</strong> 20</span>
+            <span><strong>Questions:</strong> 20</span>
+        </div>
+        <div id="question-scroll-area">
+            <h3 id="q-title"></h3>
+            <p id="q-text" style="font-size: 1.1rem; line-height: 1.6;"></p>
+            <div id="options-container"></div>
+        </div>
+        <div class="btn-container">
+            <button id="prev-btn" onclick="changeQuestion(-1)">Back</button>
+            <button id="next-btn" onclick="changeQuestion(1)">Next</button>
+        </div>
+    </div>
+
+    <div id="page-result" class="page">
+        <h2 id="res-name" style="text-align: center;"></h2>
+        <h1 style="text-align: center;">Score: <span id="final-score"></span></h1>
+        <div id="ai-analysis" style="background: rgba(76, 175, 80, 0.15); padding: 20px; border-radius: 10px; margin: 20px 0; line-height: 1.5;"></div>
+        <h3>Question Review</h3>
+        <div id="review-list"></div>
+    </div>
+</div>
+
+<script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwEutZaKIAodDqKVocXPmgGlsfyO6ma8vuQK4sFgEobmvD73QQwztuH4qbT_R3g1Figtw/exec";
+    const EXAM_KEY = "10th_AP_Ass2_vUpgraded";
+    const HARDCODED_STD = "10th";
+    const EXAM_NAME = "Arithmetic Progression 2";
+    let timerInterval;
+    let timeRemaining = 1800;
+
+    const questions = [
+        { q: "In an A.P., if first term is 6 and common difference is -3, find \\(t_3\\).", options: ["0", "3", "9", "6"], ans: 0, topic: "Advanced Term Calculations", explain: "\\(t_3 = a + 2d = 6 + 2(-3) = 0\\)." },
+        { q: "Find the 10th term of the A.P. 12, 14, 16, 18, ...", options: ["28", "30", "32", "20"], ans: 1, topic: "Advanced Term Calculations", explain: "\\(a=12, d=2. t_{10} = 12 + 9(2) = 30\\)." },
+        { q: "Find the sum of the first 10 multiples of 5.", options: ["275", "225", "325", "250"], ans: 0, topic: "Sum of Terms", explain: "\\(n=10, a=5, d=5. S_{10} = \\frac{10}{2}[2(5) + (10-1)5] = 5[10 + 45] = 275\\)." },
+        { q: "If for an A.P. \\(a = 3, n = 8, S_8 = 192\\), find \\(d\\).", options: ["4", "5", "6", "7"], ans: 2, topic: "A.P. Properties", explain: "\\(192 = 4[2(3) + 7d] \\Rightarrow 48 = 6 + 7d \\Rightarrow 42 = 7d \\Rightarrow d = 6\\)." },
+        { q: "What is the common difference of an A.P. where \\(t_n = 6n - 2\\)?", options: ["6", "-2", "4", "2"], ans: 0, topic: "A.P. Properties", explain: "\\(t_1 = 4, t_2 = 10. d = t_2 - t_1 = 6\\)." },
+        { q: "Find \\(S_{25}\\) if the first and last terms are 18 and 82.", options: ["2500", "1250", "800", "625"], ans: 1, topic: "Sum of Terms", explain: "\\(S_{25} = \\frac{25}{2}(18 + 82) = \\frac{25}{2}(100) = 1250\\)." },
+        { q: "Which term of the A.P. 5, 11, 17, 23, ... is 149?", options: ["24", "25", "30", "31"], ans: 1, topic: "Advanced Term Calculations", explain: "\\(149 = 5 + (n-1)6 \\Rightarrow 144 = 6(n-1) \\Rightarrow 24 = n-1 \\Rightarrow n = 25\\)." },
+        { q: "Find the sum of the first 10 natural numbers divisible by 3.", options: ["155", "135", "145", "165"], ans: 3, topic: "Sum of Terms", explain: "\\(a=3, d=3, n=10. S_{10} = 5[2(3) + 9(3)] = 5(33) = 165\\)." },
+        { q: "If for an A.P. \\(t_{30} = 2t_{15}\\), then which relation is true?", options: ["a - d = 0", "a + d = 0", "a - 2d = 0", "a + 2d = 0"], ans: 0, topic: "A.P. Properties", explain: "\\(a+29d = 2(a+14d) \\Rightarrow a+29d = 2a+28d \\Rightarrow a-d=0\\)." },
+        { q: "Find the sum of all odd numbers from 1 to 20.", options: ["100", "200", "400", "120"], ans: 0, topic: "Sum of Terms", explain: "Odd numbers are 1, 3, ..., 19. Total terms \\(n=10. S_n = n^2 = 100\\)." },
+        { q: "In an A.P., if \\(t_1 = 1, t_n = 20\\) and \\(n = 38\\), find \\(S_{38}\\).", options: ["399", "798", "400", "380"], ans: 0, topic: "Sum of Terms", explain: "\\(S_{38} = \\frac{38}{2}(1+20) = 19 \\times 21 = 399\\)." },
+        { q: "Find the value of \\(n\\) for an A.P. where \\(a = 10, d = 10, t_n = 100\\).", options: ["9", "10", "11", "12"], ans: 1, topic: "Advanced Term Calculations", explain: "\\(100 = 10 + (n-1)10 \\Rightarrow 90 = 10(n-1) \\Rightarrow n = 10\\)." },
+        { q: "If the 9th term of an A.P. is zero, find the ratio of its 29th and 19th term.", options: ["1 : 2", "2 : 1", "1 : 3", "3 : 1"], ans: 1, topic: "Middle Terms & Ratios", explain: "\\(t_9 = a+8d=0 \\Rightarrow a=-8d. \\frac{t_{29}}{t_{19}} = \\frac{-8d+28d}{-8d+18d} = \\frac{20d}{10d} = 2\\)." },
+        { q: "Find the sum of the first 30 natural numbers.", options: ["465", "460", "435", "500"], ans: 0, topic: "Sum of Terms", explain: "\\(S_{30} = \\frac{30 \\times 31}{2} = 15 \\times 31 = 465\\)." },
+        { q: "If \\(t_3 = 4\\) and \\(d = -4\\), find the first term \\(a\\).", options: ["12", "4", "0", "16"], ans: 0, topic: "A.P. Properties", explain: "\\(4 = a + 2(-4) \\Rightarrow 4 = a - 8 \\Rightarrow a = 12\\)." },
+        { q: "Find the common difference of the sequence 100, 70, 40, 10, ...", options: ["30", "-30", "170", "40"], ans: 1, topic: "A.P. Properties", explain: "\\(d = 70 - 100 = -30\\)." },
+        { q: "The 11th term of the A.P. -3, -0.5, 2, ... is:", options: ["22", "25", "28", "30"], ans: 0, topic: "Advanced Term Calculations", explain: "\\(a=-3, d=2.5. t_{11} = -3 + 10(2.5) = 22\\)." },
+        { q: "For an A.P. 1, 3, 5, 7, ... find \\(t_{50}\\).", options: ["99", "100", "101", "50"], ans: 0, topic: "Advanced Term Calculations", explain: "\\(t_{50} = 1 + 49(2) = 99\\)." },
+        { q: "The sum of the first \\(n\\) even natural numbers is:", options: ["n(n+1)", "n^2", "n(n-1)", "2n"], ans: 0, topic: "Sum of Terms", explain: "\\(S_n = \\frac{n}{2}[2(2) + (n-1)2] = n(n+1)\\)." },
+        { q: "Which term of the A.P. 21, 18, 15, ... is -81?", options: ["34", "35", "36", "30"], ans: 1, topic: "Advanced Term Calculations", explain: "\\(-81 = 21 + (n-1)(-3) \\Rightarrow -102 = -3(n-1) \\Rightarrow 34 = n-1 \\Rightarrow n = 35\\)." }
+    ];
+
+    let currentQ = 0;
+    let userAnswers = new Array(questions.length).fill(null);
+    let studentName = "";
+
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            timeRemaining--;
+            sessionStorage.setItem('time_remaining', timeRemaining);
+            updateTimerDisplay();
+            if (timeRemaining <= 0) { clearInterval(timerInterval); submitExam(); }
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        const mins = Math.floor(timeRemaining / 60);
+        const secs = timeRemaining % 60;
+        document.getElementById('timer-display').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function startExam() {
+        studentName = document.getElementById('student-name').value.trim();
+        if (!studentName) return alert("Please enter your name");
+        sessionStorage.setItem('name', studentName);
+        sessionStorage.setItem('in_progress_' + EXAM_KEY, "true");
+        document.getElementById('page-landing').classList.remove('active');
+        document.getElementById('page-exam').classList.add('active');
+        startTimer();
+        renderGrid();
+        showQuestion();
+    }
+
+    function renderGrid() {
+        const grid = document.getElementById('nav-grid');
+        grid.innerHTML = "";
+        questions.forEach((_, i) => {
+            const div = document.createElement('div');
+            div.className = `nav-box ${i === currentQ ? 'current' : ''} ${userAnswers[i] !== null ? 'answered' : ''}`;
+            div.innerText = i + 1;
+            div.onclick = () => jumpTo(i);
+            grid.appendChild(div);
+        });
+    }
+
+    function showQuestion() {
+        const q = questions[currentQ];
+        document.getElementById('q-title').innerText = `Question ${currentQ + 1}`;
+        document.getElementById('q-text').innerHTML = q.q;
+        const optCont = document.getElementById('options-container');
+        optCont.innerHTML = "";
+        q.options.forEach((opt, idx) => {
+            const lbl = document.createElement('label');
+            lbl.className = "option-label";
+            lbl.innerHTML = `<input type="radio" name="opt" ${userAnswers[currentQ] === idx ? 'checked' : ''} onchange="saveAns(${idx})"> ${opt}`;
+            optCont.appendChild(lbl);
+        });
+        document.getElementById('next-btn').innerText = currentQ === questions.length - 1 ? "Finish" : "Next";
+        sessionStorage.setItem('currentQ', currentQ);
+        renderGrid();
+        MathJax.typeset();
+    }
+
+    function saveAns(idx) {
+        userAnswers[currentQ] = idx;
+        sessionStorage.setItem('answers', JSON.stringify(userAnswers));
+        renderGrid();
+    }
+
+    function jumpTo(i) { currentQ = i; showQuestion(); }
+
+    function changeQuestion(dir) {
+        if (dir === 1 && currentQ === questions.length - 1) submitExam();
+        else { currentQ += dir; showQuestion(); }
+    }
+
+    async function submitExam() {
+        clearInterval(timerInterval);
+        let score = 0;
+        let topicMap = {};
+        let reviewHTML = "";
+        let missedQuestions = [];
+
+        questions.forEach((q, i) => {
+            const correct = userAnswers[i] === q.ans;
+            if (correct) {
+                score++;
+            } else {
+                missedQuestions.push("Q" + (i + 1));
+            }
+            if (!topicMap[q.topic]) topicMap[q.topic] = { total: 0, correct: 0, failedQ: [] };
+            topicMap[q.topic].total++;
+            if (correct) topicMap[q.topic].correct++;
+            else topicMap[q.topic].failedQ.push(i + 1);
+
+            reviewHTML += `<div class="review-card ${correct ? 'status-correct' : ''}">
+                <strong>Q${i+1}:</strong> ${q.q}<br>
+                Your Answer: <span style="color:${correct ? '#81c784' : '#ff5252'}">${userAnswers[i] !== null ? q.options[userAnswers[i]] : 'Skipped'}</span><br>
+                Correct: ${q.options[q.ans]}<br>
+                <em>Explanation: ${q.explain}</em></div>`;
+        });
+
+        const scoreStr = `${score}/${questions.length}`;
+        let wrongAnswersString = missedQuestions.length > 0 ? missedQuestions.join(", ") : "None";
+
+        document.getElementById('page-exam').classList.remove('active');
+        document.getElementById('page-result').classList.add('active');
+        document.getElementById('res-name').innerText = studentName;
+        document.getElementById('final-score').innerText = scoreStr;
+        document.getElementById('review-list').innerHTML = reviewHTML;
+
+        let analysis = `<strong>AI Analysis Feedback (Question-Specific):</strong><br><br>`;
+        for (let t in topicMap) {
+            let pct = (topicMap[t].correct / topicMap[t].total) * 100;
+            if (pct === 100) {
+                analysis += `• Mastery achieved in ${t}. Your concepts are perfectly clear.<br>`;
+            } else if (pct >= 60) {
+                analysis += `• Strong foundation in ${t}, but minor errors occurred in Question(s) ${topicMap[t].failedQ.join(', ')}.<br>`;
+            } else {
+                analysis += `• Weak performance in ${t}. For example, in Question(s) ${topicMap[t].failedQ.join(', ')}, you failed to apply the rules or formulas correctly.<br>`;
+            }
+        }
+        document.getElementById('ai-analysis').innerHTML = analysis;
+
+        fetch(WEB_APP_URL, { 
+            method: "POST", 
+            mode: "no-cors", 
+            body: JSON.stringify({ 
+                studentName, 
+                standard: HARDCODED_STD, 
+                examName: EXAM_NAME, 
+                score: scoreStr, 
+                wrongAnswers: wrongAnswersString 
+            }) 
+        });
+
+        localStorage.setItem('submitted_data_' + EXAM_KEY, JSON.stringify({ name: studentName, answers: userAnswers, score: scoreStr, topicMap }));
+        sessionStorage.clear();
+        MathJax.typeset();
+        window.scrollTo(0, 0);
+    }
+
+    window.onload = () => {
+        const saved = localStorage.getItem('submitted_data_' + EXAM_KEY);
+        if (saved) {
+            const data = JSON.parse(saved);
+            studentName = data.name;
+            userAnswers = data.answers;
+            showResultsFromStorage(data);
+        } else if (sessionStorage.getItem('in_progress_' + EXAM_KEY)) {
+            studentName = sessionStorage.getItem('name');
+            userAnswers = JSON.parse(sessionStorage.getItem('answers')) || userAnswers;
+            currentQ = parseInt(sessionStorage.getItem('currentQ')) || 0;
+            timeRemaining = parseInt(sessionStorage.getItem('time_remaining')) || 1800;
+            document.getElementById('page-landing').classList.remove('active');
+            document.getElementById('page-exam').classList.add('active');
+            startTimer();
+            updateTimerDisplay();
+            renderGrid();
+            showQuestion();
+        }
+    };
+
+    function showResultsFromStorage(data) {
+        document.getElementById('page-landing').classList.remove('active');
+        document.getElementById('page-result').classList.add('active');
+        document.getElementById('res-name').innerText = data.name;
+        document.getElementById('final-score').innerText = data.score;
+        let reviewHTML = "";
+        questions.forEach((q, i) => {
+            const correct = userAnswers[i] === q.ans;
+            reviewHTML += `<div class="review-card ${correct ? 'status-correct' : ''}">
+                \<strong>Q${i+1}:</strong> ${q.q}<br>
+                Your Answer: <span style="color:${correct ? '#81c784' : '#ff5252'}">${userAnswers[i] !== null ? q.options[userAnswers[i]] : 'Skipped'}</span><br>
+                Correct: ${q.options[q.ans]}<br>
+                <em>Explanation: ${q.explain}</em></div>`;
+        });
+        document.getElementById('review-list').innerHTML = reviewHTML;
+        
+        let analysis = `<strong>AI Analysis Feedback (Question-Specific):</strong><br><br>`;
+        for (let t in data.topicMap) {
+            let pct = (data.topicMap[t].correct / data.topicMap[t].total) * 100;
+            if (pct === 100) {
+                analysis += `• Mastery achieved in ${t}. Your concepts are perfectly clear.<br>`;
+            } else if (pct >= 60) {
+                analysis += `• Strong foundation in ${t}, but minor errors occurred in Question(s) ${data.topicMap[t].failedQ.join(', ')}.<br>`;
+            } else {
+                analysis += `• Weak performance in ${t}. For example, in Question(s) ${data.topicMap[t].failedQ.join(', ')}, you failed to apply the rules or formulas correctly.<br>`;
+            }
+        }
+        document.getElementById('ai-analysis').innerHTML = analysis;
+        MathJax.typeset();
+    }
+</script>
+</body>
+</html>

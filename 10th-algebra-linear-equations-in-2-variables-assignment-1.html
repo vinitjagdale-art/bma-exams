@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bright Minds Academy - 10th Math Assignment 1</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root { --primary-bg: #1b3022; --text-color: #ffffff; --accent-color: #4CAF50; --error: #ff5252; --correct: #81c784; --answered: #ff9800; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--primary-bg); color: var(--text-color); margin: 0; padding: 10px; display: flex; justify-content: center; }
+        #exam-container { width: 100%; max-width: 850px; background: rgba(255, 255, 255, 0.1); padding: 1.5rem; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+        .page { display: none; }
+        .active { display: block; }
+        
+        #nav-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 8px; margin-bottom: 20px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; }
+        .nav-box { height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 4px; background: #555; cursor: pointer; font-weight: bold; font-size: 0.9rem; }
+        .nav-box.current { background: var(--accent-color); border: 2px solid #fff; }
+        .nav-box.answered { background: var(--answered); }
+
+        .info-box { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 0.9rem; }
+        .header-main { text-align: center; border-bottom: 2px solid var(--accent-color); margin-bottom: 15px; padding-bottom: 10px; }
+        
+        #question-scroll-area { max-height: 60vh; overflow-y: auto; padding-right: 10px; margin-top: 10px; }
+        .option-label { display: block; background: rgba(255,255,255,0.05); margin: 10px 0; padding: 15px; border-radius: 8px; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
+        .option-label:hover { background: rgba(255,255,255,0.12); }
+        input[type="radio"] { margin-right: 12px; transform: scale(1.2); }
+
+        .btn-container { margin-top: 20px; display: flex; justify-content: space-between; }
+        button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; background: var(--accent-color); color: white; font-weight: bold; }
+        
+        .review-card { background: rgba(0,0,0,0.3); padding: 15px; margin: 15px 0; border-radius: 8px; border-left: 5px solid var(--error); }
+        .review-card.status-correct { border-left-color: var(--correct); }
+    </style>
+</head>
+<body>
+
+<div id="exam-container">
+    <div id="page-landing" class="page active">
+        <h1 class="header-main">Bright Minds Academy</h1>
+        <div class="info-box" style="display: block;">
+            <p><strong>Exam:</strong> Linear Equations in Two Variables 1</p>
+            <p><strong>Standard:</strong> 10th | <strong>Marks:</strong> 20 | <strong>Time:</strong> 30 Mins</p>
+        </div>
+        <div style="margin: 30px 0; text-align: center;">
+            <input type="text" id="student-name" placeholder="Enter Full Student Name" style="width: 80%; padding: 12px; border-radius: 6px; border: none;">
+        </div>
+        <div style="text-align: center;"><button onclick="startExam()">Start Assignment</button></div>
+    </div>
+
+    <div id="page-exam" class="page">
+        <div id="nav-grid"></div>
+        <div class="header-main" style="font-size: 1.2rem;">Bright Minds Academy</div>
+        <div class="info-box">
+            <span><strong>Time Left:</strong> <span id="timer-display">30:00</span></span>
+            <span><strong>Marks:</strong> 20</span>
+            <span><strong>Questions:</strong> 20</span>
+        </div>
+        
+        <div id="question-scroll-area">
+            <h3 id="q-title"></h3>
+            <p id="q-text" style="font-size: 1.1rem; line-height: 1.6;"></p>
+            <div id="options-container"></div>
+        </div>
+
+        <div class="btn-container">
+            <button id="prev-btn" onclick="changeQuestion(-1)">Back</button>
+            <button id="next-btn" onclick="changeQuestion(1)">Next</button>
+        </div>
+    </div>
+
+    <div id="page-result" class="page">
+        <h2 id="res-name" style="text-align: center;"></h2>
+        <h1 style="text-align: center;">Score: <span id="final-score"></span></h1>
+        <div id="ai-analysis" style="background: rgba(76, 175, 80, 0.15); padding: 20px; border-radius: 10px; margin: 20px 0; line-height: 1.5;"></div>
+        <h3>Question Review</h3>
+        <div id="review-list"></div>
+    </div>
+</div>
+
+<script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwEutZaKIAodDqKVocXPmgGlsfyO6ma8vuQK4sFgEobmvD73QQwztuH4qbT_R3g1Figtw/exec";
+    const EXAM_KEY = "10th_Linear_Eq_Ass1_vUpgraded";
+    const HARDCODED_STD = "10th";
+    const EXAM_NAME = "Linear Equations in Two Variables 1";
+    let timerInterval;
+    let timeRemaining = 1800; 
+
+    const questions = [
+        { q: "Write the degree of the given determinant: \\(\\begin{vmatrix} 1 & 2 \\\\ 3 & 4 \\end{vmatrix}\\)", options: ["1", "2", "3", "4"], ans: 1, topic: "Determinant Method", explain: "The degree of any 2x2 determinant is 2." },
+        { q: "Find the value of \\(\\begin{vmatrix} 5 & 3 \\\\ -7 & -4 \\end{vmatrix}\\)", options: ["-1", "-41", "41", "1"], ans: 3, topic: "Determinant Method", explain: "\\((5 \\times -4) - (3 \\times -7) = -20 - (-21) = -20 + 21 = 1\\)." },
+        { q: "To draw the graph of \\(x + 2y = 4\\), find \\(x\\) when \\(y = 1\\).", options: ["1", "2", "-2", "6"], ans: 1, topic: "Graphical Method", explain: "Substitute y=1: \\(x + 2(1) = 4 \\Rightarrow x + 2 = 4 \\Rightarrow x = 2\\)." },
+        { q: "For simultaneous equations in \\(x\\) and \\(y\\), if \\(D_x = 49, D = 7\\), then what is the value of \\(x\\)?", options: ["7", "-7", "1/7", "-1/7"], ans: 0, topic: "Cramer's Rule", explain: "By Cramer's Rule, \\(x = D_x / D = 49 / 7 = 7\\)." },
+        { q: "To draw the graph of \\(4x + 5y = 19\\), find \\(y\\) when \\(x = 1\\).", options: ["4", "3", "2", "-3"], ans: 1, topic: "Graphical Method", explain: "Substitute x=1: \\(4(1) + 5y = 19 \\Rightarrow 4 + 5y = 19 \\Rightarrow 5y = 15 \\Rightarrow y = 3\\)." },
+        { q: "Find the value of \\(\\begin{vmatrix} 3 & 2 \\\\ 4 & 5 \\end{vmatrix}\\)", options: ["2", "7", "-7", "23"], ans: 1, topic: "Determinant Method", explain: "\\((3 \\times 5) - (2 \\times 4) = 15 - 8 = 7\\)." },
+        { q: "If \\(D_x = 49, D_y = -63, D = 7\\), then what is the value of \\(y\\)?", options: ["9", "7", "-7", "-9"], ans: 3, topic: "Cramer's Rule", explain: "By Cramer's Rule, \\(y = D_y / D = -63 / 7 = -9\\)." },
+        { q: "Find the value of \\(\\begin{vmatrix} 2 & 3 \\\\ 4 & 5 \\end{vmatrix}\\)", options: ["-22", "2", "22", "-2"], ans: 3, topic: "Determinant Method", explain: "\\((2 \\times 5) - (3 \\times 4) = 10 - 12 = -2\\)." },
+        { q: "Identify the linear equation in two variables from the following:", options: ["\\(\\sqrt{3}x + \\sqrt{5}y = 10\\)", "5x - 0y - 14 = 0", "4/x + 5/y = 4", "3x^2 - 7y = 13"], ans: 0, topic: "Identification", explain: "A linear equation in two variables must have a degree of 1 for both variables." },
+        { q: "If \\(x - y = 10\\) and \\(x = 2y\\), then find \\(x\\) and \\(y\\).", options: ["x=20, y=20", "x=20, y=10", "x=20, y=0", "x=-20, y=10"], ans: 1, topic: "Simultaneous Equations", explain: "\\(2y - y = 10 \\Rightarrow y = 10\\). Then \\(x = 2(10) = 20\\)." },
+        { q: "The point of intersection of the lines represented by \\(2x + 3y = 12\\) and the Y-axis is:", options: ["(0, 3)", "(0, 4)", "(3, 0)", "(4, 0)"], ans: 1, topic: "Graphical Method", explain: "On the Y-axis, x=0. So, \\(2(0) + 3y = 12 \\Rightarrow 3y = 12 \\Rightarrow y = 4\\)." },
+        { q: "What is the value of 'k', if (k, 5) is the solution of equation \\(4x - 2y = 0\\)?", options: ["1/2", "5/2", "3/2", "-5/2"], ans: 1, topic: "Simultaneous Equations", explain: "\\(4k - 2(5) = 0 \\Rightarrow 4k - 10 = 0 \\Rightarrow 4k = 10 \\Rightarrow k = 10/4 = 5/2\\)." },
+        { q: "To solve \\(x + y = 3\\) ; \\(3x - 2y - 4 = 0\\) by determinant method, find D.", options: ["5", "1", "-5", "-1"], ans: 2, topic: "Cramer's Rule", explain: "\\(D = \\begin{vmatrix} 1 & 1 \\\\ 3 & -2 \\end{vmatrix} = (1 \\times -2) - (1 \\times 3) = -2 - 3 = -5\\)." },
+        { q: "If \\(ax + by = c\\) and \\(mx + ny = d\\) and \\(an \\neq bm\\), then these equations have:", options: ["Only one common solution", "No solution", "Infinite number of solutions", "Only two solutions"], ans: 0, topic: "Identification", explain: "When \\(a/m \\neq b/n\\), the lines intersect at a single point, giving one solution." },
+        { q: "Find the value of 'm' for which the value of the determinant \\(\\begin{vmatrix} -3 & m \\\\ -5 & -4 \\end{vmatrix}\\) is -18.", options: ["3", "-3", "6", "-6"], ans: 3, topic: "Determinant Method", explain: "\\((-3 \\times -4) - (m \\times -5) = -18 \\Rightarrow 12 + 5m = -18 \\Rightarrow 5m = -30 \\Rightarrow m = -6\\)." },
+        { q: "For the simultaneous equations \\(3x - 8y = 5\\) and \\(x + 2y = 1\\), find \\(D_x\\).", options: ["18", "10", "-18", "-10"], ans: 0, topic: "Cramer's Rule", explain: "\\(D_x = \\begin{vmatrix} 5 & -8 \\\\ 1 & 2 \\end{vmatrix} = (5 \\times 2) - (-8 \\times 1) = 10 + 8 = 18\\)." },
+        { q: "The sum of twice the smaller number (y) and the greater number (x) is 12. Mathematical form is:", options: ["2x + y = 12", "x - 2y = 12", "x + 2y = 12", "2y - x = 12"], ans: 2, topic: "Word Problems", explain: "The equation representing 'twice the smaller (2y) plus greater (x) is 12' is x + 2y = 12." },
+        { q: "If the sum of two numbers is 35 and their difference is 13, then the numbers are:", options: ["23 and 12", "24 and 11", "25 and 12", "21 and 14"], ans: 1, topic: "Word Problems", explain: "\\(x+y=35, x-y=13 \\Rightarrow 2x=48 \\Rightarrow x=24, y=11\\)." },
+        { q: "Find the value of \\(x + y\\) if \\(15x + 17y = 21\\) and \\(17x + 15y = 11\\).", options: ["1", "2", "3", "4"], ans: 0, topic: "Simultaneous Equations", explain: "Adding both: \\(32x + 32y = 32 \\Rightarrow x + y = 1\\)." },
+        { q: "For simultaneous equations in variables x and y, if \\(D_x = 49, D_y = -63, D = 7\\), find y.", options: ["9", "7", "-7", "-9"], ans: 3, topic: "Cramer's Rule", explain: "By Cramer's Rule, \\(y = D_y / D = -63 / 7 = -9\\)." }
+    ];
+
+    let currentQ = 0;
+    let userAnswers = new Array(questions.length).fill(null);
+    let studentName = "";
+
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            timeRemaining--;
+            sessionStorage.setItem('time_remaining', timeRemaining);
+            updateTimerDisplay();
+            if (timeRemaining <= 0) {
+                clearInterval(timerInterval);
+                submitExam();
+            }
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        const mins = Math.floor(timeRemaining / 60);
+        const secs = timeRemaining % 60;
+        document.getElementById('timer-display').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function startExam() {
+        studentName = document.getElementById('student-name').value.trim();
+        if (!studentName) return alert("Please enter your name");
+        sessionStorage.setItem('name', studentName);
+        sessionStorage.setItem('in_progress_' + EXAM_KEY, "true");
+        document.getElementById('page-landing').classList.remove('active');
+        document.getElementById('page-exam').classList.add('active');
+        startTimer();
+        renderGrid();
+        showQuestion();
+    }
+
+    function renderGrid() {
+        const grid = document.getElementById('nav-grid');
+        grid.innerHTML = "";
+        questions.forEach((_, i) => {
+            const div = document.createElement('div');
+            div.className = `nav-box ${i === currentQ ? 'current' : ''} ${userAnswers[i] !== null ? 'answered' : ''}`;
+            div.innerText = i + 1;
+            div.onclick = () => jumpTo(i);
+            grid.appendChild(div);
+        });
+    }
+
+    function showQuestion() {
+        const q = questions[currentQ];
+        document.getElementById('q-title').innerText = `Question ${currentQ + 1}`;
+        document.getElementById('q-text').innerHTML = q.q;
+        const optCont = document.getElementById('options-container');
+        optCont.innerHTML = "";
+        q.options.forEach((opt, idx) => {
+            const lbl = document.createElement('label');
+            lbl.className = "option-label";
+            lbl.innerHTML = `<input type="radio" name="opt" ${userAnswers[currentQ] === idx ? 'checked' : ''} onchange="saveAns(${idx})"> ${opt}`;
+            optCont.appendChild(lbl);
+        });
+        document.getElementById('next-btn').innerText = currentQ === questions.length - 1 ? "Finish" : "Next";
+        sessionStorage.setItem('currentQ', currentQ);
+        renderGrid();
+        MathJax.typeset();
+    }
+
+    function saveAns(idx) {
+        userAnswers[currentQ] = idx;
+        sessionStorage.setItem('answers', JSON.stringify(userAnswers));
+        renderGrid();
+    }
+
+    function jumpTo(i) { currentQ = i; showQuestion(); }
+
+    function changeQuestion(dir) {
+        if (dir === 1 && currentQ === questions.length - 1) submitExam();
+        else { currentQ += dir; showQuestion(); }
+    }
+
+    async function submitExam() {
+        clearInterval(timerInterval);
+        let score = 0;
+        let topicMap = {};
+        let reviewHTML = "";
+        let missedQuestions = [];
+
+        questions.forEach((q, i) => {
+            const correct = userAnswers[i] === q.ans;
+            if (correct) {
+                score++;
+            } else {
+                missedQuestions.push("Q" + (i + 1));
+            }
+            if (!topicMap[q.topic]) topicMap[q.topic] = { total: 0, correct: 0, failedQ: [] };
+            topicMap[q.topic].total++;
+            if (correct) topicMap[q.topic].correct++;
+            else topicMap[q.topic].failedQ.push(i + 1);
+
+            reviewHTML += `<div class="review-card ${correct ? 'status-correct' : ''}">
+                <strong>Q${i+1}:</strong> ${q.q}<br>
+                Your Answer: <span style="color:${correct ? '#81c784' : '#ff5252'}">${userAnswers[i] !== null ? q.options[userAnswers[i]] : 'Skipped'}</span><br>
+                Correct: ${q.options[q.ans]}<br>
+                <em>Explanation: ${q.explain}</em></div>`;
+        });
+
+        const scoreStr = `${score}/${questions.length}`;
+        let wrongAnswersString = missedQuestions.length > 0 ? missedQuestions.join(", ") : "None";
+
+        document.getElementById('page-exam').classList.remove('active');
+        document.getElementById('page-result').classList.add('active');
+        document.getElementById('res-name').innerText = studentName;
+        document.getElementById('final-score').innerText = scoreStr;
+        document.getElementById('review-list').innerHTML = reviewHTML;
+
+        let analysis = `<strong>AI Analysis Feedback (Question-Specific):</strong><br><br>`;
+        for (let t in topicMap) {
+            let pct = (topicMap[t].correct / topicMap[t].total) * 100;
+            if (pct === 100) {
+                analysis += `• Mastery achieved in ${t}. Your concepts are perfectly clear.<br>`;
+            } else if (pct >= 60) {
+                analysis += `• Strong foundation in ${t}, but minor errors occurred in Question(s) ${topicMap[t].failedQ.join(', ')}.<br>`;
+            } else {
+                analysis += `• Weak performance in ${t}. For example, in Question(s) ${topicMap[t].failedQ.join(', ')}, you failed to apply the rules or formulas correctly.<br>`;
+            }
+        }
+        document.getElementById('ai-analysis').innerHTML = analysis;
+
+        fetch(WEB_APP_URL, { 
+            method: "POST", 
+            mode: "no-cors", 
+            body: JSON.stringify({ 
+                studentName: studentName, 
+                standard: HARDCODED_STD, 
+                examName: EXAM_NAME, 
+                score: scoreStr,
+                wrongAnswers: wrongAnswersString 
+            }) 
+        });
+
+        localStorage.setItem('submitted_data_' + EXAM_KEY, JSON.stringify({ name: studentName, answers: userAnswers, score: scoreStr, topicMap }));
+        sessionStorage.clear();
+        MathJax.typeset();
+        window.scrollTo(0, 0);
+    }
+
+    window.onload = () => {
+        const saved = localStorage.getItem('submitted_data_' + EXAM_KEY);
+        if (saved) {
+            const data = JSON.parse(saved);
+            studentName = data.name;
+            userAnswers = data.answers;
+            showResultsFromStorage(data);
+        } else if (sessionStorage.getItem('in_progress_' + EXAM_KEY)) {
+            studentName = sessionStorage.getItem('name');
+            userAnswers = JSON.parse(sessionStorage.getItem('answers')) || userAnswers;
+            currentQ = parseInt(sessionStorage.getItem('currentQ')) || 0;
+            timeRemaining = parseInt(sessionStorage.getItem('time_remaining')) || 1800;
+            document.getElementById('page-landing').classList.remove('active');
+            document.getElementById('page-exam').classList.add('active');
+            startTimer();
+            updateTimerDisplay();
+            renderGrid();
+            showQuestion();
+        }
+    };
+
+    function showResultsFromStorage(data) {
+        document.getElementById('page-landing').classList.remove('active');
+        document.getElementById('page-result').classList.add('active');
+        document.getElementById('res-name').innerText = data.name;
+        document.getElementById('final-score').innerText = data.score;
+        let reviewHTML = "";
+        questions.forEach((q, i) => {
+            const correct = userAnswers[i] === q.ans;
+            reviewHTML += `<div class="review-card ${correct ? 'status-correct' : ''}">
+                <strong>Q${i+1}:</strong> ${q.q}<br>
+                Your Answer: <span style="color:${correct ? '#81c784' : '#ff5252'}">${userAnswers[i] !== null ? q.options[userAnswers[i]] : 'Skipped'}</span><br>
+                Correct: ${q.options[q.ans]}<br>
+                <em>Explanation: ${q.explain}</em></div>`;
+        });
+        document.getElementById('review-list').innerHTML = reviewHTML;
+        let analysis = `<strong>AI Analysis Feedback (Question-Specific):</strong><br><br>`;
+        for (let t in data.topicMap) {
+            let pct = (data.topicMap[t].correct / data.topicMap[t].total) * 100;
+            if (pct === 100) {
+                analysis += `• Mastery achieved in ${t}. Your concepts are perfectly clear.<br>`;
+            } else if (pct >= 60) {
+                analysis += `• Strong foundation in ${t}, but minor errors occurred in Question(s) ${data.topicMap[t].failedQ.join(', ')}.<br>`;
+            } else {
+                analysis += `• Weak performance in ${t}. For example, in Question(s) ${data.topicMap[t].failedQ.join(', ')}, you failed to apply the rules or formulas correctly.<br>`;
+            }
+        }
+        document.getElementById('ai-analysis').innerHTML = analysis;
+        MathJax.typeset();
+    }
+</script>
+</body>
+</html>

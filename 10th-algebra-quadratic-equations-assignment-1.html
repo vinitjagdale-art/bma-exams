@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bright Minds Academy - 10th Quadratic Equation 1</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root { --primary-bg: #1b3022; --text-color: #ffffff; --accent-color: #4CAF50; --error: #ff5252; --correct: #81c784; --answered: #ff9800; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--primary-bg); color: var(--text-color); margin: 0; padding: 10px; display: flex; justify-content: center; }
+        #exam-container { width: 100%; max-width: 850px; background: rgba(255, 255, 255, 0.1); padding: 1.5rem; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+        .page { display: none; }
+        .active { display: block; }
+        #nav-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 8px; margin-bottom: 20px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; }
+        .nav-box { height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 4px; background: #555; cursor: pointer; font-weight: bold; font-size: 0.9rem; }
+        .nav-box.current { background: var(--accent-color); border: 2px solid #fff; }
+        .nav-box.answered { background: var(--answered); }
+        .info-box { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 0.9rem; }
+        .header-main { text-align: center; border-bottom: 2px solid var(--accent-color); margin-bottom: 15px; padding-bottom: 10px; }
+        #question-scroll-area { max-height: 60vh; overflow-y: auto; padding-right: 10px; margin-top: 10px; }
+        .option-label { display: block; background: rgba(255,255,255,0.05); margin: 10px 0; padding: 15px; border-radius: 8px; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
+        .option-label:hover { background: rgba(255,255,255,0.12); }
+        input[type="radio"] { margin-right: 12px; transform: scale(1.2); }
+        .btn-container { margin-top: 20px; display: flex; justify-content: space-between; }
+        button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; background: var(--accent-color); color: white; font-weight: bold; }
+        .review-card { background: rgba(0,0,0,0.3); padding: 15px; margin: 15px 0; border-radius: 8px; border-left: 5px solid var(--error); }
+        .review-card.status-correct { border-left-color: var(--correct); }
+    </style>
+</head>
+<body>
+
+<div id="exam-container">
+    <div id="page-landing" class="page active">
+        <h1 class="header-main">Bright Minds Academy</h1>
+        <div class="info-box" style="display: block;">
+            <p><strong>Exam:</strong> Quadratic Equation 1</p>
+            <p><strong>Standard:</strong> 10th | <strong>Marks:</strong> 20 | <strong>Time:</strong> 30 Mins</p>
+        </div>
+        <div style="margin: 30px 0; text-align: center;">
+            <input type="text" id="student-name" placeholder="Enter Full Student Name" style="width: 80%; padding: 12px; border-radius: 6px; border: none;">
+        </div>
+        <div style="text-align: center;"><button onclick="startExam()">Start Assignment</button></div>
+    </div>
+
+    <div id="page-exam" class="page">
+        <div id="nav-grid"></div>
+        <div class="header-main" style="font-size: 1.2rem;">Bright Minds Academy</div>
+        <div class="info-box">
+            <span><strong>Time Left:</strong> <span id="timer-display">30:00</span></span>
+            <span><strong>Marks:</strong> 20</span>
+            <span><strong>Questions:</strong> 20</span>
+        </div>
+        <div id="question-scroll-area">
+            <h3 id="q-title"></h3>
+            <p id="q-text" style="font-size: 1.1rem; line-height: 1.6;"></p>
+            <div id="options-container"></div>
+        </div>
+        .btn-container { margin-top: 20px; display: flex; justify-content: space-between; }
+        <div class="btn-container">
+            <button id="prev-btn" onclick="changeQuestion(-1)">Back</button>
+            <button id="next-btn" onclick="changeQuestion(1)">Next</button>
+        </div>
+    </div>
+
+    <div id="page-result" class="page">
+        <h2 id="res-name" style="text-align: center;"></h2>
+        <h1 style="text-align: center;">Score: <span id="final-score"></span></h1>
+        <div id="ai-analysis" style="background: rgba(76, 175, 80, 0.15); padding: 20px; border-radius: 10px; margin: 20px 0; line-height: 1.5;"></div>
+        <h3>Question Review</h3>
+        <div id="review-list"></div>
+    </div>
+</div>
+
+<script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwEutZaKIAodDqKVocXPmgGlsfyO6ma8vuQK4sFgEobmvD73QQwztuH4qbT_R3g1Figtw/exec";
+    const EXAM_KEY = "10th_Quadratic_Eq_Ass1_vUpgraded";
+    const HARDCODED_STD = "10th";
+    const EXAM_NAME = "Quadratic Equation 1";
+    let timerInterval;
+    let timeRemaining = 1800; 
+
+    const questions = [
+        { q: "Which of the following is a quadratic equation?", options: ["\\(\\frac{5}{x} - 3 = x^2\\)", "\\(x(x + 5) = 2\\)", "\\(n - 1 = 2n\\)", "\\(\\frac{1}{x^2}(x + 2) = x\\)"], ans: 1, topic: "Identification", explain: "Expanding \\(x(x + 5) = 2\\) gives \\(x^2 + 5x - 2 = 0\\), which is in form \\(ax^2 + bx + c = 0\\)." },
+        { q: "Which of the following is NOT a quadratic equation?", options: ["\\(x^2 + 4x = 11 + x^2\\)", "\\(x^2 = 4x\\)", "\\(5x^2 = 90\\)", "\\(2x - x^2 = x^2 + 5\\)"], ans: 0, topic: "Identification", explain: "In \\(x^2 + 4x = 11 + x^2\\), \\(x^2\\) cancels out on both sides, leaving a linear equation \\(4x = 11\\)." },
+        { q: "If 3 is one root of the quadratic equation \\(kx^2 - 7x + 12 = 0\\), then find \\(k\\).", options: ["1", "-1", "3", "-3"], ans: 0, topic: "Roots Verification", explain: "Substitute x=3: \\(k(3)^2 - 7(3) + 12 = 0 \\Rightarrow 9k - 21 + 12 = 0 \\Rightarrow 9k = 9 \\Rightarrow k = 1\\)." },
+        { q: "Which of the following quadratic equations has roots 3 and 5?", options: ["\\(x^2 - 15x + 8 = 0\\)", "\\(x^2 - 8x + 15 = 0\\)", "\\(x^2 + 3x + 5 = 0\\)", "\\(x^2 + 8x - 15 = 0\\)"], ans: 1, topic: "Roots Verification", explain: "Sum of roots = 3+5=8. Product = 3\\(\\times\\)5=15. Equation: \\(x^2 - (sum)x + product = 0 \\Rightarrow x^2 - 8x + 15 = 0\\)." },
+        { q: "For the quadratic equation \\(x^2 + 10x - 7 = 0\\), the values of a, b, c are:", options: ["a = -1, b = 10, c = 7", "a = 1, b = -10, c = -7", "a = 1, b = 10, c = -7", "a = 1, b = 10, c = 7"], ans: 2, topic: "Standard Form Coefficients", explain: "Comparing with \\(ax^2 + bx + c = 0\\), we get a=1, b=10, c=-7." },
+        { q: "The roots of \\(x^2 + kx + k = 0\\) are real and equal. Find the value of \\(k\\).", options: ["0", "4", "0 or 4", "2"], ans: 2, topic: "The Discriminant", explain: "For real and equal roots, \\(D = b^2 - 4ac = 0\\). \\(k^2 - 4(1)(k) = 0 \\Rightarrow k(k-4) = 0 \\Rightarrow k=0\\) or \\(k=4\\)." },
+        { q: "Find the value of the discriminant for \\(\\sqrt{2}x^2 - 5x + \\sqrt{2} = 0\\).", options: ["-5", "17", "\\(\\sqrt{2}\\)", "2\\(\\sqrt{2}\\) - 5"], ans: 1, topic: "The Discriminant", explain: "\\(D = (-5)^2 - 4(\\sqrt{2})(\\sqrt{2}) = 25 - 4(2) = 25 - 8 = 17\\)." },
+        { q: "Find the equation having the sum of its roots as -5.", options: ["\\(3x^2 - 15x + 3 = 0\\)", "\\(x^2 - 5x + 3 = 0\\)", "\\(x^2 + 3x - 5 = 0\\)", "\\(3x^2 + 15x + 3 = 0\\)"], ans: 3, topic: "Roots Verification", explain: "Sum of roots = -b/a. In option D, sum = -15/3 = -5." },
+        { q: "If one root of \\(x^2 + mx - 5 = 0\\) is 2, find \\(m\\).", options: ["-2", "-1/2", "1/2", "2"], ans: 2, topic: "Roots Verification", explain: "Substitute x=2: \\((2)^2 + m(2) - 5 = 0 \\Rightarrow 4 + 2m - 5 = 0 \\Rightarrow 2m = 1 \\Rightarrow m = 1/2\\)." },
+        { q: "What is the maximum number of roots a quadratic equation can have?", options: ["Two", "Zero", "One", "Three"], ans: 0, topic: "Identification", explain: "A quadratic equation (degree 2) has a maximum of two roots." },
+        { q: "If the discriminant (\\(\\Delta\\)) of \\(4x^2 + dx + 25 = 0\\) is zero, find \\(d\\).", options: ["10", "\\(\\pm 10\\)", "20", "\\(\\pm 20\\)"], ans: 3, topic: "The Discriminant", explain: "\\(d^2 - 4(4)(25) = 0 \\Rightarrow d^2 = 400 \\Rightarrow d = \\pm 20\\)." },
+        { q: "Form a quadratic equation whose roots are (3 + \\(\\sqrt{2}\\)) and (3 - \\(\\sqrt{2}\\)).", options: ["\\(x^2 - 6x - 7 = 0\\)", "\\(x^2 + 6x + 7 = 0\\)", "\\(x^2 + 6x - 7 = 0\\)", "\\(x^2 - 6x + 7 = 0\\)"], ans: 3, topic: "Roots Verification", explain: "Sum = 6. Product = \\(3^2 - (\\sqrt{2})^2 = 9 - 2 = 7\\). Equation: \\(x^2 - 6x + 7 = 0\\)." },
+        { q: "Product of two consecutive natural numbers is 132. The algebraic form is:", options: ["\\(x^2 + x + 132 = 0\\)", "\\(x^2 + 2x = 132\\)", "\\(x^2 + x - 132 = 0\\)", "\\(x^2 + 2x + 132 = 0\\)"], ans: 2, topic: "Identification", explain: "\\(x(x + 1) = 132 \\Rightarrow x^2 + x - 132 = 0\\)." },
+        { q: "Find standard form of \\(x^2 - 9 = 13\\).", options: ["\\(x^2 - 22 = 0\\)", "\\(x^2 - 4 = 0\\)", "\\(x^2 + 22 = 0\\)", "\\(x^2 = 22\\)"], ans: 0, topic: "Identification", explain: "\\(x^2 - 9 - 13 = 0 \\Rightarrow x^2 - 22 = 0\\)." },
+        { q: "The roots of \\(x^2 - 3x - 2 = 0\\) are \\(\\alpha\\) and \\(\\beta\\). Find \\(\\frac{\\alpha}{\\beta} + \\frac{\\beta}{\\alpha}\\).", options: ["3/2", "-3/2", "13/2", "-13/2"], ans: 3, topic: "Roots Verification", explain: "Sum \\(\\alpha+\\beta=3\\), Product \\(\\alpha\\beta=-2\\). \\(\\frac{\\alpha^2+\\beta^2}{\\alpha\\beta} = \\frac{(\\alpha+\\beta)^2-2\\alpha\\beta}{\\alpha\\beta} = \\frac{9-(-4)}{-2} = -13/2\\)." },
+        { q: "Identify a, b, c for \\(y^2 = 2y - 7\\).", options: ["1, 2, 7", "1, -2, 7", "1, -2, -7", "1, 2, -7"], ans: 1, topic: "Standard Form Coefficients", explain: "Standard form: \\(y^2 - 2y + 7 = 0\\). So a=1, b=-2, c=7." },
+        { q: "If roots of a quadratic equation are real and unequal, then \\(\\Delta\\) is:", options: ["\\(\\Delta > 0\\)", "\\(\\Delta = 0\\)", "\\(\\Delta < 0\\)", "\\(\\Delta \\leq 0\\)"], ans: 0, topic: "The Discriminant", explain: "For real and unequal roots, the discriminant must be positive (greater than zero)." },
+        { q: "Find the root of \\(x^2 - 16 = 0\\).", options: ["4", "-4", "\\(\\pm 4\\)", "0"], ans: 2, topic: "Basic Factorization", explain: "\\(x^2 = 16 \\Rightarrow x = \\pm 4\\)." },
+        { q: "What term must be added to \\(x^2 - 5x\\) to make it a perfect square?", options: ["25", "25/4", "5/2", "25/2"], ans: 1, topic: "Basic Factorization", explain: "Add \\((b/2)^2 = (-5/2)^2 = 25/4\\)." },
+        { q: "Identify the quadratic equation from the following:", options: ["\\(x + 1 = 0\\)", "\\(x^2 - 5x + 6 = 0\\)", "\\(x^3 - x^2 + 1 = 0\\)", "\\(2x - 3 = 0\\)"], ans: 1, topic: "Identification", explain: "Option B is of the degree 2, making it a quadratic equation." }
+    ];
+
+    let currentQ = 0;
+    let userAnswers = new Array(questions.length).fill(null);
+    let studentName = "";
+
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            timeRemaining--;
+            sessionStorage.setItem('time_remaining', timeRemaining);
+            updateTimerDisplay();
+            if (timeRemaining <= 0) { clearInterval(timerInterval); submitExam(); }
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        const mins = Math.floor(timeRemaining / 60);
+        const secs = timeRemaining % 60;
+        document.getElementById('timer-display').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function startExam() {
+        studentName = document.getElementById('student-name').value.trim();
+        if (!studentName) return alert("Please enter your name");
+        sessionStorage.setItem('name', studentName);
+        sessionStorage.setItem('in_progress_' + EXAM_KEY, "true");
+        document.getElementById('page-landing').classList.remove('active');
+        document.getElementById('page-exam').classList.add('active');
+        startTimer();
+        renderGrid();
+        showQuestion();
+    }
+
+    function renderGrid() {
+        const grid = document.getElementById('nav-grid');
+        grid.innerHTML = "";
+        questions.forEach((_, i) => {
+            const div = document.createElement('div');
+            div.className = `nav-box ${i === currentQ ? 'current' : ''} ${userAnswers[i] !== null ? 'answered' : ''}`;
+            div.innerText = i + 1;
+            div.onclick = () => jumpTo(i);
+            grid.appendChild(div);
+        });
+    }
+
+    function showQuestion() {
+        const q = questions[currentQ];
+        document.getElementById('q-title').innerText = `Question ${currentQ + 1}`;
+        document.getElementById('q-text').innerHTML = q.q;
+        const optCont = document.getElementById('options-container');
+        optCont.innerHTML = "";
+        q.options.forEach((opt, idx) => {
+            const lbl = document.createElement('label');
+            lbl.className = "option-label";
+            lbl.innerHTML = `<input type="radio" name="opt" ${userAnswers[currentQ] === idx ? 'checked' : ''} onchange="saveAns(${idx})"> ${opt}`;
+            optCont.appendChild(lbl);
+        });
+        document.getElementById('next-btn').innerText = currentQ === questions.length - 1 ? "Finish" : "Next";
+        sessionStorage.setItem('currentQ', currentQ);
+        renderGrid();
+        MathJax.typeset();
+    }
+
+    function saveAns(idx) {
+        userAnswers[currentQ] = idx;
+        sessionStorage.setItem('answers', JSON.stringify(userAnswers));
+        renderGrid();
+    }
+
+    function jumpTo(i) { currentQ = i; showQuestion(); }
+
+    function changeQuestion(dir) {
+        if (dir === 1 && currentQ === questions.length - 1) submitExam();
+        else { currentQ += dir; showQuestion(); }
+    }
+
+    async function submitExam() {
+        clearInterval(timerInterval);
+        let score = 0;
+        let topicMap = {};
+        let reviewHTML = "";
+        let missedQuestions = [];
+
+        questions.forEach((q, i) => {
+            const correct = userAnswers[i] === q.ans;
+            if (correct) {
+                score++;
+            } else {
+                missedQuestions.push("Q" + (i + 1));
+            }
+            if (!topicMap[q.topic]) topicMap[q.topic] = { total: 0, correct: 0, failedQ: [] };
+            topicMap[q.topic].total++;
+            if (correct) topicMap[q.topic].correct++;
+            else topicMap[q.topic].failedQ.push(i + 1);
+
+            reviewHTML += `<div class="review-card ${correct ? 'status-correct' : ''}">
+                <strong>Q${i+1}:</strong> ${q.q}<br>
+                Your Answer: <span style="color:${correct ? '#81c784' : '#ff5252'}">${userAnswers[i] !== null ? q.options[userAnswers[i]] : 'Skipped'}</span><br>
+                Correct: ${q.options[q.ans]}<br>
+                <em>Explanation: ${q.explain}</em></div>`;
+        });
+
+        const scoreStr = `${score}/${questions.length}`;
+        let wrongAnswersString = missedQuestions.length > 0 ? missedQuestions.join(", ") : "None";
+
+        document.getElementById('page-exam').classList.remove('active');
+        document.getElementById('page-result').classList.add('active');
+        document.getElementById('res-name').innerText = studentName;
+        document.getElementById('final-score').innerText = scoreStr;
+        document.getElementById('review-list').innerHTML = reviewHTML;
+
+        let analysis = `<strong>AI Analysis Feedback (Question-Specific):</strong><br><br>`;
+        for (let t in topicMap) {
+            let pct = (topicMap[t].correct / topicMap[t].total) * 100;
+            if (pct === 100) {
+                analysis += `• Mastery achieved in ${t}. Your concepts are perfectly clear.<br>`;
+            } else if (pct >= 60) {
+                analysis += `• Strong foundation in ${t}, but minor errors occurred in Question(s) ${topicMap[t].failedQ.join(', ')}.<br>`;
+            } else {
+                analysis += `• Weak performance in ${t}. For example, in Question(s) ${topicMap[t].failedQ.join(', ')}, you failed to apply the rules or formulas correctly.<br>`;
+            }
+        }
+        document.getElementById('ai-analysis').innerHTML = analysis;
+
+        fetch(WEB_APP_URL, { 
+            method: "POST", 
+            mode: "no-cors", 
+            body: JSON.stringify({ 
+                studentName: studentName, 
+                standard: HARDCODED_STD, 
+                examName: EXAM_NAME, 
+                score: scoreStr,
+                wrongAnswers: wrongAnswersString 
+            }) 
+        });
+
+        localStorage.setItem('submitted_data_' + EXAM_KEY, JSON.stringify({ name: studentName, answers: userAnswers, score: scoreStr, topicMap }));
+        sessionStorage.clear();
+        MathJax.typeset();
+        window.scrollTo(0, 0);
+    }
+
+    window.onload = () => {
+        const saved = localStorage.getItem('submitted_data_' + EXAM_KEY);
+        if (saved) {
+            const data = JSON.parse(saved);
+            studentName = data.name;
+            userAnswers = data.answers;
+            showResultsFromStorage(data);
+        } else if (sessionStorage.getItem('in_progress_' + EXAM_KEY)) {
+            studentName = sessionStorage.getItem('name');
+            userAnswers = JSON.parse(sessionStorage.getItem('answers')) || userAnswers;
+            currentQ = parseInt(sessionStorage.getItem('currentQ')) || 0;
+            timeRemaining = parseInt(sessionStorage.getItem('time_remaining')) || 1800;
+            document.getElementById('page-landing').classList.remove('active');
+            document.getElementById('page-exam').classList.add('active');
+            startTimer();
+            updateTimerDisplay();
+            renderGrid();
+            showQuestion();
+        }
+    };
+
+    function showResultsFromStorage(data) {
+        document.getElementById('page-landing').classList.remove('active');
+        document.getElementById('page-result').classList.add('active');
+        document.getElementById('res-name').innerText = data.name;
+        document.getElementById('final-score').innerText = data.score;
+        let reviewHTML = "";
+        questions.forEach((q, i) => {
+            const correct = userAnswers[i] === q.ans;
+            reviewHTML += `<div class="review-card ${correct ? 'status-correct' : ''}">
+                <strong>Q${i+1}:</strong> ${q.q}<br>
+                Your Answer: <span style="color:${correct ? '#81c784' : '#ff5252'}">${userAnswers[i] !== null ? q.options[userAnswers[i]] : 'Skipped'}</span><br>
+                Correct: ${q.options[q.ans]}<br>
+                <em>Explanation: ${q.explain}</em></div>`;
+        });
+        document.getElementById('review-list').innerHTML = reviewHTML;
+        
+        let analysis = `<strong>AI Analysis Feedback (Question-Specific):</strong><br><br>`;
+        for (let t in data.topicMap) {
+            let pct = (data.topicMap[t].correct / data.topicMap[t].total) * 100;
+            if (pct === 100) {
+                analysis += `• Mastery achieved in ${t}. Your concepts are perfectly clear.<br>`;
+            } else if (pct >= 60) {
+                analysis += `• Strong foundation in ${t}, but minor errors occurred in Question(s) ${data.topicMap[t].failedQ.join(', ')}.<br>`;
+            } else {
+                analysis += `• Weak performance in ${t}. For example, in Question(s) ${data.topicMap[t].failedQ.join(', ')}, you failed to apply the rules or formulas correctly.<br>`;
+            }
+        }
+        document.getElementById('ai-analysis').innerHTML = analysis;
+        MathJax.typeset();
+    }
+</script>
+</body>
+</html>

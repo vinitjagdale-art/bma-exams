@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bright Minds Academy - 10th Financial Planning 2</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root { --primary-bg: #1b3022; --text-color: #ffffff; --accent-color: #4CAF50; --error: #ff5252; --correct: #81c784; --answered: #ff9800; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--primary-bg); color: var(--text-color); margin: 0; padding: 10px; display: flex; justify-content: center; }
+        #exam-container { width: 100%; max-width: 850px; background: rgba(255, 255, 255, 0.1); padding: 1.5rem; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+        .page { display: none; }
+        .active { display: block; }
+        #nav-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 8px; margin-bottom: 20px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; }
+        .nav-box { height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 4px; background: #555; cursor: pointer; font-weight: bold; font-size: 0.9rem; }
+        .nav-box.current { background: var(--accent-color); border: 2px solid #fff; }
+        .nav-box.answered { background: var(--answered); }
+        .info-box { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 0.9rem; }
+        .header-main { text-align: center; border-bottom: 2px solid var(--accent-color); margin-bottom: 15px; padding-bottom: 10px; }
+        #question-scroll-area { max-height: 60vh; overflow-y: auto; padding-right: 10px; margin-top: 10px; }
+        .option-label { display: block; background: rgba(255,255,255,0.05); margin: 10px 0; padding: 15px; border-radius: 8px; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
+        .option-label:hover { background: rgba(255,255,255,0.12); }
+        input[type="radio"] { margin-right: 12px; transform: scale(1.2); }
+        .btn-container { margin-top: 20px; display: flex; justify-content: space-between; }
+        button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; background: var(--accent-color); color: white; font-weight: bold; }
+        .review-card { background: rgba(0,0,0,0.3); padding: 15px; margin: 15px 0; border-radius: 8px; border-left: 5px solid var(--error); }
+        .review-card.status-correct { border-left-color: var(--correct); }
+    </style>
+</head>
+<body>
+
+<div id="exam-container">
+    <div id="page-landing" class="page active">
+        <h1 class="header-main">Bright Minds Academy</h1>
+        <div class="info-box" style="display: block;">
+            <p><strong>Exam:</strong> Financial Planning 2</p>
+            <p><strong>Standard:</strong> 10th | <strong>Marks:</strong> 20 | <strong>Time:</strong> 30 Mins</p>
+        </div>
+        <div style="margin: 30px 0; text-align: center;">
+            <input type="text" id="student-name" placeholder="Enter Full Student Name" style="width: 80%; padding: 12px; border-radius: 6px; border: none;">
+        </div>
+        <div style="text-align: center;"><button onclick="startExam()">Start Assignment</button></div>
+    </div>
+
+    <div id="page-exam" class="page">
+        <div id="nav-grid"></div>
+        <div class="header-main" style="font-size: 1.2rem;">Bright Minds Academy</div>
+        <div class="info-box">
+            <span><strong>Time Left:</strong> <span id="timer-display">30:00</span></span>
+            <span><strong>Marks:</strong> 20</span>
+            <span><strong>Questions:</strong> 20</span>
+        </div>
+        <div id="question-scroll-area">
+            <h3 id="q-title"></h3>
+            <p id="q-text" style="font-size: 1.1rem; line-height: 1.6;"></p>
+            <div id="options-container"></div>
+        </div>
+        <div class="btn-container">
+            <button id="prev-btn" onclick="changeQuestion(-1)">Back</button>
+            <button id="next-btn" onclick="changeQuestion(1)">Next</button>
+        </div>
+    </div>
+
+    <div id="page-result" class="page">
+        <h2 id="res-name" style="text-align: center;"></h2>
+        <h1 style="text-align: center;">Score: <span id="final-score"></span></h1>
+        <div id="ai-analysis" style="background: rgba(76, 175, 80, 0.15); padding: 20px; border-radius: 10px; margin: 20px 0; line-height: 1.5;"></div>
+        <h3>Question Review</h3>
+        <div id="review-list"></div>
+    </div>
+</div>
+
+<script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwEutZaKIAodDqKVocXPmgGlsfyO6ma8vuQK4sFgEobmvD73QQwztuH4qbT_R3g1Figtw/exec";
+    const EXAM_KEY = "10th_FinancialPlanning_Ass2_vUpgraded";
+    const HARDCODED_STD = "10th";
+    const EXAM_NAME = "Financial Planning 2";
+    let timerInterval;
+    let timeRemaining = 1800;
+
+    const questions = [
+        { q: "If the total GST on an article is 18%, what is the rate of CGST?", options: ["18%", "9%", "36%", "0%"], ans: 1, topic: "Fundamental Tax Logic", explain: "CGST is exactly half of the total GST rate. Half of 18% is 9%." },
+        { q: "A share is bought at its Face Value (FV) of ₹ 100. This is known as buying at _____.", options: ["Premium", "Discount", "Par", "Market Value"], ans: 2, topic: "Algebraic Share Value", explain: "When Market Value equals Face Value, the share is at par." },
+        { q: "Find the dividend on 40 shares of FV ₹ 10 if dividend declared is 25%.", options: ["₹ 100", "₹ 400", "₹ 250", "₹ 10"], ans: 0, topic: "Dividend & Return Calculations", explain: "Dividend per share = 25% of ₹ 10 = ₹ 2.5. Total = 40 × 2.5 = ₹ 100." },
+        { q: "To find the cost of buying a share, the brokerage is always _____ the Market Value (MV).", options: ["Added to", "Subtracted from", "Multiplied with", "Divided by"], ans: 0, topic: "Brokerage Operations", explain: "Buying cost = Market Value + Brokerage + GST on brokerage." },
+        { q: "If a mutual fund unit has an NAV of ₹ 25, how many units can be bought for ₹ 10,000?", options: ["400", "1000", "250", "2500"], ans: 0, topic: "Mutual Funds Logic", explain: "Number of units = Total Investment / NAV = 10000 / 25 = 400. Correction: Option A is 400." },
+        { q: "If FV = ₹ 50 and MV = ₹ 65, find the premium amount.", options: ["₹ 115", "₹ 15", "₹ 50", "₹ 65"], ans: 1, topic: "Algebraic Share Value", explain: "Premium = MV - FV = 65 - 50 = ₹ 15." },
+        { q: "If the rate of SGST is 6%, then the total GST rate is _____.", options: ["6%", "12%", "3%", "18%"], ans: 1, topic: "Fundamental Tax Logic", explain: "Total GST = CGST + SGST. Since CGST = SGST, GST = 6% + 6% = 12%." },
+        { q: "Find the Market Value of a share if FV = ₹ 10 and it is at a discount of ₹ 2.", options: ["₹ 12", "₹ 8", "₹ 10", "₹ 2"], ans: 1, topic: "Algebraic Share Value", explain: "MV = FV - Discount = 10 - 2 = ₹ 8." },
+        { q: "Brokerage is always calculated on the _____ of the share.", options: ["Face Value", "Market Value", "Net Asset Value", "Premium"], ans: 1, topic: "Brokerage Operations", explain: "Brokerage is a fee paid to a broker based on the trading price, which is the Market Value." },
+        { q: "If a person receives ₹ 400 dividend on an investment of ₹ 5,000, find the rate of return.", options: ["8%", "10%", "5%", "4%"], ans: 0, topic: "Dividend & Return Calculations", explain: "Rate of Return = (Dividend / Investment) × 100 = (400 / 5000) × 100 = 8%." },
+        { q: "An article has a taxable value of ₹ 1,000. If GST is 12%, find the total amount with tax.", options: ["₹ 1,120", "₹ 1,060", "₹ 880", "₹ 1,240"], ans: 0, topic: "Fundamental Tax Logic", explain: "GST = 12% of 1000 = ₹ 120. Total = 1000 + 120 = ₹ 1,120." },
+        { q: "Find the NAV of a mutual fund if ₹ 20,000 provides 500 units.", options: ["₹ 40", "₹ 400", "₹ 20", "₹ 50"], ans: 0, topic: "Mutual Funds Logic", explain: "NAV = Investment / Units = 20000 / 500 = ₹ 40." },
+        { q: "If FV = ₹ 100 and premium is 50%, find MV.", options: ["₹ 50", "₹ 150", "₹ 100", "₹ 200"], ans: 1, topic: "Algebraic Share Value", explain: "Premium = 50% of 100 = ₹ 50. MV = 100 + 50 = ₹ 150." },
+        { q: "If the CGST amount is ₹ 45.50, what is the SGST amount?", options: ["₹ 0", "₹ 91", "₹ 45.50", "₹ 22.75"], ans: 2, topic: "Fundamental Tax Logic", explain: "CGST and SGST amounts are always identical in intra-state trading." },
+        { q: "When selling a share, the actual amount received is _____.", options: ["MV + Brokerage", "MV - Brokerage", "FV - Brokerage", "MV"], ans: 1, topic: "Brokerage Operations", explain: "Selling receipt = Market Value - Brokerage - GST on brokerage." },
+        { q: "Find the total investment for buying 100 shares at par with FV ₹ 10.", options: ["₹ 1,000", "₹ 1,100", "₹ 900", "₹ 100"], ans: 0, topic: "Algebraic Share Value", explain: "At par, MV = FV = ₹ 10. Investment = 100 × 10 = ₹ 1,000." },
+        { q: "If a company declares a dividend of 10%, how much will a holder of 1 share of FV ₹ 50 receive?", options: ["₹ 10", "₹ 5", "₹ 50", "₹ 1"], ans: 1, topic: "Dividend & Return Calculations", explain: "Dividend = 10% of FV (₹ 50) = ₹ 5." },
+        { q: "How many digits of a GSTIN represent the state code?", options: ["First 2", "Last 3", "Middle 10", "First 5"], ans: 0, topic: "Fundamental Tax Logic", explain: "The first two digits of the 15-digit GSTIN are the state code." },
+        { q: "A mutual fund investor gets ₹ 2,000 profit on ₹ 10,000 investment. Percentage profit is:", options: ["20%", "2%", "10%", "25%"], ans: 0, topic: "Mutual Funds Logic", explain: "Profit % = (2000 / 10000) × 100 = 20%." },
+        { q: "If a share of FV ₹ 100 is at a discount of 10%, find MV.", options: ["₹ 110", "₹ 90", "₹ 100", "₹ 10"], ans: 1, topic: "Algebraic Share Value", explain: "Discount = 10% of 100 = ₹ 10. MV = 100 - 10 = ₹ 90." }
+    ];
+
+    let currentQ = 0;
+    let userAnswers = new Array(questions.length).fill(null);
+    let studentName = "";
+
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            timeRemaining--;
+            sessionStorage.setItem('time_remaining', timeRemaining);
+            updateTimerDisplay();
+            if (timeRemaining <= 0) { clearInterval(timerInterval); submitExam(); }
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        const mins = Math.floor(timeRemaining / 60);
+        const secs = timeRemaining % 60;
+        document.getElementById('timer-display').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function startExam() {
+        studentName = document.getElementById('student-name').value.trim();
+        if (!studentName) return alert("Please enter your name");
+        sessionStorage.setItem('name', studentName);
+        sessionStorage.setItem('in_progress_' + EXAM_KEY, "true");
+        document.getElementById('page-landing').classList.remove('active');
+        document.getElementById('page-exam').classList.add('active');
+        startTimer();
+        renderGrid();
+        showQuestion();
+    }
+
+    function renderGrid() {
+        const grid = document.getElementById('nav-grid');
+        grid.innerHTML = "";
+        questions.forEach((_, i) => {
+            const div = document.createElement('div');
+            div.className = `nav-box ${i === currentQ ? 'current' : ''} ${userAnswers[i] !== null ? 'answered' : ''}`;
+            div.innerText = i + 1;
+            div.onclick = () => jumpTo(i);
+            grid.appendChild(div);
+        });
+    }
+
+    function showQuestion() {
+        const q = questions[currentQ];
+        document.getElementById('q-title').innerText = `Question ${currentQ + 1}`;
+        document.getElementById('q-text').innerHTML = q.q;
+        const optCont = document.getElementById('options-container');
+        optCont.innerHTML = "";
+        q.options.forEach((opt, idx) => {
+            const lbl = document.createElement('label');
+            lbl.className = "option-label";
+            lbl.innerHTML = `<input type="radio" name="opt" ${userAnswers[currentQ] === idx ? 'checked' : ''} onchange="saveAns(${idx})"> ${opt}`;
+            optCont.appendChild(lbl);
+        });
+        document.getElementById('next-btn').innerText = currentQ === questions.length - 1 ? "Finish" : "Next";
+        sessionStorage.setItem('currentQ', currentQ);
+        renderGrid();
+        MathJax.typeset();
+    }
+
+    function saveAns(idx) {
+        userAnswers[currentQ] = idx;
+        sessionStorage.setItem('answers', JSON.stringify(userAnswers));
+        renderGrid();
+    }
+
+    function jumpTo(i) { currentQ = i; showQuestion(); }
+
+    function changeQuestion(dir) {
+        if (dir === 1 && currentQ === questions.length - 1) submitExam();
+        else { currentQ += dir; showQuestion(); }
+    }
+
+    async function submitExam() {
+        clearInterval(timerInterval);
+        let score = 0;
+        let topicMap = {};
+        let reviewHTML = "";
+        let missedQuestions = [];
+
+        questions.forEach((q, i) => {
+            const correct = userAnswers[i] === q.ans;
+            if (correct) {
+                score++;
+            } else {
+                missedQuestions.push("Q" + (i + 1));
+            }
+            if (!topicMap[q.topic]) topicMap[q.topic] = { total: 0, correct: 0, failedQ: [] };
+            topicMap[q.topic].total++;
+            if (correct) topicMap[q.topic].correct++;
+            else topicMap[q.topic].failedQ.push(i + 1);
+
+            reviewHTML += `<div class="review-card ${correct ? 'status-correct' : ''}">
+                <strong>Q${i+1}:</strong> ${q.q}<br>
+                Your Answer: <span style="color:${correct ? '#81c784' : '#ff5252'}">${userAnswers[i] !== null ? q.options[userAnswers[i]] : 'Skipped'}</span><br>
+                Correct: ${q.options[q.ans]}<br>
+                <em>Explanation: ${q.explain}</em></div>`;
+        });
+
+        const scoreStr = `${score}/${questions.length}`;
+        let wrongAnswersString = missedQuestions.length > 0 ? missedQuestions.join(", ") : "None";
+
+        document.getElementById('page-exam').classList.remove('active');
+        document.getElementById('page-result').classList.add('active');
+        document.getElementById('res-name').innerText = studentName;
+        document.getElementById('final-score').innerText = scoreStr;
+        document.getElementById('review-list').innerHTML = reviewHTML;
+
+        let analysis = `<strong>AI Analysis Feedback (Question-Specific):</strong><br><br>`;
+        for (let t in topicMap) {
+            let pct = (topicMap[t].correct / topicMap[t].total) * 100;
+            if (pct === 100) analysis += `• Mastery achieved in ${t}. Your concepts are perfectly clear.<br>`;
+            else if (pct >= 60) analysis += `• Strong foundation in ${t}, but minor errors occurred in Question(s) ${topicMap[t].failedQ.join(', ')}.<br>`;
+            else analysis += `• Weak performance in ${t}. For example, in Question(s) ${topicMap[t].failedQ.join(', ')}, you failed to apply the rules or formulas correctly.<br>`;
+        }
+        document.getElementById('ai-analysis').innerHTML = analysis;
+
+        fetch(WEB_APP_URL, { 
+            method: "POST", 
+            mode: "no-cors", 
+            body: JSON.stringify({ 
+                studentName, 
+                standard: HARDCODED_STD, 
+                examName: EXAM_NAME, 
+                score: scoreStr,
+                wrongAnswers: wrongAnswersString
+            }) 
+        });
+
+        localStorage.setItem('submitted_data_' + EXAM_KEY, JSON.stringify({ name: studentName, answers: userAnswers, score: scoreStr, topicMap }));
+        sessionStorage.clear();
+        MathJax.typeset();
+        window.scrollTo(0, 0);
+    }
+
+    window.onload = () => {
+        const saved = localStorage.getItem('submitted_data_' + EXAM_KEY);
+        if (saved) {
+            const data = JSON.parse(saved);
+            studentName = data.name;
+            userAnswers = data.answers;
+            showResultsFromStorage(data);
+        } else if (sessionStorage.getItem('in_progress_' + EXAM_KEY)) {
+            studentName = sessionStorage.getItem('name');
+            userAnswers = JSON.parse(sessionStorage.getItem('answers')) || userAnswers;
+            currentQ = parseInt(sessionStorage.getItem('currentQ')) || 0;
+            timeRemaining = parseInt(sessionStorage.getItem('time_remaining')) || 1800;
+            document.getElementById('page-landing').classList.remove('active');
+            document.getElementById('page-exam').classList.add('active');
+            startTimer();
+            updateTimerDisplay();
+            renderGrid();
+            showQuestion();
+        }
+    };
+
+    function showResultsFromStorage(data) {
+        document.getElementById('page-landing').classList.remove('active');
+        document.getElementById('page-result').classList.add('active');
+        document.getElementById('res-name').innerText = data.name;
+        document.getElementById('final-score').innerText = data.score;
+        let reviewHTML = "";
+        questions.forEach((q, i) => {
+            const correct = userAnswers[i] === q.ans;
+            reviewHTML += `<div class="review-card ${correct ? 'status-correct' : ''}">
+                <strong>Q${i+1}:</strong> ${q.q}<br>
+                Your Answer: <span style="color:${correct ? '#81c784' : '#ff5252'}">${userAnswers[i] !== null ? q.options[userAnswers[i]] : 'Skipped'}</span><br>
+                Correct: ${q.options[q.ans]}<br>
+                <em>Explanation: ${q.explain}</em></div>`;
+        });
+        document.getElementById('review-list').innerHTML = reviewHTML;
+        let analysis = `<strong>AI Analysis Feedback (Question-Specific):</strong><br><br>`;
+        for (let t in data.topicMap) {
+            let pct = (data.topicMap[t].correct / data.topicMap[t].total) * 100;
+            if (pct === 100) analysis += `• Mastery achieved in ${t}. Your concepts are perfectly clear.<br>`;
+            else if (pct >= 60) analysis += `• Strong foundation in ${t}, but minor errors occurred in Question(s) ${data.topicMap[t].failedQ.join(', ')}.<br>`;
+            else analysis += `• Weak performance in ${t}. For example, in Question(s) ${data.topicMap[t].failedQ.join(', ')}, you failed to apply the rules or formulas correctly.<br>`;
+        }
+        document.getElementById('ai-analysis').innerHTML = analysis;
+        MathJax.typeset();
+    }
+</script>
+</body>
+</html>
