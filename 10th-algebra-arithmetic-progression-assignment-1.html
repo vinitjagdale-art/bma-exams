@@ -75,6 +75,7 @@
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwEutZaKIAodDqKVocXPmgGlsfyO6ma8vuQK4sFgEobmvD73QQwztuH4qbT_R3g1Figtw/exec";
     const EXAM_KEY = "10th_AP_Ass1_vUpgraded";
     const HARDCODED_STD = "10th";
+    const HARDCODED_SUBJECT = "Algebra";   // ← NEW
     const EXAM_NAME = "Arithmetic Progression 1";
     let timerInterval;
     let timeRemaining = 1800;
@@ -224,16 +225,17 @@
         }
         document.getElementById('ai-analysis').innerHTML = analysis;
 
-        fetch(WEB_APP_URL, { 
-            method: "POST", 
-            mode: "no-cors", 
-            body: JSON.stringify({ 
-                studentName, 
-                standard: HARDCODED_STD, 
-                examName: EXAM_NAME, 
-                score: scoreStr, 
-                wrongAnswers: wrongAnswersString 
-            }) 
+        fetch(WEB_APP_URL, {
+            method: "POST",
+            mode: "no-cors",
+            body: JSON.stringify({
+                studentName,
+                standard: HARDCODED_STD,
+                subject:  HARDCODED_SUBJECT,   // ← NEW
+                examName: EXAM_NAME,
+                score: scoreStr,
+                wrongAnswers: wrongAnswersString
+            })
         });
 
         localStorage.setItem('submitted_data_' + EXAM_KEY, JSON.stringify({ name: studentName, answers: userAnswers, score: scoreStr, topicMap }));
@@ -278,7 +280,7 @@
                 <em>Explanation: ${q.explain}</em></div>`;
         });
         document.getElementById('review-list').innerHTML = reviewHTML;
-        
+
         let analysis = `<strong>AI Analysis Feedback (Question-Specific):</strong><br><br>`;
         for (let t in data.topicMap) {
             let pct = (data.topicMap[t].correct / data.topicMap[t].total) * 100;
