@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bright Minds Academy - 10th English Grammar</title>
+    <style>
+        /* Distinct Green Theme for English Grammar */
+        :root { 
+            --primary-bg: #173627; 
+            --text-color: #ffffff; 
+            --accent-color: #2bb872; 
+            --error: #ff5252; 
+            --correct: #81c784; 
+            --answered: #ff9800; 
+        }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--primary-bg); color: var(--text-color); margin: 0; padding: 10px; display: flex; justify-content: center; }
+        #exam-container { width: 100%; max-width: 850px; background: rgba(255, 255, 255, 0.1); padding: 1.5rem; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+        .page { display: none; }
+        .active { display: block; }
+        #nav-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 8px; margin-top: 20px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; }
+        .nav-box { height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 4px; background: #555; cursor: pointer; font-weight: bold; font-size: 0.9rem; }
+        .nav-box.current { background: var(--accent-color); border: 2px solid #fff; }
+        .nav-box.answered { background: var(--answered); }
+        .info-box { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 0.9rem; }
+        .header-main { text-align: center; border-bottom: 2px solid var(--accent-color); margin-bottom: 15px; padding-bottom: 10px; }
+        #question-scroll-area { max-height: 60vh; overflow-y: auto; padding-right: 10px; margin-top: 10px; }
+        .option-label { display: block; background: rgba(255,255,255,0.05); margin: 10px 0; padding: 15px; border-radius: 8px; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
+        .option-label:hover { background: rgba(255,255,255,0.12); }
+        input[type="radio"] { margin-right: 12px; transform: scale(1.2); }
+        .btn-container { margin-top: 20px; display: flex; justify-content: space-between; }
+        button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; background: var(--accent-color); color: white; font-weight: bold; }
+        .review-card { background: rgba(0,0,0,0.3); padding: 15px; margin: 15px 0; border-radius: 8px; border-left: 5px solid var(--error); }
+        .review-card.status-correct { border-left-color: var(--correct); }
+    </style>
+</head>
+<body>
+
+<div id="exam-container">
+    <div id="page-landing" class="page active">
+        <h1 class="header-main">Bright Minds Academy</h1>
+        <div class="info-box" style="display: block;">
+            <p><strong>Subject:</strong> English</p>
+            <p id="exam-title-display"><strong>Topic:</strong> Loading...</p>
+            <p><strong>Standard:</strong> 10th | <strong>Marks:</strong> 30 | <strong>Time:</strong> 30 Mins</p>
+        </div>
+        <div style="margin: 30px 0; text-align: center;">
+            <input type="text" id="student-name" placeholder="Enter Full Student Name" style="width: 80%; padding: 12px; border-radius: 6px; border: none;">
+        </div>
+        <div style="text-align: center;"><button onclick="startExam()">Start Assignment</button></div>
+    </div>
+
+    <div id="page-exam" class="page">
+        <div class="header-main" style="font-size: 1.2rem;">Bright Minds Academy</div>
+        <div class="info-box">
+            <span><strong>Time Left:</strong> <span id="timer-display">30:00</span></span>
+            <span><strong>Marks:</strong> 30</span>
+            <span><strong>Questions:</strong> 30</span>
+        </div>
+        <div id="question-scroll-area">
+            <h3 id="q-title"></h3>
+            <p id="q-text" style="font-size: 1.1rem; line-height: 1.6;"></p>
+            <div id="options-container"></div>
+        </div>
+        <div class="btn-container">
+            <button id="prev-btn" onclick="changeQuestion(-1)">Back</button>
+            <button id="next-btn" onclick="changeQuestion(1)">Next</button>
+        </div>
+        <div id="nav-grid"></div>
+    </div>
+
+    <div id="page-result" class="page">
+        <h2 id="res-name" style="text-align: center;"></h2>
+        <h1 style="text-align: center;">Score: <span id="final-score"></span></h1>
+        <div id="ai-analysis" style="background: rgba(76, 175, 80, 0.15); padding: 20px; border-radius: 10px; margin: 20px 0; line-height: 1.5;"></div>
+        <h3>Question Review</h3>
+        <div id="review-list"></div>
+    </div>
+</div>
+
+<script>
+    // UPDATE THESE FOR EACH NEW EXAM
+    const EXAM_KEY = "10th_Eng_Grammar_punctuation2"; 
+    const EXAM_NAME = "Punctuation & Error Correction test 2"; 
+    
+    // CONSTANTS
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwEutZaKIAodDqKVocXPmgGlsfyO6ma8vuQK4sFgEobmvD73QQwztuH4qbT_R3g1Figtw/exec";
+    const HARDCODED_STD = "10th";
+    const HARDCODED_SUBJECT = "English";
+    
+    let timerInterval;
+    let timeRemaining = 1800; // 30 Minutes
+
+    // JSON PAYLOAD GOES HERE (Paste the clean JSON array below this line)
+    const questions = [
+  { "q": "Choose the correctly punctuated sentence:<br><strong>can you help me</strong>", "options": ["Can you help me.", "can you help me?", "Can you help me?", "Can you help me!"], "ans": 2, "topic": "Punctuation", "explain": "Start with a capital letter. End questions with a question mark." },
+  { "q": "Choose the correctly punctuated sentence:<br><strong>maybe you should talk to him sir</strong>", "options": ["Maybe you should talk to him, sir.", "Maybe you should talk to him sir.", "maybe you should talk to him, sir.", "Maybe, you should talk to him sir."], "ans": 0, "topic": "Punctuation", "explain": "Capitalize the first letter and use a comma before a direct address like 'sir'." },
+  { "q": "Choose the correctly punctuated sentence:<br><strong>he will certainly try to win</strong>", "options": ["He will certainly try to win.", "he will certainly try to win.", "He will certainly try to win", "He will certainly try to win?"], "ans": 0, "topic": "Punctuation", "explain": "Simple statement. Needs a capital at the beginning and a full stop at the end." },
+  { "q": "Choose the correctly punctuated sentence:<br><strong>dr patil looked at the reports carefully</strong>", "options": ["dr patil looked at the reports carefully.", "Dr Patil looked at the reports carefully.", "Dr. Patil looked at the reports carefully.", "Dr. patil looked at the reports carefully."], "ans": 2, "topic": "Punctuation", "explain": "Abbreviations like 'Dr.' need a full stop, and proper nouns ('Patil') must be capitalized." },
+  { "q": "Choose the correctly punctuated sentence:<br><strong>however she doesnt know the truth</strong>", "options": ["However she doesn't know the truth.", "However, she doesnt know the truth.", "However, she doesn't know the truth.", "however, she doesn't know the truth."], "ans": 2, "topic": "Punctuation", "explain": "Capital at start, comma after introductory word, apostrophe in 'doesn't', and a full stop." },
+  { "q": "Choose the correctly punctuated sentence:<br><strong>are you coming with us she asked</strong>", "options": ["\"Are you coming with us.\" she asked?", "\"Are you coming with us?\" she asked.", "Are you coming with us? she asked.", "\"are you coming with us?\" she asked."], "ans": 1, "topic": "Punctuation", "explain": "Inverted commas around speech. A question mark replaces the comma inside the inverted commas." },
+  { "q": "Choose the correctly punctuated sentence:<br><strong>you have never read shakespeare he asked</strong>", "options": ["\"You have never read shakespeare?\" he asked.", "\"You have never read Shakespeare?\" he asked.", "You have never read Shakespeare? he asked.", "\"You have never read Shakespeare,\" he asked."], "ans": 1, "topic": "Punctuation", "explain": "Proper noun 'Shakespeare' gets a capital. Question mark goes inside inverted commas." },
+  { "q": "Choose the correctly punctuated sentence:<br><strong>the captain said march forward</strong>", "options": ["The captain said, \"March forward.\"", "The captain said \"March forward.\"", "The captain said, \"march forward.\"", "the captain said, \"March forward.\""], "ans": 0, "topic": "Punctuation", "explain": "Use a comma before direct speech, inverted commas, and capitalize the first word inside the quotes." },
+  { "q": "Choose the correctly punctuated sentence:<br><strong>what a beautiful painting this is</strong>", "options": ["What a beautiful painting this is.", "What a beautiful painting this is?", "what a beautiful painting this is!", "What a beautiful painting this is!"], "ans": 3, "topic": "Punctuation", "explain": "Capital at the start. Exclamatory sentences must end with an exclamation mark." },
+  { "q": "Choose the correctly punctuated sentence:<br><strong>the tourist asked where is the museum</strong>", "options": ["The tourist asked \"Where is the museum?\"", "The tourist asked, \"where is the museum?\"", "The tourist asked, \"Where is the museum?\"", "the tourist asked, \"Where is the museum?\""], "ans": 2, "topic": "Punctuation", "explain": "Comma after reporting verb, inverted commas, capital 'Where', and a question mark at the end." },
+  { "q": "Choose the correctly punctuated sentence:<br><strong>delhi is a very crowded city</strong>", "options": ["Delhi is a very crowded city.", "delhi is a very crowded city.", "Delhi is a very crowded City.", "Delhi is a very crowded city!"], "ans": 0, "topic": "Punctuation", "explain": "Capitalize proper nouns ('Delhi') and the start of sentences. End with a full stop." },
+  { "q": "Choose the correctly punctuated sentence:<br><strong>thank you said the old man</strong>", "options": ["Thank you, said the old man.", "\"Thank you,\" said the old man.", "\"thank you,\" said the old man.", "\"Thank you\" said the old man."], "ans": 1, "topic": "Punctuation", "explain": "Spoken words need inverted commas, and a comma separates the speech from the speaker." },
+  { "q": "Choose the correctly punctuated sentence:<br><strong>have they completed the project</strong>", "options": ["Have they completed the project.", "Have they completed the project?", "have they completed the project?", "Have they completed the project!"], "ans": 1, "topic": "Punctuation", "explain": "Questions must begin with a capital letter and end with a question mark." },
+  { "q": "Choose the correctly punctuated sentence:<br><strong>dr shah is an experienced surgeon</strong>", "options": ["Dr Shah is an experienced surgeon.", "dr. Shah is an experienced surgeon.", "Dr. Shah is an experienced surgeon.", "Dr. shah is an experienced surgeon."], "ans": 2, "topic": "Punctuation", "explain": "Abbreviations ('Dr.') get a full stop. Proper nouns ('Shah') must be capitalized." },
+  { "q": "Choose the correctly punctuated sentence:<br><strong>the dog barks loudly at night</strong>", "options": ["the dog barks loudly at night.", "The dog barks loudly at night", "The dog barks loudly at night.", "The dog barks loudly at night!"], "ans": 2, "topic": "Punctuation", "explain": "A simple statement starts with a capital and ends with a full stop." },
+  { "q": "Spot the grammatical error and choose the correct sentence:<br><strong>I doesn't have enough money to buy it.</strong>", "options": ["I don't have enough money to buy it.", "I didn't has enough money to buy it.", "I doesn't has enough money to buy it.", "I am not have enough money to buy it."], "ans": 0, "topic": "Error Correction", "explain": "Subject-Verb Agreement error. The pronoun 'I' always pairs with 'don't', not 'doesn't'." },
+  { "q": "Spot the grammatical error and choose the correct sentence:<br><strong>She swim very fast.</strong>", "options": ["She swimming very fast.", "She swims very fast.", "She is swim very fast.", "She swimmed very fast."], "ans": 1, "topic": "Error Correction", "explain": "Subject-Verb Agreement error. Singular subject 'She' takes the singular verb 'swims'." },
+  { "q": "Spot the grammatical error and choose the correct sentence:<br><strong>All the good teachers explains the topic well.</strong>", "options": ["All the good teachers explaining the topic well.", "All the good teachers explain the topic well.", "All the good teachers explaineds the topic well.", "All the good teachers is explain the topic well."], "ans": 1, "topic": "Error Correction", "explain": "Subject-Verb Agreement error. 'teachers' is plural, so it takes the plural verb 'explain'." },
+  { "q": "Spot the grammatical error and choose the correct sentence:<br><strong>The letter was delivering yesterday.</strong>", "options": ["The letter was deliver yesterday.", "The letter was delivered yesterday.", "The letter is delivering yesterday.", "The letter were delivered yesterday."], "ans": 1, "topic": "Error Correction", "explain": "Wrong verb form. A passive voice sentence needs the past participle 'delivered'." },
+  { "q": "Spot the grammatical error and choose the correct sentence:<br><strong>He don't eat junk food.</strong>", "options": ["He doesn't eat junk food.", "He didn't eats junk food.", "He don't eats junk food.", "He not eat junk food."], "ans": 0, "topic": "Error Correction", "explain": "Subject-Verb Agreement error. The singular pronoun 'He' pairs with 'doesn't'." },
+  { "q": "Spot the grammatical error and choose the correct sentence:<br><strong>The dogs barks at the strangers.</strong>", "options": ["The dogs barking at the strangers.", "The dogs bark at the strangers.", "The dog bark at the strangers.", "The dogs is bark at the strangers."], "ans": 1, "topic": "Error Correction", "explain": "Subject-Verb Agreement error. The plural subject 'dogs' takes the plural verb 'bark'." },
+  { "q": "Spot the grammatical error and choose the correct sentence:<br><strong>The song was sang by the choir.</strong>", "options": ["The song was singing by the choir.", "The song was sing by the choir.", "The song was sung by the choir.", "The song were sung by the choir."], "ans": 2, "topic": "Error Correction", "explain": "Wrong verb form. Passive voice needs the past participle 'sung', not 'sang'." },
+  { "q": "Spot the grammatical error and choose the correct sentence:<br><strong>I is reading a very interesting book.</strong>", "options": ["I are reading a very interesting book.", "I am reading a very interesting book.", "I reads a very interesting book.", "I were reading a very interesting book."], "ans": 1, "topic": "Error Correction", "explain": "Subject-Verb Agreement error. The pronoun 'I' is followed by 'am'." },
+  { "q": "Spot the grammatical error and choose the correct sentence:<br><strong>We was planning a surprise party.</strong>", "options": ["We is planning a surprise party.", "We were planning a surprise party.", "We am planning a surprise party.", "We was plan a surprise party."], "ans": 1, "topic": "Error Correction", "explain": "Subject-Verb Agreement error. The plural pronoun 'We' takes 'were'." },
+  { "q": "Spot the grammatical error and choose the correct sentence:<br><strong>The airplane fly very high.</strong>", "options": ["The airplane flies very high.", "The airplane flying very high.", "The airplane flown very high.", "The airplanes flies very high."], "ans": 0, "topic": "Error Correction", "explain": "Subject-Verb Agreement error. Singular subject 'airplane' takes the singular verb 'flies'." },
+  { "q": "Spot the grammatical error and choose the correct sentence:<br><strong>He were running late for the meeting.</strong>", "options": ["He are running late for the meeting.", "He is run late for the meeting.", "He was running late for the meeting.", "He run late for the meeting."], "ans": 2, "topic": "Error Correction", "explain": "Subject-Verb Agreement error. The singular pronoun 'He' takes 'was'." },
+  { "q": "Spot the grammatical error and choose the correct sentence:<br><strong>The cake was baking by my mother.</strong>", "options": ["The cake was bake by my mother.", "The cake was baked by my mother.", "The cake is bake by my mother.", "The cake were baked by my mother."], "ans": 1, "topic": "Error Correction", "explain": "Wrong verb form. Passive voice requires the past participle 'baked'." },
+  { "q": "Spot the grammatical error and choose the correct sentence:<br><strong>She don't know the answer.</strong>", "options": ["She doesn't know the answer.", "She didn't knows the answer.", "She don't knows the answer.", "She not know the answer."], "ans": 0, "topic": "Error Correction", "explain": "Subject-Verb Agreement error. The singular pronoun 'She' takes 'doesn't'." },
+  { "q": "Spot the grammatical error and choose the correct sentence:<br><strong>My mother cook delicious food.</strong>", "options": ["My mother cooks delicious food.", "My mother cooking delicious food.", "My mother cookeds delicious food.", "My mother cook delicious food."], "ans": 0, "topic": "Error Correction", "explain": "Subject-Verb Agreement error. 'My mother' is singular and requires the singular verb 'cooks'." },
+  { "q": "Spot the grammatical error and choose the correct sentence:<br><strong>The girls was dancing gracefully.</strong>", "options": ["The girls is dancing gracefully.", "The girls were dancing gracefully.", "The girl were dancing gracefully.", "The girls dancing gracefully."], "ans": 1, "topic": "Error Correction", "explain": "Subject-Verb Agreement error. The plural subject 'girls' requires 'were'." }
+]   ;
+
+    let currentQ = 0;
+    let userAnswers = new Array(30).fill(null);
+    let studentName = "";
+
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            timeRemaining--;
+            sessionStorage.setItem('time_remaining', timeRemaining);
+            updateTimerDisplay();
+            if (timeRemaining <= 0) { 
+                clearInterval(timerInterval); 
+                submitExam(true); // Pass true because it's a forced auto-submit
+            }
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        const mins = Math.floor(timeRemaining / 60);
+        const secs = timeRemaining % 60;
+        document.getElementById('timer-display').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function startExam() {
+        studentName = document.getElementById('student-name').value.trim();
+        if (!studentName) return alert("Please enter your name");
+        sessionStorage.setItem('name', studentName);
+        sessionStorage.setItem('in_progress_' + EXAM_KEY, "true");
+        document.getElementById('page-landing').classList.remove('active');
+        document.getElementById('page-exam').classList.add('active');
+        document.getElementById('exam-title-display').innerHTML = `<strong>Topic:</strong> ${EXAM_NAME}`;
+        startTimer();
+        renderGrid();
+        showQuestion();
+    }
+
+    function renderGrid() {
+        const grid = document.getElementById('nav-grid');
+        grid.innerHTML = "";
+        questions.forEach((_, i) => {
+            const div = document.createElement('div');
+            div.className = `nav-box ${i === currentQ ? 'current' : ''} ${userAnswers[i] !== null ? 'answered' : ''}`;
+            div.innerText = i + 1;
+            div.onclick = () => jumpTo(i);
+            grid.appendChild(div);
+        });
+    }
+
+    function showQuestion() {
+        const q = questions[currentQ];
+        document.getElementById('q-title').innerText = `Question ${currentQ + 1}`;
+        document.getElementById('q-text').innerHTML = q.q;
+        const optCont = document.getElementById('options-container');
+        optCont.innerHTML = "";
+        q.options.forEach((opt, idx) => {
+            const lbl = document.createElement('label');
+            lbl.className = "option-label";
+            lbl.innerHTML = `<input type="radio" name="opt" ${userAnswers[currentQ] === idx ? 'checked' : ''} onchange="saveAns(${idx})"> ${opt}`;
+            optCont.appendChild(lbl);
+        });
+        document.getElementById('next-btn').innerText = currentQ === questions.length - 1 ? "Finish" : "Next";
+        sessionStorage.setItem('currentQ', currentQ);
+        renderGrid();
+    }
+
+    function saveAns(idx) {
+        userAnswers[currentQ] = idx;
+        sessionStorage.setItem('answers', JSON.stringify(userAnswers));
+        renderGrid();
+    }
+
+    function jumpTo(i) { currentQ = i; showQuestion(); }
+
+    function changeQuestion(dir) {
+        if (dir === 1 && currentQ === questions.length - 1) {
+            submitExam(false); // Pass false because it is a manual submit attempt
+        } else { 
+            currentQ += dir; 
+            showQuestion(); 
+        }
+    }
+
+    async function submitExam(isAutoSubmit = false) {
+        // Warning check for missing answers
+        if (!isAutoSubmit) {
+            const unansweredCount = userAnswers.filter(ans => ans === null).length;
+            if (unansweredCount > 0) {
+                const confirmSubmit = confirm(`You have left ${unansweredCount} question(s) unanswered. Are you sure you want to finish and submit?`);
+                if (!confirmSubmit) return; // Stop submission if they click Cancel
+            }
+        }
+
+        clearInterval(timerInterval);
+        let score = 0;
+        let topicMap = {};
+        let reviewHTML = "";
+        let missedQuestions = [];
+
+        questions.forEach((q, i) => {
+            const correct = userAnswers[i] === q.ans;
+            if (correct) {
+                score++;
+            } else {
+                missedQuestions.push("Q" + (i + 1));
+            }
+            if (!topicMap[q.topic]) topicMap[q.topic] = { total: 0, correct: 0, failedQ: [] };
+            topicMap[q.topic].total++;
+            if (correct) topicMap[q.topic].correct++;
+            else topicMap[q.topic].failedQ.push(i + 1);
+
+            reviewHTML += `<div class="review-card ${correct ? 'status-correct' : ''}">
+                <strong>Q${i+1}:</strong> ${q.q}<br>
+                Your Answer: <span style="color:${correct ? '#81c784' : '#ff5252'}">${userAnswers[i] !== null ? q.options[userAnswers[i]] : 'Skipped'}</span><br>
+                Correct: ${q.options[q.ans]}<br>
+                <em>Explanation: ${q.explain}</em></div>`;
+        });
+
+        const scoreStr = `${score}/${questions.length}`;
+        let wrongAnswersString = missedQuestions.length > 0 ? missedQuestions.join(", ") : "None";
+
+        document.getElementById('page-exam').classList.remove('active');
+        document.getElementById('page-result').classList.add('active');
+        document.getElementById('res-name').innerText = studentName;
+        document.getElementById('final-score').innerText = scoreStr;
+        document.getElementById('review-list').innerHTML = reviewHTML;
+
+        let analysis = `<strong>AI Analysis Feedback (Question-Specific):</strong><br><br>`;
+        for (let t in topicMap) {
+            let pct = (topicMap[t].correct / topicMap[t].total) * 100;
+            if (pct === 100) {
+                analysis += `• Mastery achieved in ${t}. Your concepts are perfectly clear.<br>`;
+            } else if (pct >= 60) {
+                analysis += `• Strong foundation in ${t}, but minor errors occurred in Question(s) ${topicMap[t].failedQ.join(', ')}.<br>`;
+            } else {
+                analysis += `• Weak performance in ${t}. For example, in Question(s) ${topicMap[t].failedQ.join(', ')}, you failed to apply the rules correctly.<br>`;
+            }
+        }
+        document.getElementById('ai-analysis').innerHTML = analysis;
+
+        fetch(WEB_APP_URL, { 
+            method: "POST", 
+            mode: "no-cors", 
+            body: JSON.stringify({ 
+                studentName, 
+                standard: HARDCODED_STD, 
+                examName: EXAM_NAME, 
+                subject: HARDCODED_SUBJECT,
+                score: scoreStr, 
+                wrongAnswers: wrongAnswersString 
+            }) 
+        });
+        
+        localStorage.setItem('submitted_data_' + EXAM_KEY, JSON.stringify({ name: studentName, answers: userAnswers, score: scoreStr, topicMap }));
+        sessionStorage.clear();
+        window.scrollTo(0, 0);
+    }
+
+    window.onload = () => {
+        document.getElementById('exam-title-display').innerHTML = `<strong>Topic:</strong> ${EXAM_NAME}`;
+        const saved = localStorage.getItem('submitted_data_' + EXAM_KEY);
+        if (saved) {
+            const data = JSON.parse(saved);
+            studentName = data.name;
+            userAnswers = data.answers;
+            showResultsFromStorage(data);
+        } else if (sessionStorage.getItem('in_progress_' + EXAM_KEY)) {
+            studentName = sessionStorage.getItem('name');
+            userAnswers = JSON.parse(sessionStorage.getItem('answers')) || userAnswers;
+            currentQ = parseInt(sessionStorage.getItem('currentQ')) || 0;
+            timeRemaining = parseInt(sessionStorage.getItem('time_remaining')) || 1800;
+            document.getElementById('page-landing').classList.remove('active');
+            document.getElementById('page-exam').classList.add('active');
+            startTimer();
+            updateTimerDisplay();
+            renderGrid();
+            showQuestion();
+        }
+    };
+
+    function showResultsFromStorage(data) {
+        document.getElementById('page-landing').classList.remove('active');
+        document.getElementById('page-result').classList.add('active');
+        document.getElementById('res-name').innerText = data.name;
+        document.getElementById('final-score').innerText = data.score;
+        let reviewHTML = "";
+        questions.forEach((q, i) => {
+            const correct = userAnswers[i] === q.ans;
+            reviewHTML += `<div class="review-card ${correct ? 'status-correct' : ''}">
+                <strong>Q${i+1}:</strong> ${q.q}<br>
+                Your Answer: <span style="color:${correct ? '#81c784' : '#ff5252'}">${userAnswers[i] !== null ? q.options[userAnswers[i]] : 'Skipped'}</span><br>
+                Correct: ${q.options[q.ans]}<br>
+                <em>Explanation: ${q.explain}</em></div>`;
+        });
+        document.getElementById('review-list').innerHTML = reviewHTML;
+        let analysis = `<strong>AI Analysis Feedback (Question-Specific):</strong><br><br>`;
+        for (let t in data.topicMap) {
+            let pct = (data.topicMap[t].correct / data.topicMap[t].total) * 100;
+            if (pct === 100) {
+                analysis += `• Mastery achieved in ${t}. Your concepts are perfectly clear.<br>`;
+            } else if (pct >= 60) {
+                analysis += `• Strong foundation in ${t}, but minor errors occurred in Question(s) ${data.topicMap[t].failedQ.join(', ')}.<br>`;
+            } else {
+                analysis += `• Weak performance in ${t}. For example, in Question(s) ${data.topicMap[t].failedQ.join(', ')}, you failed to apply the rules correctly.<br>`;
+            }
+        }
+        document.getElementById('ai-analysis').innerHTML = analysis;
+    }
+</script>
+</body>
+</html>
