@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bright Minds Academy - Linear Equations: Word Problems Test 1</title>
+    <script>
+        MathJax = {
+            tex: { inlineMath: [['\\(','\\)'], ['$','$']], displayMath: [['$$','$$']] },
+            options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+    <style>
+        :root {
+            --primary-bg: #1e3a2f;
+            --card-bg: rgba(255, 255, 255, 0.08);
+            --text-color: #ffffff;
+            --accent-color: #2ecc71;
+            --error: #ff5252;
+            --correct: #81c784;
+            --answered: #ff9800;
+ 
+            /* Neon circle colors */
+            --neon-default: #555e58;
+            --neon-current-color: #00ffae;
+            --neon-answered-color: #ff9800;
+            --neon-glow-current: 0 0 8px #00ffae, 0 0 18px #00ffae, 0 0 32px #00ffae88;
+            --neon-glow-answered: 0 0 8px #ff9800, 0 0 18px #ff9800, 0 0 28px #ff980066;
+        }
+ 
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+ 
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background-color: var(--primary-bg);
+            background-image:
+                radial-gradient(ellipse at 20% 20%, rgba(46,204,113,0.07) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 80%, rgba(0,255,174,0.05) 0%, transparent 55%);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 14px 10px 30px;
+        }
+ 
+        #exam-container {
+            width: 100%;
+            max-width: 860px;
+            background: rgba(255,255,255,0.07);
+            padding: 1.6rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08);
+            border: 1px solid rgba(46,204,113,0.15);
+        }
+ 
+        .page { display: none; }
+        .active { display: block; }
+ 
+        /* ── Header ── */
+        .header-main {
+            text-align: center;
+            border-bottom: 2px solid var(--accent-color);
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            letter-spacing: 0.5px;
+        }
+        .header-main h1, .header-main span {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-color);
+        }
+ 
+        /* ── Info Box ── */
+        .info-box {
+            background: rgba(0,0,0,0.25);
+            padding: 14px 18px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            font-size: 0.88rem;
+            text-align: center;
+            border: 1px solid rgba(46,204,113,0.12);
+        }
+        .info-box span { line-height: 1.6; }
+ 
+        /* ── Landing Hero Card ── */
+        .hero-card {
+            text-align: center;
+            background: rgba(0,0,0,0.35);
+            border: 1px solid rgba(46,204,113,0.3);
+            border-radius: 16px;
+            padding: 36px 28px 30px;
+            margin-bottom: 28px;
+            box-shadow: 0 0 40px rgba(46,204,113,0.08), inset 0 1px 0 rgba(255,255,255,0.06);
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--accent-color), transparent);
+        }
+        .hero-exam-label {
+            font-size: 0.75rem;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: var(--accent-color);
+            opacity: 0.75;
+            margin-bottom: 10px;
+        }
+        .hero-exam-name {
+            font-size: 1.9rem;
+            font-weight: 700;
+            color: #ffffff;
+            line-height: 1.25;
+            margin-bottom: 22px;
+            text-shadow: 0 0 20px rgba(46,204,113,0.25);
+        }
+        .hero-meta {
+            display: flex;
+            justify-content: center;
+            gap: 0;
+            flex-wrap: wrap;
+        }
+        .hero-meta-item {
+            padding: 8px 22px;
+            border-right: 1px solid rgba(255,255,255,0.12);
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.65);
+        }
+        .hero-meta-item:last-child { border-right: none; }
+        .hero-meta-item strong { color: #ffffff; display: block; font-size: 1.05rem; margin-bottom: 2px; }
+ 
+        .name-input-wrap {
+            margin: 32px 0;
+            text-align: center;
+        }
+        #student-name {
+            width: 80%;
+            padding: 13px 16px;
+            border-radius: 8px;
+            border: 2px solid rgba(46,204,113,0.4);
+            background: rgba(0,0,0,0.3);
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        #student-name:focus { border-color: var(--accent-color); }
+        #student-name::placeholder { color: rgba(255,255,255,0.4); }
+ 
+        /* ── Buttons ── */
+        .btn-container { margin-top: 22px; display: flex; justify-content: space-between; }
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: var(--accent-color);
+            color: #0d2318;
+            font-weight: 700;
+            font-size: 0.95rem;
+            transition: transform 0.15s, box-shadow 0.15s;
+            box-shadow: 0 0 10px rgba(46,204,113,0.35);
+        }
+        button:hover { transform: translateY(-2px); box-shadow: 0 0 18px rgba(46,204,113,0.55); }
+        button:active { transform: translateY(0); }
+ 
+        /* ── Question area ── */
+        #question-scroll-area {
+            max-height: 58vh;
+            overflow-y: auto;
+            padding-right: 8px;
+            margin-top: 12px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent-color) transparent;
+        }
+        #question-scroll-area::-webkit-scrollbar { width: 5px; }
+        #question-scroll-area::-webkit-scrollbar-thumb { background: var(--accent-color); border-radius: 4px; }
+ 
+        #q-title { font-size: 0.82rem; color: rgba(255,255,255,0.5); margin-bottom: 6px; }
+        #q-text { font-size: 1.05rem; line-height: 1.75; margin-bottom: 14px; }
+ 
+        .option-label {
+            display: block;
+            background: rgba(255,255,255,0.05);
+            margin: 10px 0;
+            padding: 14px 16px;
+            border-radius: 9px;
+            cursor: pointer;
+            transition: background 0.18s, border-color 0.18s;
+            border: 1px solid transparent;
+        }
+        .option-label:hover { background: rgba(46,204,113,0.12); border-color: rgba(46,204,113,0.3); }
+        .option-label.selected { background: rgba(46,204,113,0.18); border-color: var(--accent-color); }
+        input[type="radio"] { margin-right: 12px; transform: scale(1.2); accent-color: var(--accent-color); }
+ 
+        /* ── Neon Navigation Grid ── */
+        #nav-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 22px;
+            background: rgba(0,0,0,0.2);
+            padding: 16px;
+            border-radius: 10px;
+            justify-content: center;
+        }
+ 
+        .nav-circle {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.82rem;
+            cursor: pointer;
+            background: var(--neon-default);
+            color: rgba(255,255,255,0.6);
+            border: 2px solid transparent;
+            transition: box-shadow 0.2s, background 0.2s, color 0.2s, border-color 0.2s, transform 0.15s;
+            user-select: none;
+        }
+        .nav-circle:hover { transform: scale(1.12); }
+ 
+        .nav-circle.current {
+            background: #001a10;
+            color: var(--neon-current-color);
+            border-color: var(--neon-current-color);
+            box-shadow: var(--neon-glow-current);
+        }
+ 
+        .nav-circle.answered {
+            background: #1a0d00;
+            color: var(--neon-answered-color);
+            border-color: var(--neon-answered-color);
+            box-shadow: var(--neon-glow-answered);
+        }
+ 
+        .nav-circle.current.answered {
+            background: #001a10;
+            color: var(--neon-current-color);
+            border-color: var(--neon-current-color);
+            box-shadow: var(--neon-glow-current);
+        }
+ 
+        /* Nav legend */
+        .nav-legend {
+            display: flex;
+            gap: 18px;
+            justify-content: center;
+            margin-top: 10px;
+            font-size: 0.78rem;
+            color: rgba(255,255,255,0.55);
+        }
+        .legend-dot {
+            display: inline-block;
+            width: 11px; height: 11px;
+            border-radius: 50%;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+ 
+        /* ── Result Page ── */
+        #res-name { text-align: center; font-size: 1.3rem; color: rgba(255,255,255,0.8); margin-bottom: 6px; }
+        #score-display {
+            text-align: center;
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            text-shadow: 0 0 16px rgba(46,204,113,0.5);
+            margin: 10px 0 20px;
+        }
+ 
+        #ai-analysis {
+            background: rgba(46,204,113,0.1);
+            border: 1px solid rgba(46,204,113,0.25);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            line-height: 1.75;
+            font-size: 0.93rem;
+        }
+ 
+        .review-card {
+            background: rgba(0,0,0,0.3);
+            padding: 16px;
+            margin: 14px 0;
+            border-radius: 10px;
+            border-left: 5px solid var(--error);
+            line-height: 1.65;
+            font-size: 0.92rem;
+        }
+        .review-card.status-correct { border-left-color: var(--correct); }
+        .review-card em { color: rgba(255,255,255,0.6); display: block; margin-top: 6px; }
+ 
+        /* ── Timer colour change ── */
+        .timer-warning { color: #ff5252 !important; font-weight: 700; animation: pulse 1s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+ 
+        /* ── Responsive ── */
+        @media (max-width: 500px) {
+            #exam-container { padding: 1rem; }
+            .nav-circle { width: 32px; height: 32px; font-size: 0.75rem; }
+            #student-name { width: 95%; }
+            .info-box { grid-template-columns: 1fr; gap: 4px; }
+        }
+    </style>
+</head>
+<body>
+ 
+<div id="exam-container">
+ 
+    <!-- ══ PAGE 1: LANDING ══ -->
+    <div id="page-landing" class="page active">
+        <div class="header-main"><h1>Bright Minds Academy</h1></div>
+        <div class="hero-card">
+            <div class="hero-exam-label">Chapter 1 &nbsp;|&nbsp; Algebra</div>
+            <div class="hero-exam-name" id="exam-title-display">Loading...</div>
+            <div class="hero-meta">
+                <div class="hero-meta-item"><strong>Maths</strong>Subject</div>
+                <div class="hero-meta-item"><strong>10th</strong>Standard</div>
+                <div class="hero-meta-item"><strong>20</strong>Marks</div>
+                <div class="hero-meta-item"><strong>30 Mins</strong>Time</div>
+            </div>
+        </div>
+        <div class="name-input-wrap">
+            <input type="text" id="student-name" placeholder="Enter Full Student Name">
+        </div>
+        <div style="text-align:center;">
+            <button onclick="startExam()">Start Assignment</button>
+        </div>
+    </div>
+ 
+    <!-- ══ PAGE 2: EXAM ══ -->
+    <div id="page-exam" class="page">
+        <div class="header-main"><span>Bright Minds Academy</span></div>
+        <div class="info-box">
+            <span><strong>Time Left:</strong> <span id="timer-display">30:00</span></span>
+            <span><strong>Marks:</strong> 20</span>
+            <span><strong>Questions:</strong> 20</span>
+        </div>
+        <div id="question-scroll-area">
+            <h3 id="q-title"></h3>
+            <p id="q-text"></p>
+            <div id="options-container"></div>
+        </div>
+        <div class="btn-container">
+            <button id="prev-btn" onclick="changeQuestion(-1)">◀ Back</button>
+            <button id="next-btn" onclick="changeQuestion(1)">Next ▶</button>
+        </div>
+        <div id="nav-grid"></div>
+        <div class="nav-legend">
+            <span><span class="legend-dot" style="background:#00ffae; box-shadow:0 0 6px #00ffae;"></span>Current</span>
+            <span><span class="legend-dot" style="background:#ff9800; box-shadow:0 0 6px #ff9800;"></span>Answered</span>
+            <span><span class="legend-dot" style="background:#555e58;"></span>Not Visited</span>
+        </div>
+        <div style="text-align:center; margin-top:22px;">
+            <button onclick="confirmSubmit()" style="background:#e74c3c; box-shadow:0 0 10px rgba(231,76,60,0.4);">Submit Exam</button>
+        </div>
+    </div>
+ 
+    <!-- ══ PAGE 3: RESULT ══ -->
+    <div id="page-result" class="page">
+        <h2 id="res-name"></h2>
+        <div id="score-display"></div>
+        <div id="ai-analysis"></div>
+        <h3 style="margin-bottom:8px;">📋 Question Review</h3>
+        <div id="review-list"></div>
+    </div>
+ 
+</div>
+ 
+<script>
+    // ══════════════════════════════════════════════
+    //  EXAM CONFIGURATION — update per exam
+    // ══════════════════════════════════════════════
+    const EXAM_KEY        = "10th_Maths_LinearEq_WordProblems_Test1";
+    const EXAM_NAME       = "Form equations test 1";
+    const HARDCODED_STD   = "10th";
+    const HARDCODED_SUBJ  = "Maths Practice";
+    const WEB_APP_URL     = "https://script.google.com/macros/s/AKfycbwEutZaKIAodDqKVocXPmgGlsfyO6ma8vuQK4sFgEobmvD73QQwztuH4qbT_R3g1Figtw/exec";
+    const TOTAL_TIME      = 1800; // 30 minutes in seconds
+ 
+    // ══════════════════════════════════════════════
+    //  ✏️  PASTE YOUR JSON QUESTIONS ARRAY BELOW
+    //      Format: { q, options[], ans (0-based index), topic, explain }
+    // ══════════════════════════════════════════════
+    const questions = [
+  {
+    "q": "The sum of two numbers is 47 and their difference is 13. Let <strong>x = the greater number</strong> and <strong>y = the smaller number</strong>. Which pair of equations represents this situation?",
+    "options": [
+      "\\(x + y = 47\\) and \\(x - y = 13\\)",
+      "\\(x + y = 13\\) and \\(x - y = 47\\)",
+      "\\(x + y = 47\\) and \\(y - x = 13\\)",
+      "\\(2x + y = 47\\) and \\(x - y = 13\\)"
+    ],
+    "ans": 0,
+    "topic": "Numbers",
+    "explain": "Sum of the two numbers: \\(x + y = 47\\). Since x is greater, their difference: \\(x - y = 13\\). Option A is correct."
+  },
+  {
+    "q": "Twice the smaller number added to thrice the greater number gives 67. The greater number exceeds the smaller by 4. Let <strong>x = greater number</strong> and <strong>y = smaller number</strong>. Which pair of equations is correct?",
+    "options": [
+      "\\(3x + 2y = 67\\) and \\(x + y = 4\\)",
+      "\\(2x + 3y = 67\\) and \\(x - y = 4\\)",
+      "\\(3x + 2y = 67\\) and \\(x - y = 4\\)",
+      "\\(3x + 2y = 67\\) and \\(y - x = 4\\)"
+    ],
+    "ans": 2,
+    "topic": "Numbers",
+    "explain": "Thrice greater + twice smaller = 67 → \\(3x + 2y = 67\\). Greater exceeds smaller by 4 → \\(x - y = 4\\). Option C is correct."
+  },
+  {
+    "q": "The sum of a two-digit number and the number formed by reversing its digits is 99. Let <strong>x = tens digit</strong> and <strong>y = units digit</strong>. Which equation represents the sum condition?",
+    "options": [
+      "\\(x + y = 99\\)",
+      "\\(10x + y + 10y + x = 99\\)",
+      "\\(10x + y - (10y + x) = 99\\)",
+      "\\(xy = 99\\)"
+    ],
+    "ans": 1,
+    "topic": "Digits",
+    "explain": "Original number = \\(10x + y\\). Reversed number = \\(10y + x\\). Sum = \\((10x + y) + (10y + x) = 11x + 11y = 99\\), which simplifies to \\(x + y = 9\\). Option B is the direct (unsimplified) equation for the sum condition."
+  },
+  {
+    "q": "In a two-digit number, the units digit is 3 more than the tens digit. If the digits are reversed, the new number is 27 more than the original. Let <strong>x = tens digit</strong> and <strong>y = units digit</strong>. Which pair of equations is correct?",
+    "options": [
+      "\\(y = x + 3\\) and \\(10y + x = 10x + y + 27\\)",
+      "\\(x = y + 3\\) and \\(10y + x = 10x + y + 27\\)",
+      "\\(y = x + 3\\) and \\(10x + y = 10y + x + 27\\)",
+      "\\(y - x = 3\\) and \\(10x + y + 27 = 10y + x\\)"
+    ],
+    "ans": 0,
+    "topic": "Digits",
+    "explain": "Units digit is 3 more than tens digit: \\(y = x + 3\\). Reversed number exceeds original by 27: \\(10y + x = 10x + y + 27\\), i.e., \\(9y - 9x = 27\\) → \\(y - x = 3\\), consistent with option A."
+  },
+  {
+    "q": "The present age of a father is 4 times the present age of his son. After 10 years, the father will be twice as old as his son. Let <strong>x = father's present age</strong> and <strong>y = son's present age</strong>. Which pair of equations is correct?",
+    "options": [
+      "\\(x = 4y\\) and \\(x + 10 = 2(y + 10)\\)",
+      "\\(x = 4y\\) and \\(x + 10 = 2y\\)",
+      "\\(4x = y\\) and \\(x + 10 = 2(y + 10)\\)",
+      "\\(x + y = 4\\) and \\(x + 10 = 2(y + 10)\\)"
+    ],
+    "ans": 0,
+    "topic": "Ages",
+    "explain": "Father is 4 times son's age now: \\(x = 4y\\). After 10 years: \\(x + 10 = 2(y + 10)\\). Option A is correct."
+  },
+  {
+    "q": "The sum of a father's age and twice his son's age is 70. If twice the father's age is added to the son's age, the sum is 95. Let <strong>x = father's age</strong> and <strong>y = son's age</strong>. Which pair of equations is correct?",
+    "options": [
+      "\\(2x + y = 70\\) and \\(x + 2y = 95\\)",
+      "\\(x + 2y = 70\\) and \\(2x + y = 95\\)",
+      "\\(x + y = 70\\) and \\(2x + 2y = 95\\)",
+      "\\(x + 2y = 95\\) and \\(2x + y = 70\\)"
+    ],
+    "ans": 1,
+    "topic": "Ages",
+    "explain": "Father's age + twice son's age = 70: \\(x + 2y = 70\\). Twice father's age + son's age = 95: \\(2x + y = 95\\). Option B is correct."
+  },
+  {
+    "q": "The cost of 3 pens and 5 notebooks is ₹55. The cost of 5 pens and 3 notebooks is ₹65. Let <strong>x = cost of one pen (₹)</strong> and <strong>y = cost of one notebook (₹)</strong>. Which pair of equations is correct?",
+    "options": [
+      "\\(3x + 5y = 65\\) and \\(5x + 3y = 55\\)",
+      "\\(5x + 3y = 65\\) and \\(3x + 5y = 55\\)",
+      "\\(3x + 5y = 55\\) and \\(5x + 3y = 65\\)",
+      "\\(3x + 5y = 55\\) and \\(3x + 5y = 65\\)"
+    ],
+    "ans": 2,
+    "topic": "Cost and Prices",
+    "explain": "3 pens + 5 notebooks = ₹55: \\(3x + 5y = 55\\). 5 pens + 3 notebooks = ₹65: \\(5x + 3y = 65\\). Option C is correct."
+  },
+  {
+    "q": "4 chairs and 3 tables cost ₹2100. 3 chairs and 2 tables cost ₹1550. Let <strong>x = cost of one chair (₹)</strong> and <strong>y = cost of one table (₹)</strong>. Which pair of equations is correct?",
+    "options": [
+      "\\(4x + 3y = 1550\\) and \\(3x + 2y = 2100\\)",
+      "\\(4x + 3y = 2100\\) and \\(3x + 2y = 1550\\)",
+      "\\(3x + 4y = 2100\\) and \\(2x + 3y = 1550\\)",
+      "\\(4x + 3y = 2100\\) and \\(2x + 3y = 1550\\)"
+    ],
+    "ans": 1,
+    "topic": "Cost and Prices",
+    "explain": "4 chairs + 3 tables = ₹2100: \\(4x + 3y = 2100\\). 3 chairs + 2 tables = ₹1550: \\(3x + 2y = 1550\\). Option B is correct."
+  },
+  {
+    "q": "A fraction equals \\(\\dfrac{2}{3}\\) when 2 is added to both its numerator and denominator. It equals \\(\\dfrac{3}{5}\\) when 3 is subtracted from both. Let <strong>x = numerator</strong> and <strong>y = denominator</strong>. Which pair of equations is correct?",
+    "options": [
+      "\\(\\dfrac{x+2}{y+2} = \\dfrac{2}{3}\\) and \\(\\dfrac{x-3}{y-3} = \\dfrac{3}{5}\\)",
+      "\\(\\dfrac{x}{y} = \\dfrac{2}{3}\\) and \\(\\dfrac{x}{y} = \\dfrac{3}{5}\\)",
+      "\\(\\dfrac{x+2}{y+2} = \\dfrac{3}{2}\\) and \\(\\dfrac{x-3}{y-3} = \\dfrac{5}{3}\\)",
+      "\\(\\dfrac{x-2}{y-2} = \\dfrac{2}{3}\\) and \\(\\dfrac{x+3}{y+3} = \\dfrac{3}{5}\\)"
+    ],
+    "ans": 0,
+    "topic": "Fractions",
+    "explain": "Adding 2 to both numerator and denominator gives \\(\\dfrac{2}{3}\\): \\(\\dfrac{x+2}{y+2} = \\dfrac{2}{3}\\). Subtracting 3 from both gives \\(\\dfrac{3}{5}\\): \\(\\dfrac{x-3}{y-3} = \\dfrac{3}{5}\\). Option A is correct."
+  },
+  {
+    "q": "The denominator of a fraction is 4 more than twice its numerator. When both numerator and denominator are reduced by 6, the fraction becomes \\(\\dfrac{1}{12}\\). Let <strong>x = numerator</strong> and <strong>y = denominator</strong>. Which pair of equations is correct?",
+    "options": [
+      "\\(y = 2x + 4\\) and \\(\\dfrac{x-6}{y-6} = \\dfrac{1}{12}\\)",
+      "\\(y = 2x - 4\\) and \\(\\dfrac{x-6}{y-6} = \\dfrac{1}{12}\\)",
+      "\\(y = 2x + 4\\) and \\(\\dfrac{x+6}{y+6} = \\dfrac{1}{12}\\)",
+      "\\(x = 2y + 4\\) and \\(\\dfrac{x-6}{y-6} = \\dfrac{1}{12}\\)"
+    ],
+    "ans": 0,
+    "topic": "Fractions",
+    "explain": "Denominator is 4 more than twice the numerator: \\(y = 2x + 4\\). Both reduced by 6 gives \\(\\dfrac{1}{12}\\): \\(\\dfrac{x-6}{y-6} = \\dfrac{1}{12}\\). Option A is correct."
+  },
+  {
+    "q": "A boat travels 36 km downstream in 2 hours and 24 km upstream in 3 hours. Let <strong>x = speed of boat in still water (km/h)</strong> and <strong>y = speed of current (km/h)</strong>. Which pair of equations is correct?",
+    "options": [
+      "\\(2(x - y) = 36\\) and \\(3(x + y) = 24\\)",
+      "\\(2(x + y) = 36\\) and \\(3(x - y) = 24\\)",
+      "\\(36(x + y) = 2\\) and \\(24(x - y) = 3\\)",
+      "\\(x + y = 36\\) and \\(x - y = 24\\)"
+    ],
+    "ans": 1,
+    "topic": "Speed, Distance, Time",
+    "explain": "Downstream speed = \\(x + y\\). Upstream speed = \\(x - y\\). In 2 hours downstream: \\(2(x+y) = 36\\). In 3 hours upstream: \\(3(x-y) = 24\\). Option B is correct."
+  },
+  {
+    "q": "A train covers 300 km in the same time a car covers 180 km. If the train is 40 km/h faster than the car, let <strong>x = speed of train (km/h)</strong> and <strong>y = speed of car (km/h)</strong>. Which pair of equations is correct?",
+    "options": [
+      "\\(x = y + 40\\) and \\(\\dfrac{300}{x} = \\dfrac{180}{y}\\)",
+      "\\(y = x + 40\\) and \\(\\dfrac{300}{x} = \\dfrac{180}{y}\\)",
+      "\\(x = y + 40\\) and \\(300x = 180y\\)",
+      "\\(x + y = 40\\) and \\(\\dfrac{300}{x} = \\dfrac{180}{y}\\)"
+    ],
+    "ans": 0,
+    "topic": "Speed, Distance, Time",
+    "explain": "Train is 40 km/h faster: \\(x = y + 40\\). Same time means \\(\\dfrac{\\text{distance}}{\\text{speed}}\\) is equal: \\(\\dfrac{300}{x} = \\dfrac{180}{y}\\). Option A is correct."
+  },
+  {
+    "q": "If 2 is added to both the numerator and denominator of a fraction, it becomes \\(\\dfrac{1}{2}\\). If 3 is subtracted from both, it becomes \\(\\dfrac{1}{5}\\). Let <strong>x = numerator</strong> and <strong>y = denominator</strong>. Which equation comes from the first condition?",
+    "options": [
+      "\\(2x + 2 = y + 2\\)",
+      "\\(2(x + 2) = y + 2\\)",
+      "\\(x + 2 = 2(y + 2)\\)",
+      "\\(2x - y = -2\\)"
+    ],
+    "ans": 1,
+    "topic": "Fractions",
+    "explain": "\\(\\dfrac{x+2}{y+2} = \\dfrac{1}{2}\\) means \\(2(x+2) = 1 \\cdot (y+2)\\), i.e., \\(2(x+2) = y+2\\). Option B is correct."
+  },
+  {
+    "q": "Meera's age is 3 years more than twice Sita's age. Five years ago, Meera's age was 4 times Sita's age. Let <strong>x = Meera's present age</strong> and <strong>y = Sita's present age</strong>. Which pair of equations is correct?",
+    "options": [
+      "\\(x = 2y + 3\\) and \\(x - 5 = 4(y - 5)\\)",
+      "\\(y = 2x + 3\\) and \\(x - 5 = 4(y - 5)\\)",
+      "\\(x = 2y + 3\\) and \\(x + 5 = 4(y + 5)\\)",
+      "\\(x = 2y - 3\\) and \\(x - 5 = 4(y - 5)\\)"
+    ],
+    "ans": 0,
+    "topic": "Ages",
+    "explain": "Meera is 3 more than twice Sita: \\(x = 2y + 3\\). Five years ago: \\(x - 5 = 4(y - 5)\\). Option A is correct."
+  },
+  {
+    "q": "A class has 40 students. The number of boys is 4 more than the number of girls. Let <strong>x = number of boys</strong> and <strong>y = number of girls</strong>. Which pair of equations is correct?",
+    "options": [
+      "\\(x + y = 40\\) and \\(y = x + 4\\)",
+      "\\(x + y = 40\\) and \\(x = y + 4\\)",
+      "\\(x - y = 40\\) and \\(x = y + 4\\)",
+      "\\(x + y = 40\\) and \\(x + y = 4\\)"
+    ],
+    "ans": 1,
+    "topic": "Numbers",
+    "explain": "Total students: \\(x + y = 40\\). Boys are 4 more than girls: \\(x = y + 4\\). Option B is correct."
+  },
+  {
+    "q": "Tickets for a school play cost ₹10 for students and ₹25 for adults. A total of 200 tickets were sold and ₹3250 was collected. Let <strong>x = number of student tickets</strong> and <strong>y = number of adult tickets</strong>. Which pair of equations is correct?",
+    "options": [
+      "\\(x + y = 200\\) and \\(25x + 10y = 3250\\)",
+      "\\(x + y = 3250\\) and \\(10x + 25y = 200\\)",
+      "\\(x + y = 200\\) and \\(10x + 25y = 3250\\)",
+      "\\(10x + 25y = 200\\) and \\(x + y = 3250\\)"
+    ],
+    "ans": 2,
+    "topic": "Cost and Prices",
+    "explain": "Total tickets sold: \\(x + y = 200\\). Total collection: \\(10x + 25y = 3250\\). Option C is correct."
+  },
+  {
+    "q": "A man walks at a speed of x km/h and cycles at y km/h. He takes 4 hours to cover 60 km on foot and 40 km by cycle. He takes 3 hours to cover 30 km on foot and 45 km by cycle. Which pair of equations is correct?",
+    "options": [
+      "\\(\\dfrac{60}{x} + \\dfrac{40}{y} = 4\\) and \\(\\dfrac{30}{x} + \\dfrac{45}{y} = 3\\)",
+      "\\(60x + 40y = 4\\) and \\(30x + 45y = 3\\)",
+      "\\(\\dfrac{4}{60x} + \\dfrac{4}{40y} = 1\\) and \\(\\dfrac{3}{30x} + \\dfrac{3}{45y} = 1\\)",
+      "\\(\\dfrac{40}{x} + \\dfrac{60}{y} = 4\\) and \\(\\dfrac{45}{x} + \\dfrac{30}{y} = 3\\)"
+    ],
+    "ans": 0,
+    "topic": "Speed, Distance, Time",
+    "explain": "Time = Distance ÷ Speed. First journey: \\(\\dfrac{60}{x} + \\dfrac{40}{y} = 4\\). Second journey: \\(\\dfrac{30}{x} + \\dfrac{45}{y} = 3\\). Option A is correct."
+  },
+  {
+    "q": "In a rectangle, the length is 5 cm more than twice the breadth. The perimeter of the rectangle is 52 cm. Let <strong>x = length (cm)</strong> and <strong>y = breadth (cm)</strong>. Which pair of equations is correct?",
+    "options": [
+      "\\(x = 2y + 5\\) and \\(x + y = 52\\)",
+      "\\(x = 2y + 5\\) and \\(2(x + y) = 52\\)",
+      "\\(x = 2y - 5\\) and \\(2(x + y) = 52\\)",
+      "\\(x = 2y + 5\\) and \\(2x + y = 52\\)"
+    ],
+    "ans": 1,
+    "topic": "Geometry – Perimeter",
+    "explain": "Length is 5 more than twice breadth: \\(x = 2y + 5\\). Perimeter of rectangle = \\(2(x + y) = 52\\). Option B is correct."
+  },
+  {
+    "q": "The sum of the digits of a two-digit number is 9. When the digits are reversed, the new number is 9 less than the original. Let <strong>x = tens digit</strong> and <strong>y = units digit</strong>. Which equation comes from the second condition?",
+    "options": [
+      "\\(10y + x = 10x + y - 9\\)",
+      "\\(10x + y = 10y + x - 9\\)",
+      "\\(10y + x + 9 = 10x + y\\)",
+      "Both A and C"
+    ],
+    "ans": 3,
+    "topic": "Digits",
+    "explain": "Reversed number is 9 less than original: \\(10y + x = (10x + y) - 9\\), which rearranges to \\(10y + x + 9 = 10x + y\\). Both options A and C express the same condition, so D is correct."
+  },
+  {
+    "q": "A shopkeeper sold 12 kg of rice and 8 kg of wheat for ₹560. On another day, he sold 8 kg of rice and 12 kg of wheat for ₹480. Let <strong>x = price per kg of rice (₹)</strong> and <strong>y = price per kg of wheat (₹)</strong>. Which pair of equations is correct?",
+    "options": [
+      "\\(8x + 12y = 560\\) and \\(12x + 8y = 480\\)",
+      "\\(12x + 8y = 480\\) and \\(8x + 12y = 560\\)",
+      "\\(12x + 8y = 560\\) and \\(8x + 12y = 480\\)",
+      "\\(12x + 8y = 560\\) and \\(8x + 12y = 560\\)"
+    ],
+    "ans": 2,
+    "topic": "Cost and Prices",
+    "explain": "Day 1 — 12 kg rice + 8 kg wheat = ₹560: \\(12x + 8y = 560\\). Day 2 — 8 kg rice + 12 kg wheat = ₹480: \\(8x + 12y = 480\\). Option C is correct."
+  }
+]
+    ;
+    // ══════════════════════════════════════════════
+ 
+    // ── State ──
+    let studentName   = "";
+    let userAnswers   = [];
+    let currentQ      = 0;
+    let timerInterval = null;
+    let timeRemaining = TOTAL_TIME;
+ 
+    // ── Start Exam ──
+    function startExam() {
+        const nameInput = document.getElementById('student-name').value.trim();
+        if (!nameInput) { alert("Please enter your name to begin."); return; }
+        if (questions.length === 0) { alert("No questions loaded. Please add the JSON data."); return; }
+        studentName = nameInput;
+        userAnswers = new Array(questions.length).fill(null);
+        switchPage('page-exam');
+        renderGrid();
+        showQuestion();
+        startTimer();
+    }
+ 
+    // ── Timer ──
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            timeRemaining--;
+            updateTimerDisplay();
+            sessionStorage.setItem('time_remaining', timeRemaining);
+            if (timeRemaining <= 0) { clearInterval(timerInterval); submitExam(); }
+        }, 1000);
+    }
+ 
+    function updateTimerDisplay() {
+        const m = Math.floor(timeRemaining / 60).toString().padStart(2, '0');
+        const s = (timeRemaining % 60).toString().padStart(2, '0');
+        const el = document.getElementById('timer-display');
+        el.textContent = `${m}:${s}`;
+        el.className = timeRemaining <= 120 ? 'timer-warning' : '';
+    }
+ 
+    // ── Show Question ──
+    function showQuestion() {
+        const q = questions[currentQ];
+        document.getElementById('q-title').textContent = `Question ${currentQ + 1} of ${questions.length}`;
+        document.getElementById('q-text').innerHTML = q.q;
+ 
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+        q.options.forEach((opt, i) => {
+            const label = document.createElement('label');
+            label.className = 'option-label' + (userAnswers[currentQ] === i ? ' selected' : '');
+            label.innerHTML = `<input type="radio" name="option" value="${i}" ${userAnswers[currentQ] === i ? 'checked' : ''}> ${opt}`;
+            label.addEventListener('click', () => selectAnswer(i));
+            container.appendChild(label);
+        });
+ 
+        document.getElementById('prev-btn').disabled = currentQ === 0;
+        document.getElementById('next-btn').textContent = currentQ === questions.length - 1 ? 'Review' : 'Next ▶';
+        updateGrid();
+        saveSession();
+        if (window.MathJax) MathJax.typesetPromise([document.getElementById('question-scroll-area')]);
+    }
+ 
+    // ── Select Answer ──
+    function selectAnswer(index) {
+        userAnswers[currentQ] = index;
+        document.querySelectorAll('.option-label').forEach((el, i) => {
+            el.classList.toggle('selected', i === index);
+        });
+        updateGrid();
+        saveSession();
+    }
+ 
+    // ── Navigate ──
+    function changeQuestion(dir) {
+        const next = currentQ + dir;
+        if (next >= 0 && next < questions.length) {
+            currentQ = next;
+            showQuestion();
+        }
+    }
+ 
+    // ── Neon Navigation Grid ──
+    function renderGrid() {
+        const grid = document.getElementById('nav-grid');
+        grid.innerHTML = '';
+        questions.forEach((_, i) => {
+            const circle = document.createElement('div');
+            circle.className = 'nav-circle';
+            circle.textContent = i + 1;
+            circle.id = `nav-${i}`;
+            circle.addEventListener('click', () => { currentQ = i; showQuestion(); });
+            grid.appendChild(circle);
+        });
+    }
+ 
+    function updateGrid() {
+        questions.forEach((_, i) => {
+            const el = document.getElementById(`nav-${i}`);
+            if (!el) return;
+            el.className = 'nav-circle';
+            if (userAnswers[i] !== null) el.classList.add('answered');
+            if (i === currentQ) el.classList.add('current');
+        });
+    }
+ 
+    // ── Submit ──
+    function confirmSubmit() {
+        const answered = userAnswers.filter(a => a !== null).length;
+        const unanswered = questions.length - answered;
+        const msg = unanswered > 0
+            ? `You have ${unanswered} unanswered question(s). Are you sure you want to submit?`
+            : `All questions answered. Submit the exam?`;
+        if (confirm(msg)) submitExam();
+    }
+ 
+    function submitExam() {
+        clearInterval(timerInterval);
+ 
+        let score = 0;
+        let missedQuestions = [];
+        const topicMap = {};
+        let reviewHTML = '';
+ 
+        questions.forEach((q, i) => {
+            const correct = userAnswers[i] === q.ans;
+            if (correct) score++;
+            else missedQuestions.push("Q" + (i + 1));
+ 
+            if (!topicMap[q.topic]) topicMap[q.topic] = { total: 0, correct: 0, failedQ: [] };
+            topicMap[q.topic].total++;
+            if (correct) topicMap[q.topic].correct++;
+            else topicMap[q.topic].failedQ.push(i + 1);
+ 
+            const userAns = userAnswers[i] !== null ? q.options[userAnswers[i]] : '<em>Skipped</em>';
+            reviewHTML += `
+                <div class="review-card ${correct ? 'status-correct' : ''}">
+                    <strong>Q${i + 1}:</strong> ${q.q}<br>
+                    <span style="color:${correct ? '#81c784' : '#ff5252'}">Your Answer: ${userAns}</span><br>
+                    <span style="color:#81c784">Correct: ${q.options[q.ans]}</span>
+                    <em>💡 ${q.explain}</em>
+                </div>`;
+        });
+ 
+        const scoreStr      = `${score}/${questions.length}`;
+        const wrongAnswersStr = missedQuestions.length > 0 ? missedQuestions.join(", ") : "None";
+ 
+        // ── Show Result Page ──
+        switchPage('page-result');
+        document.getElementById('res-name').textContent   = studentName;
+        document.getElementById('score-display').textContent = `Score: ${scoreStr}`;
+        document.getElementById('review-list').innerHTML  = reviewHTML;
+ 
+        // ── AI Topic Analysis ──
+        let analysis = `<strong>🤖 AI Analysis Feedback (Question-Specific):</strong><br><br>`;
+        for (let t in topicMap) {
+            const pct = (topicMap[t].correct / topicMap[t].total) * 100;
+            if (pct === 100) {
+                analysis += `✅ <strong>${t}:</strong> Mastery achieved. Your concepts are perfectly clear.<br>`;
+            } else if (pct >= 60) {
+                analysis += `🟡 <strong>${t}:</strong> Strong foundation, but minor errors in Question(s) ${topicMap[t].failedQ.join(', ')}. Revise those specific cases.<br>`;
+            } else {
+                analysis += `🔴 <strong>${t}:</strong> Needs more practice. You missed Question(s) ${topicMap[t].failedQ.join(', ')} — revisit the core rules for this topic.<br>`;
+            }
+        }
+        document.getElementById('ai-analysis').innerHTML = analysis;
+        // Retypeset full result page after all HTML is injected
+        if (window.MathJax) {
+            MathJax.typesetClear([document.getElementById('page-result')]);
+            MathJax.typesetPromise([document.getElementById('page-result')]);
+        }
+ 
+        // ── Send to Google Sheet ──
+        fetch(WEB_APP_URL, {
+            method: "POST",
+            mode: "no-cors",
+            body: JSON.stringify({
+                studentName,
+                standard:    HARDCODED_STD,
+                examName:    EXAM_NAME,
+                subject:     HARDCODED_SUBJ,
+                score:       scoreStr,
+                wrongAnswers: wrongAnswersStr
+            })
+        });
+ 
+        // ── Save to localStorage ──
+        localStorage.setItem('submitted_data_' + EXAM_KEY,
+            JSON.stringify({ name: studentName, answers: userAnswers, score: scoreStr, topicMap }));
+        sessionStorage.clear();
+        window.scrollTo(0, 0);
+    }
+ 
+    // ── Session Save ──
+    function saveSession() {
+        sessionStorage.setItem('in_progress_' + EXAM_KEY, '1');
+        sessionStorage.setItem('name', studentName);
+        sessionStorage.setItem('answers', JSON.stringify(userAnswers));
+        sessionStorage.setItem('currentQ', currentQ);
+        sessionStorage.setItem('time_remaining', timeRemaining);
+    }
+ 
+    // ── Utility ──
+    function switchPage(id) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+ 
+    // ── On Load ──
+    window.onload = () => {
+        document.getElementById('exam-title-display').textContent = EXAM_NAME;
+ 
+        const saved = localStorage.getItem('submitted_data_' + EXAM_KEY);
+        if (saved) {
+            const data = JSON.parse(saved);
+            studentName = data.name;
+            userAnswers = data.answers;
+            showResultsFromStorage(data);
+            return;
+        }
+ 
+        if (sessionStorage.getItem('in_progress_' + EXAM_KEY)) {
+            studentName   = sessionStorage.getItem('name');
+            userAnswers   = JSON.parse(sessionStorage.getItem('answers')) || new Array(questions.length).fill(null);
+            currentQ      = parseInt(sessionStorage.getItem('currentQ')) || 0;
+            timeRemaining = parseInt(sessionStorage.getItem('time_remaining')) || TOTAL_TIME;
+            switchPage('page-exam');
+            renderGrid();
+            showQuestion();
+            startTimer();
+            updateTimerDisplay();
+        }
+    };
+ 
+    // ── Show Results from localStorage (already submitted) ──
+    function showResultsFromStorage(data) {
+        switchPage('page-result');
+        document.getElementById('res-name').textContent     = data.name;
+        document.getElementById('score-display').textContent = `Score: ${data.score}`;
+ 
+        let reviewHTML = '';
+        questions.forEach((q, i) => {
+            const correct = userAnswers[i] === q.ans;
+            const userAns = userAnswers[i] !== null ? q.options[userAnswers[i]] : '<em>Skipped</em>';
+            reviewHTML += `
+                <div class="review-card ${correct ? 'status-correct' : ''}">
+                    <strong>Q${i + 1}:</strong> ${q.q}<br>
+                    <span style="color:${correct ? '#81c784' : '#ff5252'}">Your Answer: ${userAns}</span><br>
+                    <span style="color:#81c784">Correct: ${q.options[q.ans]}</span>
+                    <em>💡 ${q.explain}</em>
+                </div>`;
+        });
+        document.getElementById('review-list').innerHTML = reviewHTML;
+ 
+        let analysis = `<strong>🤖 AI Analysis Feedback (Question-Specific):</strong><br><br>`;
+        for (let t in data.topicMap) {
+            const pct = (data.topicMap[t].correct / data.topicMap[t].total) * 100;
+            if (pct === 100) {
+                analysis += `✅ <strong>${t}:</strong> Mastery achieved. Your concepts are perfectly clear.<br>`;
+            } else if (pct >= 60) {
+                analysis += `🟡 <strong>${t}:</strong> Strong foundation, but minor errors in Question(s) ${data.topicMap[t].failedQ.join(', ')}. Revise those specific cases.<br>`;
+            } else {
+                analysis += `🔴 <strong>${t}:</strong> Needs more practice. You missed Question(s) ${data.topicMap[t].failedQ.join(', ')} — revisit the core rules for this topic.<br>`;
+            }
+        }
+        document.getElementById('ai-analysis').innerHTML = analysis;
+        // Retypeset result page after restoring from storage
+        if (window.MathJax) {
+            MathJax.typesetClear([document.getElementById('page-result')]);
+            MathJax.typesetPromise([document.getElementById('page-result')]);
+        }
+    }
+</script>
+</body>
+</html>
+ 
