@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bright Minds Academy - 10th English Grammar</title>
+    <style>
+        /* Distinct Green Theme for English Grammar */
+        :root { 
+            --primary-bg: #173627; 
+            --text-color: #ffffff; 
+            --accent-color: #2bb872; 
+            --error: #ff5252; 
+            --correct: #81c784; 
+            --answered: #ff9800; 
+        }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--primary-bg); color: var(--text-color); margin: 0; padding: 10px; display: flex; justify-content: center; }
+        #exam-container { width: 100%; max-width: 850px; background: rgba(255, 255, 255, 0.1); padding: 1.5rem; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+        .page { display: none; }
+        .active { display: block; }
+       #nav-grid { 
+    display: grid; 
+    grid-template-columns: repeat(10, 35px); /* Locks width to make perfect circles */
+    justify-content: center; /* Centers the circles in the box */
+    gap: 12px; /* Slightly wider gap so glowing borders don't overlap */
+    margin-top: 20px; 
+    background: rgba(0,0,0,0.2); 
+    padding: 15px; 
+    border-radius: 8px; 
+}
+.nav-box { 
+    width: 35px; /* Explicit width added */
+    height: 35px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    border-radius: 50%; /* This makes the box a perfect circle */
+    background: rgba(255, 255, 255, 0.05); /* Dimmed default state */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    cursor: pointer; 
+    font-weight: bold; 
+    font-size: 0.9rem; 
+    transition: all 0.3s ease; /* Smooth fade when glowing */
+}
+/* Neon Green Glow for Current Question */
+.nav-box.current { 
+    background: var(--accent-color); 
+    border: 2px solid #fff; 
+    box-shadow: 0 0 10px var(--accent-color), 0 0 20px var(--accent-color); 
+    color: var(--primary-bg); /* Dark text to stand out against bright green */
+}
+/* Neon Orange/Amber Glow for Answered Questions */
+.nav-box.answered { 
+    background: var(--answered); 
+    border: 2px solid #fff;
+    box-shadow: 0 0 8px var(--answered), 0 0 15px var(--answered); 
+    color: #fff;
+}
+        .info-box { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 0.9rem; }
+        .header-main { text-align: center; border-bottom: 2px solid var(--accent-color); margin-bottom: 15px; padding-bottom: 10px; }
+        #question-scroll-area { max-height: 60vh; overflow-y: auto; padding-right: 10px; margin-top: 10px; }
+        .option-label { display: block; background: rgba(255,255,255,0.05); margin: 10px 0; padding: 15px; border-radius: 8px; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
+        .option-label:hover { background: rgba(255,255,255,0.12); }
+        input[type="radio"] { margin-right: 12px; transform: scale(1.2); }
+        .btn-container { margin-top: 20px; display: flex; justify-content: space-between; }
+        button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; background: var(--accent-color); color: white; font-weight: bold; }
+        .review-card { background: rgba(0,0,0,0.3); padding: 15px; margin: 15px 0; border-radius: 8px; border-left: 5px solid var(--error); }
+        .review-card.status-correct { border-left-color: var(--correct); }
+    </style>
+</head>
+<body>
+
+<div id="exam-container">
+    <div id="page-landing" class="page active">
+        <h1 class="header-main">Bright Minds Academy</h1>
+        <div class="info-box" style="display: block;">
+            <p><strong>Subject:</strong> English</p>
+            <p id="exam-title-display"><strong>Topic:</strong> Loading...</p>
+            <p><strong>Standard:</strong> 10th | <strong>Marks:</strong> 30 | <strong>Time:</strong> 30 Mins</p>
+        </div>
+        <div style="margin: 30px 0; text-align: center;">
+            <input type="text" id="student-name" placeholder="Enter Full Student Name" style="width: 80%; padding: 12px; border-radius: 6px; border: none;">
+        </div>
+        <div style="text-align: center;"><button onclick="startExam()">Start Assignment</button></div>
+    </div>
+
+    <div id="page-exam" class="page">
+        <div class="header-main" style="font-size: 1.2rem;">Bright Minds Academy</div>
+        <div class="info-box">
+            <span><strong>Time Left:</strong> <span id="timer-display">30:00</span></span>
+            <span><strong>Marks:</strong> 30</span>
+            <span><strong>Questions:</strong> 30</span>
+        </div>
+        <div id="question-scroll-area">
+            <h3 id="q-title"></h3>
+            <p id="q-text" style="font-size: 1.1rem; line-height: 1.6;"></p>
+            <div id="options-container"></div>
+        </div>
+        <div class="btn-container">
+            <button id="prev-btn" onclick="changeQuestion(-1)">Back</button>
+            <button id="next-btn" onclick="changeQuestion(1)">Next</button>
+        </div>
+        <div id="nav-grid"></div>
+    </div>
+
+    <div id="page-result" class="page">
+        <h2 id="res-name" style="text-align: center;"></h2>
+        <h1 style="text-align: center;">Score: <span id="final-score"></span></h1>
+        <div id="ai-analysis" style="background: rgba(76, 175, 80, 0.15); padding: 20px; border-radius: 10px; margin: 20px 0; line-height: 1.5;"></div>
+        <h3>Question Review</h3>
+        <div id="review-list"></div>
+    </div>
+</div>
+
+<script>
+    // UPDATE THESE FOR EACH NEW EXAM
+    const EXAM_KEY = "10th_Eng_Grammar_tenses3"; 
+    const EXAM_NAME = "Tenses Test 3"; 
+    
+    // CONSTANTS
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwEutZaKIAodDqKVocXPmgGlsfyO6ma8vuQK4sFgEobmvD73QQwztuH4qbT_R3g1Figtw/exec";
+    const HARDCODED_STD = "10th";
+    const HARDCODED_SUBJECT = "English";
+    
+    let timerInterval;
+    let timeRemaining = 1800; // 30 Minutes
+
+    // JSON PAYLOAD GOES HERE (Paste the clean JSON array below this line)
+    const questions = [
+  {
+    "q": "Identify the tense of the underlined verb: The Dauphin <u>has given</u> me all I need.",
+    "options": [
+      "Past Perfect Tense",
+      "Present Perfect Tense",
+      "Simple Past Tense",
+      "Present Continuous Tense"
+    ],
+    "ans": 1,
+    "topic": "Identify the Tense",
+    "explain": "The structure 'has + V3' (has given) is the exact formula for the Present Perfect Tense."
+  },
+  {
+    "q": "Identify the tense of the underlined verb: I <u>am doing</u> my bit.",
+    "options": [
+      "Present Perfect Tense",
+      "Simple Present Tense",
+      "Present Continuous Tense",
+      "Past Continuous Tense"
+    ],
+    "ans": 2,
+    "topic": "Identify the Tense",
+    "explain": "The formula 'am + V-ing' (am doing) indicates an ongoing action in the present, which is the Present Continuous Tense."
+  },
+  {
+    "q": "Identify the tense: Life <u>hit</u> him hard.",
+    "options": [
+      "Simple Present Tense",
+      "Present Perfect Tense",
+      "Past Continuous Tense",
+      "Simple Past Tense"
+    ],
+    "ans": 3,
+    "topic": "Identify the Tense",
+    "explain": "The subject 'Life' is singular. If it were Present Tense, the verb would be 'hits'. Since it is 'hit' (no 's'), it must be the V2 form, making it Simple Past Tense."
+  },
+  {
+    "q": "Identify the tense: Smita <u>will be feeling</u> alone in their midst.",
+    "options": [
+      "Simple Future Tense",
+      "Future Continuous Tense",
+      "Present Continuous Tense",
+      "Future Perfect Tense"
+    ],
+    "ans": 1,
+    "topic": "Identify the Tense",
+    "explain": "The auxiliary 'will be' paired with the V-ing form 'feeling' creates the Future Continuous Tense."
+  },
+  {
+    "q": "Identify the tense: I <u>had worked</u> for Anil.",
+    "options": [
+      "Present Perfect Tense",
+      "Simple Past Tense",
+      "Past Perfect Tense",
+      "Past Perfect Continuous Tense"
+    ],
+    "ans": 2,
+    "topic": "Identify the Tense",
+    "explain": "The formula 'had + V3' (had worked) shows an action completed in the past before another action. This is the Past Perfect Tense."
+  },
+  {
+    "q": "Identify the tense: She <u>is feeling</u> sad and alone.",
+    "options": [
+      "Present Continuous Tense",
+      "Past Continuous Tense",
+      "Present Perfect Tense",
+      "Simple Present Tense"
+    ],
+    "ans": 0,
+    "topic": "Identify the Tense",
+    "explain": "The structure 'is + V-ing' (is feeling) points to an action happening right now, which is the Present Continuous Tense."
+  },
+  {
+    "q": "Identify the tense: He <u>goes</u> to school by bus.",
+    "options": [
+      "Present Perfect Tense",
+      "Present Continuous Tense",
+      "Simple Past Tense",
+      "Simple Present Tense"
+    ],
+    "ans": 3,
+    "topic": "Identify the Tense",
+    "explain": "The verb 'goes' is the V1+es form, used with singular subjects to indicate a habit. This marks the Simple Present Tense."
+  },
+  {
+    "q": "Identify the tense: The children <u>had been playing</u> in the park.",
+    "options": [
+      "Past Perfect Tense",
+      "Present Perfect Continuous Tense",
+      "Past Perfect Continuous Tense",
+      "Past Continuous Tense"
+    ],
+    "ans": 2,
+    "topic": "Identify the Tense",
+    "explain": "The long structure 'had been + V-ing' indicates an action started and continued up to a point in the past. This is the Past Perfect Continuous Tense."
+  },
+  {
+    "q": "Identify the tense: The teacher <u>will teach</u> the lesson.",
+    "options": [
+      "Simple Present Tense",
+      "Simple Future Tense",
+      "Future Continuous Tense",
+      "Future Perfect Tense"
+    ],
+    "ans": 1,
+    "topic": "Identify the Tense",
+    "explain": "The use of 'will' followed by the base verb (V1) 'teach' identifies the Simple Future Tense."
+  },
+  {
+    "q": "Identify the tense: She <u>was singing</u> a song on the stage.",
+    "options": [
+      "Present Continuous Tense",
+      "Past Continuous Tense",
+      "Past Perfect Tense",
+      "Simple Past Tense"
+    ],
+    "ans": 1,
+    "topic": "Identify the Tense",
+    "explain": "The auxiliary 'was' combined with the V-ing form 'singing' indicates the Past Continuous Tense."
+  },
+  {
+    "q": "Identify the tense: They <u>will be running</u> on the field.",
+    "options": [
+      "Future Continuous Tense",
+      "Simple Future Tense",
+      "Future Perfect Tense",
+      "Future Perfect Continuous Tense"
+    ],
+    "ans": 0,
+    "topic": "Identify the Tense",
+    "explain": "The formula 'will be + V-ing' (will be running) represents the Future Continuous Tense."
+  },
+  {
+    "q": "Identify the tense: He <u>has gone</u> to the market.",
+    "options": [
+      "Simple Past Tense",
+      "Present Perfect Tense",
+      "Past Perfect Tense",
+      "Present Continuous Tense"
+    ],
+    "ans": 1,
+    "topic": "Identify the Tense",
+    "explain": "The combination of 'has + V3' (has gone) means the action is complete in the present, which is the Present Perfect Tense."
+  },
+  {
+    "q": "Identify the tense: I <u>have worked</u> for almost a month.",
+    "options": [
+      "Past Perfect Tense",
+      "Present Perfect Continuous Tense",
+      "Present Perfect Tense",
+      "Simple Present Tense"
+    ],
+    "ans": 2,
+    "topic": "Identify the Tense",
+    "explain": "The structure 'have + V3' (have worked) is the standard formula for the Present Perfect Tense."
+  },
+  {
+    "q": "Identify the tense: Life <u>will hit</u> you in the head.",
+    "options": [
+      "Simple Present Tense",
+      "Future Continuous Tense",
+      "Future Perfect Tense",
+      "Simple Future Tense"
+    ],
+    "ans": 3,
+    "topic": "Identify the Tense",
+    "explain": "The formula 'will + V1' (will hit) represents the Simple Future Tense."
+  },
+  {
+    "q": "Identify the tense: Smita <u>had felt</u> alone in their midst.",
+    "options": [
+      "Past Perfect Tense",
+      "Simple Past Tense",
+      "Present Perfect Tense",
+      "Past Continuous Tense"
+    ],
+    "ans": 0,
+    "topic": "Identify the Tense",
+    "explain": "The formula 'had + V3' (had felt) shows an action completed before another past action, identifying the Past Perfect Tense."
+  },
+  {
+    "q": "Rewrite the following sentence in <strong>Simple Present Tense</strong>:<br><br>The Dauphin will give me all I need.",
+    "options": [
+      "The Dauphin gave me all I need.",
+      "The Dauphin gives me all I need.",
+      "The Dauphin has given me all I need.",
+      "The Dauphin is giving me all I need."
+    ],
+    "ans": 1,
+    "topic": "Tense Transformation",
+    "explain": "Simple Present requires the V1 or V1+s form of the verb. Because 'The Dauphin' is singular, 'will give' becomes 'gives'."
+  },
+  {
+    "q": "Rewrite the following sentence in <strong>Present Continuous Tense</strong>:<br><br>I had been working for Anil.",
+    "options": [
+      "I am working for Anil.",
+      "I was working for Anil.",
+      "I have worked for Anil.",
+      "I work for Anil."
+    ],
+    "ans": 0,
+    "topic": "Tense Transformation",
+    "explain": "Present Continuous requires 'is/am/are + V-ing'. The subject 'I' takes 'am', and the main verb is 'working'. Therefore: 'I am working'."
+  },
+  {
+    "q": "Rewrite the following sentence in <strong>Present Perfect Tense</strong>:<br><br>Life hits you in the head.",
+    "options": [
+      "Life hit you in the head.",
+      "Life had hit you in the head.",
+      "Life has hit you in the head.",
+      "Life is hitting you in the head."
+    ],
+    "ans": 2,
+    "topic": "Tense Transformation",
+    "explain": "Present Perfect uses 'has/have + V3'. 'Life' takes 'has', and the V3 of 'hit' remains 'hit'. Thus: 'Life has hit'."
+  },
+  {
+    "q": "Rewrite the following sentence in <strong>Past Continuous Tense</strong>:<br><br>Smita felt alone in their midst.",
+    "options": [
+      "Smita feels alone in their midst.",
+      "Smita was feeling alone in their midst.",
+      "Smita had felt alone in their midst.",
+      "Smita has been feeling alone in their midst."
+    ],
+    "ans": 1,
+    "topic": "Tense Transformation",
+    "explain": "Past Continuous requires 'was/were + V-ing'. 'Smita' takes 'was', and the V-ing form of 'felt' is 'feeling'."
+  },
+  {
+    "q": "Rewrite the following sentence in <strong>Simple Future Tense</strong>:<br><br>I am doing my bit.",
+    "options": [
+      "I did my bit.",
+      "I will be doing my bit.",
+      "I will do my bit.",
+      "I will have done my bit."
+    ],
+    "ans": 2,
+    "topic": "Tense Transformation",
+    "explain": "Simple Future uses 'will + V1'. The verb 'doing' must revert to its base form 'do', giving us 'will do'."
+  },
+  {
+    "q": "Rewrite the following sentence in <strong>Past Perfect Continuous Tense</strong>:<br><br>The teacher taught the lesson.",
+    "options": [
+      "The teacher had taught the lesson.",
+      "The teacher had been teaching the lesson.",
+      "The teacher was teaching the lesson.",
+      "The teacher has been teaching the lesson."
+    ],
+    "ans": 1,
+    "topic": "Tense Transformation",
+    "explain": "Past Perfect Continuous uses 'had been + V-ing'. The V2 verb 'taught' changes to its V-ing form 'teaching', resulting in 'had been teaching'."
+  },
+  {
+    "q": "Rewrite the following sentence in <strong>Present Perfect Continuous Tense</strong>:<br><br>She writes a letter to her mother.",
+    "options": [
+      "She had been writing a letter to her mother.",
+      "She has written a letter to her mother.",
+      "She is writing a letter to her mother.",
+      "She has been writing a letter to her mother."
+    ],
+    "ans": 3,
+    "topic": "Tense Transformation",
+    "explain": "Present Perfect Continuous uses 'has/have been + V-ing'. 'She' takes 'has', giving us 'has been writing'."
+  },
+  {
+    "q": "Rewrite the following sentence in <strong>Simple Past Tense</strong>:<br><br>He goes to the market.",
+    "options": [
+      "He had gone to the market.",
+      "He was going to the market.",
+      "He went to the market.",
+      "He has gone to the market."
+    ],
+    "ans": 2,
+    "topic": "Tense Transformation",
+    "explain": "Simple Past requires the V2 form of the main verb. The V2 form of 'goes' is the irregular verb 'went'."
+  },
+  {
+    "q": "Rewrite the following sentence in <strong>Future Continuous Tense</strong>:<br><br>The children play in the park.",
+    "options": [
+      "The children will play in the park.",
+      "The children are playing in the park.",
+      "The children will be playing in the park.",
+      "The children will have played in the park."
+    ],
+    "ans": 2,
+    "topic": "Tense Transformation",
+    "explain": "Future Continuous uses 'will be + V-ing'. The V1 verb 'play' becomes 'playing', making the correct phrase 'will be playing'."
+  },
+  {
+    "q": "Rewrite the following sentence in <strong>Past Perfect Tense</strong>:<br><br>Life is hitting him hard.",
+    "options": [
+      "Life hit him hard.",
+      "Life had hit him hard.",
+      "Life was hitting him hard.",
+      "Life has hit him hard."
+    ],
+    "ans": 1,
+    "topic": "Tense Transformation",
+    "explain": "Past Perfect uses 'had + V3'. The V3 form of 'hitting' is 'hit', which gives us the formula 'had hit'."
+  },
+  {
+    "q": "Rewrite the following sentence in <strong>Simple Present Tense</strong>:<br><br>She sang a song at the programme.",
+    "options": [
+      "She sings a song at the programme.",
+      "She is singing a song at the programme.",
+      "She has sung a song at the programme.",
+      "She will sing a song at the programme."
+    ],
+    "ans": 0,
+    "topic": "Tense Transformation",
+    "explain": "Simple Present uses the V1 form. Because the subject 'She' is singular, we must add an 's' to the base verb 'sing', making it 'sings'."
+  },
+  {
+    "q": "Rewrite the following sentence in <strong>Future Perfect Tense</strong>:<br><br>They are running on the field.",
+    "options": [
+      "They will be running on the field.",
+      "They will have run on the field.",
+      "They had run on the field.",
+      "They will run on the field."
+    ],
+    "ans": 1,
+    "topic": "Tense Transformation",
+    "explain": "Future Perfect requires 'will have + V3'. The V3 form of 'run' is 'run'. Therefore, it becomes 'will have run'."
+  },
+  {
+    "q": "Rewrite the following sentence in <strong>Present Perfect Tense</strong>:<br><br>I was doing my bit.",
+    "options": [
+      "I had done my bit.",
+      "I am doing my bit.",
+      "I did my bit.",
+      "I have done my bit."
+    ],
+    "ans": 3,
+    "topic": "Tense Transformation",
+    "explain": "Present Perfect uses 'has/have + V3'. 'I' takes 'have', and the V3 of 'doing' is 'done'. The result is 'have done'."
+  },
+  {
+    "q": "Rewrite the following sentence in <strong>Simple Past Tense</strong>:<br><br>The Dauphin has given me all I need.",
+    "options": [
+      "The Dauphin gives me all I need.",
+      "The Dauphin gave me all I need.",
+      "The Dauphin had given me all I need.",
+      "The Dauphin was giving me all I need."
+    ],
+    "ans": 1,
+    "topic": "Tense Transformation",
+    "explain": "Simple Past requires the V2 form without an auxiliary verb. 'has given' changes to the V2 form 'gave'."
+  },
+  {
+    "q": "Rewrite the following sentence in <strong>Past Continuous Tense</strong>:<br><br>He will work in the field all day.",
+    "options": [
+      "He had worked in the field all day.",
+      "He worked in the field all day.",
+      "He was working in the field all day.",
+      "He had been working in the field all day."
+    ],
+    "ans": 2,
+    "topic": "Tense Transformation",
+    "explain": "Past Continuous uses 'was/were + V-ing'. The subject 'He' takes 'was', and the verb 'work' becomes 'working'."
+  }
+];
+
+    let currentQ = 0;
+    let userAnswers = new Array(30).fill(null);
+    let studentName = "";
+
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            timeRemaining--;
+            sessionStorage.setItem('time_remaining', timeRemaining);
+            updateTimerDisplay();
+            if (timeRemaining <= 0) { 
+                clearInterval(timerInterval); 
+                submitExam(true); // Pass true because it's a forced auto-submit
+            }
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        const mins = Math.floor(timeRemaining / 60);
+        const secs = timeRemaining % 60;
+        document.getElementById('timer-display').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function startExam() {
+        studentName = document.getElementById('student-name').value.trim();
+        if (!studentName) return alert("Please enter your name");
+        sessionStorage.setItem('name', studentName);
+        sessionStorage.setItem('in_progress_' + EXAM_KEY, "true");
+        document.getElementById('page-landing').classList.remove('active');
+        document.getElementById('page-exam').classList.add('active');
+        document.getElementById('exam-title-display').innerHTML = `<strong>Topic:</strong> ${EXAM_NAME}`;
+        startTimer();
+        renderGrid();
+        showQuestion();
+    }
+
+    function renderGrid() {
+        const grid = document.getElementById('nav-grid');
+        grid.innerHTML = "";
+        questions.forEach((_, i) => {
+            const div = document.createElement('div');
+            div.className = `nav-box ${i === currentQ ? 'current' : ''} ${userAnswers[i] !== null ? 'answered' : ''}`;
+            div.innerText = i + 1;
+            div.onclick = () => jumpTo(i);
+            grid.appendChild(div);
+        });
+    }
+
+    function showQuestion() {
+        const q = questions[currentQ];
+        document.getElementById('q-title').innerText = `Question ${currentQ + 1}`;
+        document.getElementById('q-text').innerHTML = q.q;
+        const optCont = document.getElementById('options-container');
+        optCont.innerHTML = "";
+        q.options.forEach((opt, idx) => {
+            const lbl = document.createElement('label');
+            lbl.className = "option-label";
+            lbl.innerHTML = `<input type="radio" name="opt" ${userAnswers[currentQ] === idx ? 'checked' : ''} onchange="saveAns(${idx})"> ${opt}`;
+            optCont.appendChild(lbl);
+        });
+        document.getElementById('next-btn').innerText = currentQ === questions.length - 1 ? "Finish" : "Next";
+        sessionStorage.setItem('currentQ', currentQ);
+        renderGrid();
+    }
+
+    function saveAns(idx) {
+        userAnswers[currentQ] = idx;
+        sessionStorage.setItem('answers', JSON.stringify(userAnswers));
+        renderGrid();
+    }
+
+    function jumpTo(i) { currentQ = i; showQuestion(); }
+
+    function changeQuestion(dir) {
+        if (dir === 1 && currentQ === questions.length - 1) {
+            submitExam(false); // Pass false because it is a manual submit attempt
+        } else { 
+            currentQ += dir; 
+            showQuestion(); 
+        }
+    }
+
+    async function submitExam(isAutoSubmit = false) {
+        // Warning check for missing answers
+        if (!isAutoSubmit) {
+            const unansweredCount = userAnswers.filter(ans => ans === null).length;
+            if (unansweredCount > 0) {
+                const confirmSubmit = confirm(`You have left ${unansweredCount} question(s) unanswered. Are you sure you want to finish and submit?`);
+                if (!confirmSubmit) return; // Stop submission if they click Cancel
+            }
+        }
+
+        clearInterval(timerInterval);
+        let score = 0;
+        let topicMap = {};
+        let reviewHTML = "";
+        let missedQuestions = [];
+
+        questions.forEach((q, i) => {
+            const correct = userAnswers[i] === q.ans;
+            if (correct) {
+                score++;
+            } else {
+                missedQuestions.push("Q" + (i + 1));
+            }
+            if (!topicMap[q.topic]) topicMap[q.topic] = { total: 0, correct: 0, failedQ: [] };
+            topicMap[q.topic].total++;
+            if (correct) topicMap[q.topic].correct++;
+            else topicMap[q.topic].failedQ.push(i + 1);
+
+            reviewHTML += `<div class="review-card ${correct ? 'status-correct' : ''}">
+                <strong>Q${i+1}:</strong> ${q.q}<br>
+                Your Answer: <span style="color:${correct ? '#81c784' : '#ff5252'}">${userAnswers[i] !== null ? q.options[userAnswers[i]] : 'Skipped'}</span><br>
+                Correct: ${q.options[q.ans]}<br>
+                <em>Explanation: ${q.explain}</em></div>`;
+        });
+
+        const scoreStr = `${score}/${questions.length}`;
+        let wrongAnswersString = missedQuestions.length > 0 ? missedQuestions.join(", ") : "None";
+
+        document.getElementById('page-exam').classList.remove('active');
+        document.getElementById('page-result').classList.add('active');
+        document.getElementById('res-name').innerText = studentName;
+        document.getElementById('final-score').innerText = scoreStr;
+        document.getElementById('review-list').innerHTML = reviewHTML;
+
+        let analysis = `<strong>AI Analysis Feedback (Question-Specific):</strong><br><br>`;
+        for (let t in topicMap) {
+            let pct = (topicMap[t].correct / topicMap[t].total) * 100;
+            if (pct === 100) {
+                analysis += `• Mastery achieved in ${t}. Your concepts are perfectly clear.<br>`;
+            } else if (pct >= 60) {
+                analysis += `• Strong foundation in ${t}, but minor errors occurred in Question(s) ${topicMap[t].failedQ.join(', ')}.<br>`;
+            } else {
+                analysis += `• Weak performance in ${t}. For example, in Question(s) ${topicMap[t].failedQ.join(', ')}, you failed to apply the rules correctly.<br>`;
+            }
+        }
+        document.getElementById('ai-analysis').innerHTML = analysis;
+
+        fetch(WEB_APP_URL, { 
+            method: "POST", 
+            mode: "no-cors", 
+            body: JSON.stringify({ 
+                studentName, 
+                standard: HARDCODED_STD, 
+                examName: EXAM_NAME, 
+                subject: HARDCODED_SUBJECT,
+                score: scoreStr, 
+                wrongAnswers: wrongAnswersString 
+            }) 
+        });
+        
+        localStorage.setItem('submitted_data_' + EXAM_KEY, JSON.stringify({ name: studentName, answers: userAnswers, score: scoreStr, topicMap }));
+        sessionStorage.clear();
+        window.scrollTo(0, 0);
+    }
+
+    window.onload = () => {
+        document.getElementById('exam-title-display').innerHTML = `<strong>Topic:</strong> ${EXAM_NAME}`;
+        const saved = localStorage.getItem('submitted_data_' + EXAM_KEY);
+        if (saved) {
+            const data = JSON.parse(saved);
+            studentName = data.name;
+            userAnswers = data.answers;
+            showResultsFromStorage(data);
+        } else if (sessionStorage.getItem('in_progress_' + EXAM_KEY)) {
+            studentName = sessionStorage.getItem('name');
+            userAnswers = JSON.parse(sessionStorage.getItem('answers')) || userAnswers;
+            currentQ = parseInt(sessionStorage.getItem('currentQ')) || 0;
+            timeRemaining = parseInt(sessionStorage.getItem('time_remaining')) || 1800;
+            document.getElementById('page-landing').classList.remove('active');
+            document.getElementById('page-exam').classList.add('active');
+            startTimer();
+            updateTimerDisplay();
+            renderGrid();
+            showQuestion();
+        }
+    };
+
+    function showResultsFromStorage(data) {
+        document.getElementById('page-landing').classList.remove('active');
+        document.getElementById('page-result').classList.add('active');
+        document.getElementById('res-name').innerText = data.name;
+        document.getElementById('final-score').innerText = data.score;
+        let reviewHTML = "";
+        questions.forEach((q, i) => {
+            const correct = userAnswers[i] === q.ans;
+            reviewHTML += `<div class="review-card ${correct ? 'status-correct' : ''}">
+                <strong>Q${i+1}:</strong> ${q.q}<br>
+                Your Answer: <span style="color:${correct ? '#81c784' : '#ff5252'}">${userAnswers[i] !== null ? q.options[userAnswers[i]] : 'Skipped'}</span><br>
+                Correct: ${q.options[q.ans]}<br>
+                <em>Explanation: ${q.explain}</em></div>`;
+        });
+        document.getElementById('review-list').innerHTML = reviewHTML;
+        let analysis = `<strong>AI Analysis Feedback (Question-Specific):</strong><br><br>`;
+        for (let t in data.topicMap) {
+            let pct = (data.topicMap[t].correct / data.topicMap[t].total) * 100;
+            if (pct === 100) {
+                analysis += `• Mastery achieved in ${t}. Your concepts are perfectly clear.<br>`;
+            } else if (pct >= 60) {
+                analysis += `• Strong foundation in ${t}, but minor errors occurred in Question(s) ${data.topicMap[t].failedQ.join(', ')}.<br>`;
+            } else {
+                analysis += `• Weak performance in ${t}. For example, in Question(s) ${data.topicMap[t].failedQ.join(', ')}, you failed to apply the rules correctly.<br>`;
+            }
+        }
+        document.getElementById('ai-analysis').innerHTML = analysis;
+    }
+</script>
+</body>
+</html>
