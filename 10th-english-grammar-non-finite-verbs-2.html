@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bright Minds Academy - 10th English Grammar</title>
+    <style>
+        /* Distinct Green Theme for English Grammar */
+        :root { 
+            --primary-bg: #173627; 
+            --text-color: #ffffff; 
+            --accent-color: #2bb872; 
+            --error: #ff5252; 
+            --correct: #81c784; 
+            --answered: #ff9800; 
+        }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--primary-bg); color: var(--text-color); margin: 0; padding: 10px; display: flex; justify-content: center; }
+        #exam-container { width: 100%; max-width: 850px; background: rgba(255, 255, 255, 0.1); padding: 1.5rem; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+        .page { display: none; }
+        .active { display: block; }
+       #nav-grid { 
+    display: grid; 
+    grid-template-columns: repeat(10, 35px); /* Locks width to make perfect circles */
+    justify-content: center; /* Centers the circles in the box */
+    gap: 12px; /* Slightly wider gap so glowing borders don't overlap */
+    margin-top: 20px; 
+    background: rgba(0,0,0,0.2); 
+    padding: 15px; 
+    border-radius: 8px; 
+}
+.nav-box { 
+    width: 35px; /* Explicit width added */
+    height: 35px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    border-radius: 50%; /* This makes the box a perfect circle */
+    background: rgba(255, 255, 255, 0.05); /* Dimmed default state */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    cursor: pointer; 
+    font-weight: bold; 
+    font-size: 0.9rem; 
+    transition: all 0.3s ease; /* Smooth fade when glowing */
+}
+/* Neon Green Glow for Current Question */
+.nav-box.current { 
+    background: var(--accent-color); 
+    border: 2px solid #fff; 
+    box-shadow: 0 0 10px var(--accent-color), 0 0 20px var(--accent-color); 
+    color: var(--primary-bg); /* Dark text to stand out against bright green */
+}
+/* Neon Orange/Amber Glow for Answered Questions */
+.nav-box.answered { 
+    background: var(--answered); 
+    border: 2px solid #fff;
+    box-shadow: 0 0 8px var(--answered), 0 0 15px var(--answered); 
+    color: #fff;
+}
+        .info-box { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 0.9rem; }
+        .header-main { text-align: center; border-bottom: 2px solid var(--accent-color); margin-bottom: 15px; padding-bottom: 10px; }
+        #question-scroll-area { max-height: 60vh; overflow-y: auto; padding-right: 10px; margin-top: 10px; }
+        .option-label { display: block; background: rgba(255,255,255,0.05); margin: 10px 0; padding: 15px; border-radius: 8px; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
+        .option-label:hover { background: rgba(255,255,255,0.12); }
+        input[type="radio"] { margin-right: 12px; transform: scale(1.2); }
+        .btn-container { margin-top: 20px; display: flex; justify-content: space-between; }
+        button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; background: var(--accent-color); color: white; font-weight: bold; }
+        .review-card { background: rgba(0,0,0,0.3); padding: 15px; margin: 15px 0; border-radius: 8px; border-left: 5px solid var(--error); }
+        .review-card.status-correct { border-left-color: var(--correct); }
+    </style>
+</head>
+<body>
+
+<div id="exam-container">
+    <div id="page-landing" class="page active">
+        <h1 class="header-main">Bright Minds Academy</h1>
+        <div class="info-box" style="display: block;">
+            <p><strong>Subject:</strong> English</p>
+            <p id="exam-title-display"><strong>Topic:</strong> Loading...</p>
+            <p><strong>Standard:</strong> 10th | <strong>Marks:</strong> 30 | <strong>Time:</strong> 30 Mins</p>
+        </div>
+        <div style="margin: 30px 0; text-align: center;">
+            <input type="text" id="student-name" placeholder="Enter Full Student Name" style="width: 80%; padding: 12px; border-radius: 6px; border: none;">
+        </div>
+        <div style="text-align: center;"><button onclick="startExam()">Start Assignment</button></div>
+    </div>
+
+    <div id="page-exam" class="page">
+        <div class="header-main" style="font-size: 1.2rem;">Bright Minds Academy</div>
+        <div class="info-box">
+            <span><strong>Time Left:</strong> <span id="timer-display">30:00</span></span>
+            <span><strong>Marks:</strong> 30</span>
+            <span><strong>Questions:</strong> 30</span>
+        </div>
+        <div id="question-scroll-area">
+            <h3 id="q-title"></h3>
+            <p id="q-text" style="font-size: 1.1rem; line-height: 1.6;"></p>
+            <div id="options-container"></div>
+        </div>
+        <div class="btn-container">
+            <button id="prev-btn" onclick="changeQuestion(-1)">Back</button>
+            <button id="next-btn" onclick="changeQuestion(1)">Next</button>
+        </div>
+        <div id="nav-grid"></div>
+    </div>
+
+    <div id="page-result" class="page">
+        <h2 id="res-name" style="text-align: center;"></h2>
+        <h1 style="text-align: center;">Score: <span id="final-score"></span></h1>
+        <div id="ai-analysis" style="background: rgba(76, 175, 80, 0.15); padding: 20px; border-radius: 10px; margin: 20px 0; line-height: 1.5;"></div>
+        <h3>Question Review</h3>
+        <div id="review-list"></div>
+    </div>
+</div>
+
+<script>
+    // UPDATE THESE FOR EACH NEW EXAM
+    const EXAM_KEY = "10th_Eng_Grammar_non-finite-verbs2"; 
+    const EXAM_NAME = "Non-Finite Verbs Test 2"; 
+    
+    // CONSTANTS
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwEutZaKIAodDqKVocXPmgGlsfyO6ma8vuQK4sFgEobmvD73QQwztuH4qbT_R3g1Figtw/exec";
+    const HARDCODED_STD = "10th";
+    const HARDCODED_SUBJECT = "English";
+    
+    let timerInterval;
+    let timeRemaining = 1800; // 30 Minutes
+
+    // JSON PAYLOAD GOES HERE (Paste the clean JSON array below this line)
+    const questions = [
+  {
+    "q": "Pick out the infinitive from the sentence: He needs to rest now.",
+    "options": [
+      "He",
+      "needs",
+      "to rest",
+      "now"
+    ],
+    "ans": 2,
+    "topic": "Infinitive",
+    "explain": "'to rest' is formed by TO + base verb 'rest', functioning as a non-finite verb."
+  },
+  {
+    "q": "Which of the following sentences contains an infinitive?",
+    "options": [
+      "She went to the market.",
+      "He wants to eat rice.",
+      "They traveled to Mumbai.",
+      "I spoke to him."
+    ],
+    "ans": 1,
+    "topic": "Infinitive",
+    "explain": "In 'He wants to eat rice', 'to eat' is an infinitive (TO + verb). The other sentences use 'to' as a preposition followed by a noun or pronoun."
+  },
+  {
+    "q": "Pick out the infinitive from the given sentence: The child started to cry.",
+    "options": [
+      "child",
+      "started",
+      "to",
+      "to cry"
+    ],
+    "ans": 3,
+    "topic": "Infinitive",
+    "explain": "'to cry' acts as the object of 'started' and is a non-finite infinitive verb."
+  },
+  {
+    "q": "Pick out the infinitive from the sentence: The boy hopes to win the match.",
+    "options": [
+      "hopes",
+      "to win",
+      "match",
+      "The boy"
+    ],
+    "ans": 1,
+    "topic": "Infinitive",
+    "explain": "'to win' is the infinitive here, acting as the object of the verb 'hopes'."
+  },
+  {
+    "q": "Rewrite the sentence using an infinitive: He started playing the guitar.",
+    "options": [
+      "He starts to play the guitar.",
+      "He started to play the guitar.",
+      "He started to playing the guitar.",
+      "He started play the guitar."
+    ],
+    "ans": 1,
+    "topic": "Infinitive",
+    "explain": "The gerund 'playing' is correctly replaced by the infinitive 'to play', keeping the original past tense 'started'."
+  },
+  {
+    "q": "Pick out the gerund from the following sentence: Walking in the rain is fun.",
+    "options": [
+      "Walking",
+      "rain",
+      "is",
+      "fun"
+    ],
+    "ans": 0,
+    "topic": "Gerund",
+    "explain": "'Walking' ends in -ING and acts as a noun (the subject of the sentence), making it a gerund."
+  },
+  {
+    "q": "Identify the gerund in the sentence: I like helping people.",
+    "options": [
+      "I",
+      "like",
+      "helping",
+      "people"
+    ],
+    "ans": 2,
+    "topic": "Gerund",
+    "explain": "'helping' functions as a noun here, serving as the object of the verb 'like'."
+  },
+  {
+    "q": "Pick out the gerund from the sentence: He gave up smoking.",
+    "options": [
+      "He",
+      "gave",
+      "up",
+      "smoking"
+    ],
+    "ans": 3,
+    "topic": "Gerund",
+    "explain": "'smoking' is a verb+ING form acting as a noun, which makes it a gerund."
+  },
+  {
+    "q": "Identify the gerund in the given sentence: She enjoys singing songs.",
+    "options": [
+      "She",
+      "enjoys",
+      "singing",
+      "songs"
+    ],
+    "ans": 2,
+    "topic": "Gerund",
+    "explain": "'singing' acts as the object of the verb 'enjoys', so it is a gerund."
+  },
+  {
+    "q": "Pick out the gerund from the sentence: This habit of lying is very bad.",
+    "options": [
+      "habit",
+      "lying",
+      "very",
+      "bad"
+    ],
+    "ans": 1,
+    "topic": "Gerund",
+    "explain": "'lying' is the object of the preposition 'of', acting as a noun (gerund)."
+  },
+  {
+    "q": "Which word is the present participle in the sentence: The running water is clean.",
+    "options": [
+      "running",
+      "water",
+      "is",
+      "clean"
+    ],
+    "ans": 0,
+    "topic": "Participle",
+    "explain": "'running' is a present participle used as an adjective modifying the noun 'water'."
+  },
+  {
+    "q": "Pick out the present participle from the sentence: She heard a bird singing.",
+    "options": [
+      "She",
+      "heard",
+      "bird",
+      "singing"
+    ],
+    "ans": 3,
+    "topic": "Participle",
+    "explain": "'singing' acts as an adjective describing the bird, making it a present participle."
+  },
+  {
+    "q": "Identify the past participle in the given sentence: He wore a torn shirt.",
+    "options": [
+      "He",
+      "wore",
+      "torn",
+      "shirt"
+    ],
+    "ans": 2,
+    "topic": "Participle",
+    "explain": "'torn' is the past participle form of the verb 'tear', used here as an adjective describing the shirt."
+  },
+  {
+    "q": "Pick out the past participle from the following sentence: The stolen bag was found.",
+    "options": [
+      "stolen",
+      "bag",
+      "was",
+      "found"
+    ],
+    "ans": 0,
+    "topic": "Participle",
+    "explain": "'stolen' acts as an adjective modifying 'bag', making it a past participle."
+  },
+  {
+    "q": "Identify the type of participle used in the sentence: She wore a stitched dress.",
+    "options": [
+      "Present Participle",
+      "Past Participle",
+      "Perfect Participle",
+      "Gerund"
+    ],
+    "ans": 1,
+    "topic": "Participle",
+    "explain": "'stitched' ends in -ED and acts as an adjective describing 'dress', which makes it a Past Participle."
+  },
+  {
+    "q": "Pick out the present participle from the sentence: I don't like boring movies.",
+    "options": [
+      "don't",
+      "like",
+      "boring",
+      "movies"
+    ],
+    "ans": 2,
+    "topic": "Participle",
+    "explain": "'boring' ends in -ING and modifies the noun 'movies', acting as a present participle (adjective)."
+  },
+  {
+    "q": "Which is the correctly formed present participle for the verb 'cut' following the doubling rule?",
+    "options": [
+      "cuting",
+      "cuteing",
+      "cutting",
+      "cuttinge"
+    ],
+    "ans": 2,
+    "topic": "Doubling Rule",
+    "explain": "'cut' has a short vowel followed by a single consonant, so the 't' is doubled before adding -ING."
+  },
+  {
+    "q": "Form a present participle in which the last letter is doubled for the base verb 'drop'.",
+    "options": [
+      "droping",
+      "dropping",
+      "dropp",
+      "dropt"
+    ],
+    "ans": 1,
+    "topic": "Doubling Rule",
+    "explain": "Because 'drop' ends in a single vowel + single consonant, we double the 'p' to make 'dropping'."
+  },
+  {
+    "q": "Which is the correctly formed past participle for the verb 'wrap'?",
+    "options": [
+      "wraped",
+      "wrapping",
+      "wrapt",
+      "wrapped"
+    ],
+    "ans": 3,
+    "topic": "Doubling Rule",
+    "explain": "The base verb 'wrap' ends in a single vowel and a single consonant, so the 'p' must be doubled before adding -ED."
+  },
+  {
+    "q": "Form a present participle in which the last letter is doubled for the base verb 'skip'.",
+    "options": [
+      "skiping",
+      "skipped",
+      "skipping",
+      "skeep"
+    ],
+    "ans": 2,
+    "topic": "Doubling Rule",
+    "explain": "'skip' ends in a single vowel + single consonant, so we double the 'p' before adding -ING."
+  },
+  {
+    "q": "Form a past participle in which the last letter is doubled for the base verb 'beg'.",
+    "options": [
+      "beging",
+      "begged",
+      "beged",
+      "begging"
+    ],
+    "ans": 1,
+    "topic": "Doubling Rule",
+    "explain": "To form the past participle of 'beg', double the 'g' and add -ED to get 'begged'."
+  },
+  {
+    "q": "Why do we NOT double the last letter when forming the present participle of 'sleep' (sleeping)?",
+    "options": [
+      "It ends in a consonant cluster.",
+      "It is a non-finite verb.",
+      "It has a short vowel sound.",
+      "It has two vowels (ee) before the final consonant."
+    ],
+    "ans": 3,
+    "topic": "Doubling Rule",
+    "explain": "The doubling rule requires a SINGLE short vowel. 'sleep' has two vowels (ee), so the last letter is not doubled."
+  },
+  {
+    "q": "Why is the last letter NOT doubled in the word 'walking'?",
+    "options": [
+      "Because it has two vowels.",
+      "Because it ends in a consonant cluster (lk).",
+      "Because it is a past participle.",
+      "Because 'w' is a special letter."
+    ],
+    "ans": 1,
+    "topic": "Doubling Rule",
+    "explain": "The word 'walk' ends with two consonants (l and k), so the doubling rule does not apply."
+  },
+  {
+    "q": "Identify the FINITE verb in the sentence: She wants to sleep.",
+    "options": [
+      "She",
+      "wants",
+      "to",
+      "sleep"
+    ],
+    "ans": 1,
+    "topic": "Finite vs Non-Finite",
+    "explain": "'wants' changes according to the subject (e.g., They want). It is the finite main verb of the sentence."
+  },
+  {
+    "q": "Identify the NON-FINITE verb in the sentence: They began to sing.",
+    "options": [
+      "They",
+      "began",
+      "to sing",
+      "began to"
+    ],
+    "ans": 2,
+    "topic": "Finite vs Non-Finite",
+    "explain": "'to sing' is an infinitive. It does not change if the subject or tense changes, so it is a non-finite verb."
+  },
+  {
+    "q": "Apply the 'Golden Test'. Which of the following sentences contains a FINITE verb?",
+    "options": [
+      "He wants to run.",
+      "They run fast.",
+      "To err is human.",
+      "Swimming keeps you fit."
+    ],
+    "ans": 1,
+    "topic": "Finite vs Non-Finite",
+    "explain": "In 'They run fast', the verb 'run' changes with the subject (He runs) or tense (He ran), proving it is a finite verb."
+  },
+  {
+    "q": "Identify the verb in the given sentence and state whether it is finite or non-finite: She gave her book to the teacher.",
+    "options": [
+      "gave - Finite",
+      "book - Non-finite",
+      "teacher - Finite",
+      "gave - Non-finite"
+    ],
+    "ans": 0,
+    "topic": "Finite vs Non-Finite",
+    "explain": "'gave' is a finite verb because it indicates past tense and changes with the subject."
+  },
+  {
+    "q": "In the sentence 'He loves to sing', what roles do the verbs play?",
+    "options": [
+      "'loves' is Non-Finite, 'to sing' is Finite",
+      "'loves' is Finite, 'to sing' is Finite",
+      "'loves' is Finite, 'to sing' is Non-Finite",
+      "'loves' is Non-Finite, 'to sing' is Non-Finite"
+    ],
+    "ans": 2,
+    "topic": "Finite vs Non-Finite",
+    "explain": "'loves' is the main finite verb that changes with the subject. 'to sing' is the non-finite infinitive."
+  },
+  {
+    "q": "What is the perfect participle form mentioned in the rules?",
+    "options": [
+      "Verb + ING",
+      "TO + base verb",
+      "Having + Past Participle",
+      "Verb + D/ED/EN"
+    ],
+    "ans": 2,
+    "topic": "Participle",
+    "explain": "A perfect participle is formed by combining 'Having' with the Past Participle (e.g., Having eaten)."
+  },
+  {
+    "q": "How can you tell the difference between a Gerund and a Present Participle since both end in -ING?",
+    "options": [
+      "Gerund acts like a noun; Present Participle acts like an adjective or verb.",
+      "Gerund acts like a verb; Present Participle acts like a noun.",
+      "Gerund is always plural; Present Participle is always singular.",
+      "Gerunds double the last letter; Present Participles do not."
+    ],
+    "ans": 0,
+    "topic": "Gerund vs Participle",
+    "explain": "A gerund works like a noun (subject or object), while a present participle acts as an adjective describing something or as part of a continuous verb."
+  }
+];
+
+    let currentQ = 0;
+    let userAnswers = new Array(30).fill(null);
+    let studentName = "";
+
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            timeRemaining--;
+            sessionStorage.setItem('time_remaining', timeRemaining);
+            updateTimerDisplay();
+            if (timeRemaining <= 0) { 
+                clearInterval(timerInterval); 
+                submitExam(true); // Pass true because it's a forced auto-submit
+            }
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        const mins = Math.floor(timeRemaining / 60);
+        const secs = timeRemaining % 60;
+        document.getElementById('timer-display').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function startExam() {
+        studentName = document.getElementById('student-name').value.trim();
+        if (!studentName) return alert("Please enter your name");
+        sessionStorage.setItem('name', studentName);
+        sessionStorage.setItem('in_progress_' + EXAM_KEY, "true");
+        document.getElementById('page-landing').classList.remove('active');
+        document.getElementById('page-exam').classList.add('active');
+        document.getElementById('exam-title-display').innerHTML = `<strong>Topic:</strong> ${EXAM_NAME}`;
+        startTimer();
+        renderGrid();
+        showQuestion();
+    }
+
+    function renderGrid() {
+        const grid = document.getElementById('nav-grid');
+        grid.innerHTML = "";
+        questions.forEach((_, i) => {
+            const div = document.createElement('div');
+            div.className = `nav-box ${i === currentQ ? 'current' : ''} ${userAnswers[i] !== null ? 'answered' : ''}`;
+            div.innerText = i + 1;
+            div.onclick = () => jumpTo(i);
+            grid.appendChild(div);
+        });
+    }
+
+    function showQuestion() {
+        const q = questions[currentQ];
+        document.getElementById('q-title').innerText = `Question ${currentQ + 1}`;
+        document.getElementById('q-text').innerHTML = q.q;
+        const optCont = document.getElementById('options-container');
+        optCont.innerHTML = "";
+        q.options.forEach((opt, idx) => {
+            const lbl = document.createElement('label');
+            lbl.className = "option-label";
+            lbl.innerHTML = `<input type="radio" name="opt" ${userAnswers[currentQ] === idx ? 'checked' : ''} onchange="saveAns(${idx})"> ${opt}`;
+            optCont.appendChild(lbl);
+        });
+        document.getElementById('next-btn').innerText = currentQ === questions.length - 1 ? "Finish" : "Next";
+        sessionStorage.setItem('currentQ', currentQ);
+        renderGrid();
+    }
+
+    function saveAns(idx) {
+        userAnswers[currentQ] = idx;
+        sessionStorage.setItem('answers', JSON.stringify(userAnswers));
+        renderGrid();
+    }
+
+    function jumpTo(i) { currentQ = i; showQuestion(); }
+
+    function changeQuestion(dir) {
+        if (dir === 1 && currentQ === questions.length - 1) {
+            submitExam(false); // Pass false because it is a manual submit attempt
+        } else { 
+            currentQ += dir; 
+            showQuestion(); 
+        }
+    }
+
+    async function submitExam(isAutoSubmit = false) {
+        // Warning check for missing answers
+        if (!isAutoSubmit) {
+            const unansweredCount = userAnswers.filter(ans => ans === null).length;
+            if (unansweredCount > 0) {
+                const confirmSubmit = confirm(`You have left ${unansweredCount} question(s) unanswered. Are you sure you want to finish and submit?`);
+                if (!confirmSubmit) return; // Stop submission if they click Cancel
+            }
+        }
+
+        clearInterval(timerInterval);
+        let score = 0;
+        let topicMap = {};
+        let reviewHTML = "";
+        let missedQuestions = [];
+
+        questions.forEach((q, i) => {
+            const correct = userAnswers[i] === q.ans;
+            if (correct) {
+                score++;
+            } else {
+                missedQuestions.push("Q" + (i + 1));
+            }
+            if (!topicMap[q.topic]) topicMap[q.topic] = { total: 0, correct: 0, failedQ: [] };
+            topicMap[q.topic].total++;
+            if (correct) topicMap[q.topic].correct++;
+            else topicMap[q.topic].failedQ.push(i + 1);
+
+            reviewHTML += `<div class="review-card ${correct ? 'status-correct' : ''}">
+                <strong>Q${i+1}:</strong> ${q.q}<br>
+                Your Answer: <span style="color:${correct ? '#81c784' : '#ff5252'}">${userAnswers[i] !== null ? q.options[userAnswers[i]] : 'Skipped'}</span><br>
+                Correct: ${q.options[q.ans]}<br>
+                <em>Explanation: ${q.explain}</em></div>`;
+        });
+
+        const scoreStr = `${score}/${questions.length}`;
+        let wrongAnswersString = missedQuestions.length > 0 ? missedQuestions.join(", ") : "None";
+
+        document.getElementById('page-exam').classList.remove('active');
+        document.getElementById('page-result').classList.add('active');
+        document.getElementById('res-name').innerText = studentName;
+        document.getElementById('final-score').innerText = scoreStr;
+        document.getElementById('review-list').innerHTML = reviewHTML;
+
+        let analysis = `<strong>AI Analysis Feedback (Question-Specific):</strong><br><br>`;
+        for (let t in topicMap) {
+            let pct = (topicMap[t].correct / topicMap[t].total) * 100;
+            if (pct === 100) {
+                analysis += `• Mastery achieved in ${t}. Your concepts are perfectly clear.<br>`;
+            } else if (pct >= 60) {
+                analysis += `• Strong foundation in ${t}, but minor errors occurred in Question(s) ${topicMap[t].failedQ.join(', ')}.<br>`;
+            } else {
+                analysis += `• Weak performance in ${t}. For example, in Question(s) ${topicMap[t].failedQ.join(', ')}, you failed to apply the rules correctly.<br>`;
+            }
+        }
+        document.getElementById('ai-analysis').innerHTML = analysis;
+
+        fetch(WEB_APP_URL, { 
+            method: "POST", 
+            mode: "no-cors", 
+            body: JSON.stringify({ 
+                studentName, 
+                standard: HARDCODED_STD, 
+                examName: EXAM_NAME, 
+                subject: HARDCODED_SUBJECT,
+                score: scoreStr, 
+                wrongAnswers: wrongAnswersString 
+            }) 
+        });
+        
+        localStorage.setItem('submitted_data_' + EXAM_KEY, JSON.stringify({ name: studentName, answers: userAnswers, score: scoreStr, topicMap }));
+        sessionStorage.clear();
+        window.scrollTo(0, 0);
+    }
+
+    window.onload = () => {
+        document.getElementById('exam-title-display').innerHTML = `<strong>Topic:</strong> ${EXAM_NAME}`;
+        const saved = localStorage.getItem('submitted_data_' + EXAM_KEY);
+        if (saved) {
+            const data = JSON.parse(saved);
+            studentName = data.name;
+            userAnswers = data.answers;
+            showResultsFromStorage(data);
+        } else if (sessionStorage.getItem('in_progress_' + EXAM_KEY)) {
+            studentName = sessionStorage.getItem('name');
+            userAnswers = JSON.parse(sessionStorage.getItem('answers')) || userAnswers;
+            currentQ = parseInt(sessionStorage.getItem('currentQ')) || 0;
+            timeRemaining = parseInt(sessionStorage.getItem('time_remaining')) || 1800;
+            document.getElementById('page-landing').classList.remove('active');
+            document.getElementById('page-exam').classList.add('active');
+            startTimer();
+            updateTimerDisplay();
+            renderGrid();
+            showQuestion();
+        }
+    };
+
+    function showResultsFromStorage(data) {
+        document.getElementById('page-landing').classList.remove('active');
+        document.getElementById('page-result').classList.add('active');
+        document.getElementById('res-name').innerText = data.name;
+        document.getElementById('final-score').innerText = data.score;
+        let reviewHTML = "";
+        questions.forEach((q, i) => {
+            const correct = userAnswers[i] === q.ans;
+            reviewHTML += `<div class="review-card ${correct ? 'status-correct' : ''}">
+                <strong>Q${i+1}:</strong> ${q.q}<br>
+                Your Answer: <span style="color:${correct ? '#81c784' : '#ff5252'}">${userAnswers[i] !== null ? q.options[userAnswers[i]] : 'Skipped'}</span><br>
+                Correct: ${q.options[q.ans]}<br>
+                <em>Explanation: ${q.explain}</em></div>`;
+        });
+        document.getElementById('review-list').innerHTML = reviewHTML;
+        let analysis = `<strong>AI Analysis Feedback (Question-Specific):</strong><br><br>`;
+        for (let t in data.topicMap) {
+            let pct = (data.topicMap[t].correct / data.topicMap[t].total) * 100;
+            if (pct === 100) {
+                analysis += `• Mastery achieved in ${t}. Your concepts are perfectly clear.<br>`;
+            } else if (pct >= 60) {
+                analysis += `• Strong foundation in ${t}, but minor errors occurred in Question(s) ${data.topicMap[t].failedQ.join(', ')}.<br>`;
+            } else {
+                analysis += `• Weak performance in ${t}. For example, in Question(s) ${data.topicMap[t].failedQ.join(', ')}, you failed to apply the rules correctly.<br>`;
+            }
+        }
+        document.getElementById('ai-analysis').innerHTML = analysis;
+    }
+</script>
+</body>
+</html>
