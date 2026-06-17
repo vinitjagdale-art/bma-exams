@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5th Maths Olympiad - Factors and Multiples Test 1</title>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        /* Faint Orange Theme for 5th Maths Olympiad */
+        :root { 
+            --primary-bg: #4a3521; 
+            --text-color: #ffffff; 
+            --accent-color: #e67e22; /* Faint Orange */
+            --error: #ff5252; 
+            --correct: #81c784; 
+            --answered: #ff9800; 
+        }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--primary-bg); color: var(--text-color); margin: 0; padding: 10px; display: flex; justify-content: center; }
+        #exam-container { width: 100%; max-width: 850px; background: rgba(255, 255, 255, 0.1); padding: 1.5rem; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+        .page { display: none; }
+        .active { display: block; }
+        #nav-grid { 
+            display: grid; 
+            grid-template-columns: repeat(10, 35px); 
+            justify-content: center; 
+            gap: 12px; 
+            margin-top: 20px; 
+            background: rgba(0,0,0,0.2); 
+            padding: 15px; 
+            border-radius: 8px; 
+        }
+        .nav-box { 
+            width: 35px; 
+            height: 35px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            border-radius: 50%; 
+            background: rgba(255, 255, 255, 0.05); 
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            cursor: pointer; 
+            font-weight: bold; 
+            font-size: 0.9rem; 
+            transition: all 0.3s ease; 
+        }
+        .nav-box.current { 
+            background: var(--accent-color); 
+            border: 2px solid #fff; 
+            box-shadow: 0 0 10px var(--accent-color), 0 0 20px var(--accent-color); 
+            color: var(--primary-bg); 
+        }
+        .nav-box.answered { 
+            background: var(--answered); 
+            border: 2px solid #fff;
+            box-shadow: 0 0 8px var(--answered), 0 0 15px var(--answered); 
+            color: #fff;
+        }
+        .info-box { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 0.9rem; }
+        .header-main { text-align: center; border-bottom: 2px solid var(--accent-color); margin-bottom: 15px; padding-bottom: 10px; }
+        #question-scroll-area { max-height: 60vh; overflow-y: auto; padding-right: 10px; margin-top: 10px; }
+        .option-label { display: block; background: rgba(255,255,255,0.05); margin: 10px 0; padding: 15px; border-radius: 8px; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
+        .option-label:hover { background: rgba(255,255,255,0.12); }
+        input[type="radio"] { margin-right: 12px; transform: scale(1.2); }
+        .btn-container { margin-top: 20px; display: flex; justify-content: space-between; }
+        button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; background: var(--accent-color); color: white; font-weight: bold; }
+        .review-card { background: rgba(0,0,0,0.3); padding: 15px; margin: 15px 0; border-radius: 8px; border-left: 5px solid var(--error); }
+        .review-card.status-correct { border-left-color: var(--correct); }
+    </style>
+</head>
+<body>
+
+<div id="exam-container">
+    <div id="page-landing" class="page active">
+        <h1 class="header-main">5th Maths Olympiad</h1>
+        <div class="info-box" style="display: block;">
+            <p><strong>Subject:</strong> Maths</p>
+            <p id="exam-title-display"><strong>Topic:</strong> Loading...</p>
+            <p><strong>Standard:</strong> 5th | <strong>Marks:</strong> 20 | <strong>Time:</strong> 30 Mins</p>
+        </div>
+        <div style="margin: 30px 0; text-align: center;">
+            <input type="text" id="student-name" placeholder="Enter Full Student Name" style="width: 80%; padding: 12px; border-radius: 6px; border: none;">
+        </div>
+        <div style="text-align: center;"><button onclick="startExam()">Start Assignment</button></div>
+    </div>
+
+    <div id="page-exam" class="page">
+        <div class="header-main" style="font-size: 1.2rem;">5th Maths Olympiad</div>
+        <div class="info-box">
+            <span><strong>Time Left:</strong> <span id="timer-display">30:00</span></span>
+            <span><strong>Marks:</strong> 20</span>
+            <span><strong>Questions:</strong> 20</span>
+        </div>
+        <div id="question-scroll-area">
+            <h3 id="q-title"></h3>
+            <p id="q-text" style="font-size: 1.1rem; line-height: 1.6;"></p>
+            <div id="options-container"></div>
+        </div>
+        <div class="btn-container">
+            <button id="prev-btn" onclick="changeQuestion(-1)">Back</button>
+            <button id="next-btn" onclick="changeQuestion(1)">Next</button>
+        </div>
+        <div id="nav-grid"></div>
+    </div>
+
+    <div id="page-result" class="page">
+        <h2 id="res-name" style="text-align: center;"></h2>
+        <h1 style="text-align: center;">Score: <span id="final-score"></span></h1>
+        <div id="ai-analysis" style="background: rgba(230, 126, 34, 0.15); padding: 20px; border-radius: 10px; margin: 20px 0; line-height: 1.5;"></div>
+        <h3>Question Review</h3>
+        <div id="review-list"></div>
+    </div>
+</div>
+
+<script>
+    const EXAM_KEY = "5th_Math_Factors_Multiples_Test1"; 
+    const EXAM_NAME = "Factors and Multiples - Assignment 1"; 
+    
+    // CONSTANTS
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwEutZaKIAodDqKVocXPmgGlsfyO6ma8vuQK4sFgEobmvD73QQwztuH4qbT_R3g1Figtw/exec";
+    const HARDCODED_STD = "5th";
+    const HARDCODED_SUBJECT = "Maths";
+    
+    let timerInterval;
+    let timeRemaining = 1800; // 30 Minutes
+
+    // 20 Questions: 7 from PDF + 13 New Unique
+    const questions = [
+        {
+            "q": "Which one of the following are prime numbers?",
+            "options": ["2, 5, 9", "5, 6, 11", "4, 5, 7", "2, 3, 5"],
+            "ans": 3,
+            "topic": "Prime Numbers",
+            "explain": "2, 3, and 5 are the only numbers in the set that have exactly two factors: 1 and themselves."
+        },
+        {
+            "q": "Find the smallest number that is divisible by both 225 and 625.",
+            "options": ["5525", "5625", "3025", "7225"],
+            "ans": 1,
+            "topic": "LCM",
+            "explain": "The Least Common Multiple (LCM) of 225 and 625 is 5625."
+        },
+        {
+            "q": "What least number should be subtracted from 2465445455207 so that the number becomes exactly divisible by 5?",
+            "options": ["3", "4", "5", "2"],
+            "ans": 3,
+            "topic": "Divisibility Rules",
+            "explain": "A number is divisible by 5 if it ends in 0 or 5. Subtracting 2 from the last digit (7) gives 5, making the number divisible by 5."
+        },
+        {
+            "q": "Which one of the following sets contains all the prime numbers between 1 to 20?",
+            "options": ["{1, 2, 3, 5, 7, 9, 11, 17, 19}", "{2, 3, 5, 7, 11, 13, 17, 19}", "{2, 5, 7, 9, 11, 13, 17, 19}", "{3, 5, 7, 9, 11, 13, 17, 19}"],
+            "ans": 1,
+            "topic": "Prime Numbers",
+            "explain": "1 is not prime, and 9 is composite. The correct set of primes under 20 is {2, 3, 5, 7, 11, 13, 17, 19}."
+        },
+        {
+            "q": "Which specific term is used for the number, whose sum of all the factors, except the number itself, is equal to the number?",
+            "options": ["Perfect number", "Prime number", "Composite number", "Relatively co-prime number"],
+            "ans": 0,
+            "topic": "Definitions",
+            "explain": "A perfect number is a positive integer that is equal to the sum of its proper divisors (e.g., 6 = 1 + 2 + 3)."
+        },
+        {
+            "q": "Find five multiples of 2384.",
+            "options": ["4768, 7152, 9530, 11920, 14304", "4768, 7152, 9536, 11924, 14304", "4768, 7152, 9536, 11920, 16304", "4768, 7152, 9536, 11920, 14304"],
+            "ans": 3,
+            "topic": "Multiples",
+            "explain": "Multiplying 2384 by 2, 3, 4, 5, and 6 respectively yields 4768, 7152, 9536, 11920, and 14304."
+        },
+        {
+            "q": "If two numbers have only one common factor, the numbers are called:",
+            "options": ["Perfect numbers", "Prime numbers", "Composite numbers", "Relatively co-prime numbers"],
+            "ans": 3,
+            "topic": "Co-prime Numbers",
+            "explain": "Numbers that share no common factors other than 1 are known as relatively co-prime numbers."
+        },
+        {
+            "q": "What is the Highest Common Factor (HCF) of 48 and 72?",
+            "options": ["12", "16", "24", "36"],
+            "ans": 2,
+            "topic": "HCF",
+            "explain": "The largest number that divides both 48 and 72 without a remainder is 24."
+        },
+        {
+            "q": "The sum of the first four multiples of 15 is:",
+            "options": ["100", "150", "120", "90"],
+            "ans": 1,
+            "topic": "Multiples",
+            "explain": "The first four multiples of 15 are 15, 30, 45, and 60. Their sum is 15 + 30 + 45 + 60 = 150."
+        },
+        {
+            "q": "Which of the following is a pair of twin primes?",
+            "options": ["(3, 5)", "(7, 11)", "(13, 15)", "(19, 21)"],
+            "ans": 0,
+            "topic": "Prime Numbers",
+            "explain": "Twin primes are prime numbers that differ by 2. Both 3 and 5 are prime and differ by exactly 2."
+        },
+        {
+            "q": "A number is divisible by 6 if it is divisible by:",
+            "options": ["2 and 4", "3 and 4", "2 and 3", "3 and 6"],
+            "ans": 2,
+            "topic": "Divisibility Rules",
+            "explain": "Because 2 and 3 are co-prime factors of 6, any number divisible by both 2 and 3 is also divisible by 6."
+        },
+        {
+            "q": "Find the LCM of 12, 15, and 20.",
+            "options": ["60", "120", "30", "90"],
+            "ans": 0,
+            "topic": "LCM",
+            "explain": "The smallest number that is a multiple of 12, 15, and 20 is 60."
+        },
+        {
+            "q": "How many prime numbers are there between 20 and 40?",
+            "options": ["3", "4", "5", "6"],
+            "ans": 1,
+            "topic": "Prime Numbers",
+            "explain": "There are 4 prime numbers between 20 and 40: 23, 29, 31, and 37."
+        },
+        {
+            "q": "If a number is a multiple of both 8 and 12, it must also be a multiple of:",
+            "options": ["20", "24", "32", "48"],
+            "ans": 1,
+            "topic": "Multiples",
+            "explain": "A number that is a multiple of both 8 and 12 must be a multiple of their LCM, which is 24."
+        },
+        {
+            "q": "What is the greatest 2-digit prime number?",
+            "options": ["99", "97", "93", "89"],
+            "ans": 1,
+            "topic": "Prime Numbers",
+            "explain": "99 is divisible by 9, and 93 is divisible by 3. 97 is the largest 2-digit number that has exactly two factors."
+        },
+        {
+            "q": "The product of two relatively co-prime numbers is 143. What is their HCF?",
+            "options": ["1", "11", "13", "143"],
+            "ans": 0,
+            "topic": "Co-prime Numbers",
+            "explain": "By definition, relatively co-prime numbers share only one common factor, which is 1. Therefore, their HCF is always 1."
+        },
+        {
+            "q": "Which of these numbers has exactly 3 factors?",
+            "options": ["4", "6", "8", "10"],
+            "ans": 0,
+            "topic": "Factors",
+            "explain": "The factors of 4 are 1, 2, and 4 (exactly 3 factors). The other numbers listed have 4 factors."
+        },
+        {
+            "q": "What is the smallest 3-digit number divisible by 4, 5, and 6?",
+            "options": ["100", "120", "150", "180"],
+            "ans": 1,
+            "topic": "LCM",
+            "explain": "The LCM of 4, 5, and 6 is 60. The multiples of 60 are 60, 120, 180... The smallest 3-digit multiple is 120."
+        },
+        {
+            "q": "Find the sum of all factors of 12.",
+            "options": ["24", "28", "16", "12"],
+            "ans": 1,
+            "topic": "Factors",
+            "explain": "The factors of 12 are 1, 2, 3, 4, 6, and 12. Their sum is 1 + 2 + 3 + 4 + 6 + 12 = 28."
+        },
+        {
+            "q": "Express 84 as a product of prime factors.",
+            "options": ["2 x 2 x 3 x 7", "2 x 4 x 7", "3 x 4 x 7", "2 x 6 x 7"],
+            "ans": 0,
+            "topic": "Prime Factorization",
+            "explain": "To completely break down 84 into prime numbers: 84 = 4 x 21 = 2 x 2 x 3 x 7."
+        }
+    ];
+
+    let currentQ = 0;
+    let userAnswers = new Array(20).fill(null);
+    let studentName = "";
+
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            timeRemaining--;
+            sessionStorage.setItem('time_remaining', timeRemaining);
+            updateTimerDisplay();
+            if (timeRemaining <= 0) { 
+                clearInterval(timerInterval); 
+                submitExam(true); 
+            }
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        const mins = Math.floor(timeRemaining / 60);
+        const secs = timeRemaining % 60;
+        document.getElementById('timer-display').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function startExam() {
+        studentName = document.getElementById('student-name').value.trim();
+        if (!studentName) return alert("Please enter your name");
+        sessionStorage.setItem('name', studentName);
+        sessionStorage.setItem('in_progress_' + EXAM_KEY, "true");
+        document.getElementById('page-landing').classList.remove('active');
+        document.getElementById('page-exam').classList.add('active');
+        document.getElementById('exam-title-display').innerHTML = `<strong>Topic:</strong> ${EXAM_NAME}`;
+        startTimer();
+        renderGrid();
+        showQuestion();
+    }
+
+    function renderGrid() {
+        const grid = document.getElementById('nav-grid');
+        grid.innerHTML = "";
+        questions.forEach((_, i) => {
+            const div = document.createElement('div');
+            div.className = `nav-box ${i === currentQ ? 'current' : ''} ${userAnswers[i] !== null ? 'answered' : ''}`;
+            div.innerText = i + 1;
+            div.onclick = () => jumpTo(i);
+            grid.appendChild(div);
+        });
+    }
+
+    function showQuestion() {
+        const q = questions[currentQ];
+        document.getElementById('q-title').innerText = `Question ${currentQ + 1}`;
+        document.getElementById('q-text').innerHTML = q.q;
+        const optCont = document.getElementById('options-container');
+        optCont.innerHTML = "";
+        q.options.forEach((opt, idx) => {
+            const lbl = document.createElement('label');
+            lbl.className = "option-label";
+            lbl.innerHTML = `<input type="radio" name="opt" ${userAnswers[currentQ] === idx ? 'checked' : ''} onchange="saveAns(${idx})"> ${opt}`;
+            optCont.appendChild(lbl);
+        });
+        document.getElementById('next-btn').innerText = currentQ === questions.length - 1 ? "Finish" : "Next";
+        sessionStorage.setItem('currentQ', currentQ);
+        renderGrid();
+        
+        if (window.MathJax) {
+            MathJax.typesetPromise();
+        }
+    }
+
+    function saveAns(idx) {
+        userAnswers[currentQ] = idx;
+        sessionStorage.setItem('answers', JSON.stringify(userAnswers));
+        renderGrid();
+    }
+
+    function jumpTo(i) { currentQ = i; showQuestion(); }
+
+    function changeQuestion(dir) {
+        if (dir === 1 && currentQ === questions.length - 1) {
+            submitExam(false); 
+        } else { 
+            currentQ += dir; 
+            showQuestion(); 
+        }
+    }
+
+    async function submitExam(isAutoSubmit = false) {
+        if (!isAutoSubmit) {
+            const unansweredCount = userAnswers.filter(ans => ans === null).length;
+            if (unansweredCount > 0) {
+                const confirmSubmit = confirm(`You have left ${unansweredCount} question(s) unanswered. Are you sure you want to finish and submit?`);
+                if (!confirmSubmit) return; 
+            }
+        }
+
+        clearInterval(timerInterval);
+        let score = 0;
+        let topicMap = {};
+        let reviewHTML = "";
+        let missedQuestions = [];
+
+        questions.forEach((q, i) => {
+            const correct = userAnswers[i] === q.ans;
+            if (correct) {
+                score++;
+            } else {
+                missedQuestions.push("Q" + (i + 1));
+            }
+            if (!topicMap[q.topic]) topicMap[q.topic] = { total: 0, correct: 0, failedQ: [] };
+            topicMap[q.topic].total++;
+            if (correct) topicMap[q.topic].correct++;
+            else topicMap[q.topic].failedQ.push(i + 1);
+
+            reviewHTML += `<div class="review-card ${correct ? 'status-correct' : ''}">
+                <strong>Q${i+1}:</strong> ${q.q}<br>
+                Your Answer: <span style="color:${correct ? '#81c784' : '#ff5252'}">${userAnswers[i] !== null ? q.options[userAnswers[i]] : 'Skipped'}</span><br>
+                Correct: ${q.options[q.ans]}<br>
+                <em>Explanation: ${q.explain}</em></div>`;
+        });
+
+        const scoreStr = `${score}/${questions.length}`;
+        let wrongAnswersString = missedQuestions.length > 0 ? missedQuestions.join(", ") : "None";
+
+        document.getElementById('page-exam').classList.remove('active');
+        document.getElementById('page-result').classList.add('active');
+        document.getElementById('res-name').innerText = studentName;
+        document.getElementById('final-score').innerText = scoreStr;
+        document.getElementById('review-list').innerHTML = reviewHTML;
+
+        let analysis = `<strong>AI Analysis Feedback (Question-Specific):</strong><br><br>`;
+        for (let t in topicMap) {
+            let pct = (topicMap[t].correct / topicMap[t].total) * 100;
+            if (pct === 100) {
+                analysis += `• Mastery achieved in ${t}. Your concepts are perfectly clear.<br>`;
+            } else if (pct >= 60) {
+                analysis += `• Strong foundation in ${t}, but minor errors occurred in Question(s) ${topicMap[t].failedQ.join(', ')}.<br>`;
+            } else {
+                analysis += `• Weak performance in ${t}. For example, in Question(s) ${topicMap[t].failedQ.join(', ')}, you failed to apply the rules correctly.<br>`;
+            }
+        }
+        document.getElementById('ai-analysis').innerHTML = analysis;
+
+        if (window.MathJax) {
+            MathJax.typesetPromise();
+        }
+
+        fetch(WEB_APP_URL, { 
+            method: "POST", 
+            mode: "no-cors", 
+            body: JSON.stringify({ 
+                studentName, 
+                standard: HARDCODED_STD, 
+                examName: EXAM_NAME, 
+                subject: HARDCODED_SUBJECT,
+                score: scoreStr, 
+                wrongAnswers: wrongAnswersString 
+            }) 
+        });
+        
+        localStorage.setItem('submitted_data_' + EXAM_KEY, JSON.stringify({ name: studentName, answers: userAnswers, score: scoreStr, topicMap }));
+        sessionStorage.clear();
+        window.scrollTo(0, 0);
+    }
+
+    window.onload = () => {
+        document.getElementById('exam-title-display').innerHTML = `<strong>Topic:</strong> ${EXAM_NAME}`;
+        const saved = localStorage.getItem('submitted_data_' + EXAM_KEY);
+        if (saved) {
+            const data = JSON.parse(saved);
+            studentName = data.name;
+            userAnswers = data.answers;
+            showResultsFromStorage(data);
+        } else if (sessionStorage.getItem('in_progress_' + EXAM_KEY)) {
+            studentName = sessionStorage.getItem('name');
+            userAnswers = JSON.parse(sessionStorage.getItem('answers')) || userAnswers;
+            currentQ = parseInt(sessionStorage.getItem('currentQ')) || 0;
+            timeRemaining = parseInt(sessionStorage.getItem('time_remaining')) || 1800;
+            document.getElementById('page-landing').classList.remove('active');
+            document.getElementById('page-exam').classList.add('active');
+            startTimer();
+            updateTimerDisplay();
+            renderGrid();
+            showQuestion();
+        }
+    };
+
+    function showResultsFromStorage(data) {
+        document.getElementById('page-landing').classList.remove('active');
+        document.getElementById('page-result').classList.add('active');
+        document.getElementById('res-name').innerText = data.name;
+        document.getElementById('final-score').innerText = data.score;
+        let reviewHTML = "";
+        questions.forEach((q, i) => {
+            const correct = userAnswers[i] === q.ans;
+            reviewHTML += `<div class="review-card ${correct ? 'status-correct' : ''}">
+                <strong>Q${i+1}:</strong> ${q.q}<br>
+                Your Answer: <span style="color:${correct ? '#81c784' : '#ff5252'}">${userAnswers[i] !== null ? q.options[userAnswers[i]] : 'Skipped'}</span><br>
+                Correct: ${q.options[q.ans]}<br>
+                <em>Explanation: ${q.explain}</em></div>`;
+        });
+        document.getElementById('review-list').innerHTML = reviewHTML;
+        let analysis = `<strong>AI Analysis Feedback (Question-Specific):</strong><br><br>`;
+        for (let t in data.topicMap) {
+            let pct = (data.topicMap[t].correct / data.topicMap[t].total) * 100;
+            if (pct === 100) {
+                analysis += `• Mastery achieved in ${t}. Your concepts are perfectly clear.<br>`;
+            } else if (pct >= 60) {
+                analysis += `• Strong foundation in ${t}, but minor errors occurred in Question(s) ${data.topicMap[t].failedQ.join(', ')}.<br>`;
+            } else {
+                analysis += `• Weak performance in ${t}. For example, in Question(s) ${data.topicMap[t].failedQ.join(', ')}, you failed to apply the rules correctly.<br>`;
+            }
+        }
+        document.getElementById('ai-analysis').innerHTML = analysis;
+        
+        if (window.MathJax) {
+            MathJax.typesetPromise();
+        }
+    }
+</script>
+</body>
+</html>
