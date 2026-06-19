@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bright Minds Academy - 10th Science Periodic Classification</title>
+    <style>
+        :root {
+            --primary-bg: #0e1726;
+            --panel-bg: #16223a;
+            --panel-soft: #1d2c47;
+            --text-color: #e6ecf5;
+            --text-muted: #97a6c0;
+            --accent: #2dd4bf;
+            --accent-soft: rgba(45, 212, 191, 0.12);
+            --border: #2a3a5a;
+            --error: #f87171;
+            --correct: #4ade80;
+            --answered: #38bdf8;
+        }
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--primary-bg); color: var(--text-color); margin: 0; padding: 16px; display: flex; justify-content: center; }
+        #exam-container { width: 100%; max-width: 860px; background: var(--panel-bg); padding: 2rem; border-radius: 14px; border: 1px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.4); }
+        .page { display: none; }
+        .active { display: block; }
+
+        .header-main { text-align: center; margin: 0 0 4px; font-size: 1.5rem; letter-spacing: 0.5px; font-weight: 600; }
+        .header-sub { text-align: center; color: var(--accent); font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; }
+        .divider { height: 1px; background: var(--border); margin: 18px 0; }
+
+        #nav-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 10px; margin-top: 22px; background: var(--panel-soft); padding: 16px; border-radius: 10px; border: 1px solid var(--border); }
+        .nav-box {
+            aspect-ratio: 1; width: 100%;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%;
+            background: transparent; color: var(--text-muted);
+            cursor: pointer; font-weight: 600; font-size: 0.85rem;
+            border: 1.5px solid var(--border);
+            transition: all 0.18s ease;
+        }
+        .nav-box:hover { border-color: var(--accent); color: var(--text-color); }
+        .nav-box.current { background: var(--accent); border-color: var(--accent); color: #08131f; }
+        .nav-box.answered { border-color: var(--answered); color: var(--answered); }
+        .nav-box.current.answered { background: var(--accent); color: #08131f; }
+
+        .info-box { background: var(--panel-soft); padding: 16px; border-radius: 10px; margin-bottom: 22px; text-align: center; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 0.9rem; border: 1px solid var(--border); }
+        .info-box span strong { color: var(--text-muted); font-weight: 500; }
+
+        .detail-card { background: var(--panel-soft); padding: 8px 24px; border-radius: 12px; margin-bottom: 24px; border: 1px solid var(--border); }
+        .detail-row { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+        .detail-row:last-child { border-bottom: none; }
+        .detail-label { color: var(--text-muted); font-size: 0.95rem; flex-shrink: 0; }
+        .detail-value { color: var(--text-color); font-weight: 600; font-size: 1.02rem; text-align: right; }
+
+        #question-scroll-area { max-height: 58vh; overflow-y: auto; padding-right: 12px; margin-top: 10px; }
+        #q-title { color: var(--accent); font-size: 0.85rem; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+        #q-text { font-size: 1.12rem; line-height: 1.6; margin-top: 0; }
+        .option-label { display: block; background: var(--panel-soft); margin: 12px 0; padding: 15px 16px; border-radius: 9px; cursor: pointer; transition: all 0.18s ease; border: 1.5px solid var(--border); }
+        .option-label:hover { border-color: var(--accent); }
+        input[type="radio"] { margin-right: 12px; transform: scale(1.15); accent-color: var(--accent); }
+
+        input[type="text"] { width: 80%; padding: 13px 16px; border-radius: 9px; border: 1.5px solid var(--border); background: var(--panel-soft); color: var(--text-color); font-size: 1rem; outline: none; }
+        input[type="text"]:focus { border-color: var(--accent); }
+
+        .btn-container { margin-top: 22px; display: flex; justify-content: space-between; }
+        button { padding: 12px 30px; border: none; border-radius: 8px; cursor: pointer; background: var(--accent); color: #08131f; font-weight: 600; font-size: 0.95rem; transition: all 0.18s ease; }
+        button:hover { background: #5eead4; }
+        #prev-btn { background: transparent; color: var(--text-muted); border: 1.5px solid var(--border); }
+        #prev-btn:hover { color: var(--text-color); border-color: var(--accent); }
+
+        .review-card { background: var(--panel-soft); padding: 16px; margin: 14px 0; border-radius: 9px; border: 1px solid var(--border); border-left: 4px solid var(--error); line-height: 1.55; }
+        .review-card.status-correct { border-left-color: var(--correct); }
+        #timer-display { color: var(--accent); font-weight: 600; }
+        #ai-analysis { background: var(--accent-soft); padding: 22px; border-radius: 11px; margin: 22px 0; line-height: 1.6; border: 1px solid var(--border); }
+        #final-score { color: var(--accent); }
+        .locked-msg { text-align: center; padding: 16px; background: var(--accent-soft); border: 1px solid var(--accent); border-radius: 9px; margin-bottom: 18px; font-size: 0.92rem; }
+    </style>
+</head>
+<body>
+
+<div id="exam-container">
+    <div id="page-landing" class="page active">
+        <h1 class="header-main">Bright Minds Academy</h1>
+        <div class="header-sub">Examination Portal</div>
+        <div class="detail-card">
+            <div class="detail-row"><span class="detail-label">Subject</span><span class="detail-value">Science</span></div>
+            <div class="detail-row"><span class="detail-label">Topic</span><span class="detail-value" id="exam-title-display">Periodic Classification of Elements - Test 1</span></div>
+            <div class="detail-row"><span class="detail-label">Standard</span><span class="detail-value">10th</span></div>
+            <div class="detail-row"><span class="detail-label">Total Marks</span><span class="detail-value">20</span></div>
+            <div class="detail-row"><span class="detail-label">Time Allowed</span><span class="detail-value">30 Minutes</span></div>
+        </div>
+        <div style="margin: 28px 0; text-align: center;">
+            <input type="text" id="student-name" placeholder="Enter Full Student Name">
+        </div>
+        <div style="text-align: center;"><button onclick="startExam()">Start Assignment</button></div>
+    </div>
+
+    <div id="page-exam" class="page">
+        <h1 class="header-main" style="font-size: 1.2rem;">Bright Minds Academy</h1>
+        <div class="info-box">
+            <span><strong>Time Left:</strong> <span id="timer-display">30:00</span></span>
+            <span><strong>Marks:</strong> 20</span>
+            <span><strong>Questions:</strong> 20</span>
+        </div>
+        <div id="question-scroll-area">
+            <h3 id="q-title"></h3>
+            <p id="q-text"></p>
+            <div id="options-container"></div>
+        </div>
+        <div class="btn-container">
+            <button id="prev-btn" onclick="changeQuestion(-1)">Back</button>
+            <button id="next-btn" onclick="changeQuestion(1)">Next</button>
+        </div>
+        <div id="nav-grid"></div>
+    </div>
+
+    <div id="page-result" class="page">
+        <h2 id="res-name" style="text-align: center;"></h2>
+        <h1 style="text-align: center;">Score: <span id="final-score"></span></h1>
+        <div id="ai-analysis"></div>
+        <div class="divider"></div>
+        <h3>Question Review</h3>
+        <div id="review-list"></div>
+    </div>
+</div>
+
+<script>
+    const EXAM_KEY = "10th_Sci_PeriodicClassification_Test1";
+    const EXAM_NAME = "Periodic Classification of Elements - Test 1";
+
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwEutZaKIAodDqKVocXPmgGlsfyO6ma8vuQK4sFgEobmvD73QQwztuH4qbT_R3g1Figtw/exec";
+    const HARDCODED_STD = "10th";
+    const HARDCODED_SUBJECT = "Science 1";
+
+    let timerInterval;
+    let timeRemaining = 1800;
+
+    const questions = [
+  {
+    "q": "Who arranged elements into groups of three called triads, based on atomic masses?",
+    "options": ["Newlands", "Mendeleev", "Dobereiner", "Moseley"],
+    "ans": 2,
+    "topic": "Dobereiner's Triads",
+    "explain": "In 1817, Dobereiner grouped elements into triads of three where the atomic mass of the middle element was approximately the mean of the other two."
+  },
+  {
+    "q": "In a Dobereiner triad of Li, Na, K, if the atomic masses of Li and K are 6.9 and 39.1 respectively, what is the approximate atomic mass of Na?",
+    "options": ["46.0", "23.0", "32.2", "11.5"],
+    "ans": 1,
+    "topic": "Dobereiner's Triads",
+    "explain": "Mean = (6.9 + 39.1)/2 = 23.0, which closely matches the actual atomic mass of sodium."
+  },
+  {
+    "q": "Which set of elements forms a correct Dobereiner's triad?",
+    "options": ["Mg, Ca, Sr", "Li, Be, B", "C, N, O", "Na, Mg, Al"],
+    "ans": 0,
+    "topic": "Dobereiner's Triads",
+    "explain": "Mg (24.3), Ca (40.1), Sr (87.6) form a triad as Ca's mass is approximately the mean of Mg and Sr's masses."
+  },
+  {
+    "q": "Which scientist proposed the Law of Octaves?",
+    "options": ["Dobereiner", "John Newlands", "Mendeleev", "Henry Moseley"],
+    "ans": 1,
+    "topic": "Newlands' Octaves",
+    "explain": "In 1866, John Newlands arranged elements in increasing order of atomic mass and observed that every eighth element had properties similar to the first."
+  },
+  {
+    "q": "According to Newlands' Law of Octaves, which element shows properties similar to lithium?",
+    "options": ["Beryllium", "Sodium", "Magnesium", "Carbon"],
+    "ans": 1,
+    "topic": "Newlands' Octaves",
+    "explain": "Sodium is the eighth element from lithium in Newlands' arrangement, and both show similar properties."
+  },
+  {
+    "q": "Newlands' Law of Octaves was found to be applicable only up to which element?",
+    "options": ["Sodium", "Calcium", "Potassium", "Chlorine"],
+    "ans": 1,
+    "topic": "Newlands' Octaves",
+    "explain": "Newlands' octaves worked well only for the lighter elements up to calcium; beyond that, the pattern broke down."
+  },
+  {
+    "q": "Newlands placed two elements in the same box for elements such as:",
+    "options": ["H and He", "Co and Ni", "Na and Mg", "O and F"],
+    "ans": 1,
+    "topic": "Newlands' Octaves",
+    "explain": "Newlands placed pairs like Co and Ni, and Ce and La, in the same box to fit all known elements into his 7x8 table."
+  },
+  {
+    "q": "Who developed the periodic table based on increasing atomic mass during 1869-1872?",
+    "options": ["Newlands", "Dmitri Mendeleev", "Dobereiner", "Henry Moseley"],
+    "ans": 1,
+    "topic": "Mendeleev's Periodic Table",
+    "explain": "The Russian scientist Dmitri Mendeleev arranged 63 known elements in increasing order of their atomic masses."
+  },
+  {
+    "q": "According to Mendeleev's periodic law, properties of elements are a periodic function of their:",
+    "options": ["Atomic numbers", "Atomic masses", "Densities", "Boiling points"],
+    "ans": 1,
+    "topic": "Mendeleev's Periodic Table",
+    "explain": "Mendeleev's periodic law states that properties of elements are a periodic function of their atomic masses."
+  },
+  {
+    "q": "In Mendeleev's periodic table, the vertical columns are called ________ and horizontal rows are called ________.",
+    "options": ["periods, groups", "groups, periods", "blocks, series", "series, blocks"],
+    "ans": 1,
+    "topic": "Mendeleev's Periodic Table",
+    "explain": "In Mendeleev's table, vertical columns are groups and horizontal rows are periods (called series)."
+  },
+  {
+    "q": "Mendeleev predicted a then-undiscovered element 'eka-silicon'. This element was later discovered and named:",
+    "options": ["Scandium", "Gallium", "Germanium", "Technetium"],
+    "ans": 2,
+    "topic": "Merits of Mendeleev's Table",
+    "explain": "Eka-silicon was Mendeleev's predicted name; the element was later discovered and named Germanium (Ge), matching predicted properties closely."
+  },
+  {
+    "q": "Which of the following is a merit of Mendeleev's periodic table?",
+    "options": ["It explained the position of isotopes correctly", "It removed the ambiguity of hydrogen's position", "It left gaps for elements not yet discovered", "It placed elements by atomic number"],
+    "ans": 2,
+    "topic": "Merits of Mendeleev's Table",
+    "explain": "Mendeleev left vacant places for undiscovered elements like eka-aluminium and eka-boron, which were later filled by Gallium and Scandium respectively."
+  },
+  {
+    "q": "Mendeleev created a separate 'zero group' to accommodate which set of elements?",
+    "options": ["Halogens", "Alkali metals", "Noble gases", "Transition metals"],
+    "ans": 2,
+    "topic": "Merits of Mendeleev's Table",
+    "explain": "When noble gases like helium, neon and argon were discovered, Mendeleev created the zero group without disturbing his original table."
+  },
+  {
+    "q": "Which is a demerit of Mendeleev's periodic table?",
+    "options": ["It could not predict new elements", "The position of hydrogen was ambiguous", "It had no groups or periods", "It was based on atomic number"],
+    "ans": 1,
+    "topic": "Demerits of Mendeleev's Table",
+    "explain": "Hydrogen shows similarity with both alkali metals (group I) and halogens (group VII), so its correct position could not be decided."
+  },
+  {
+    "q": "Cobalt (Co) and Nickel (Ni) caused a problem in Mendeleev's table because:",
+    "options": ["They have the same atomic number", "Their whole number atomic masses are the same, causing ambiguity in sequence", "They belong to the zero group", "They are noble gases"],
+    "ans": 1,
+    "topic": "Demerits of Mendeleev's Table",
+    "explain": "Cobalt and Nickel have nearly the same atomic mass, creating ambiguity about which should come first in the sequence."
+  },
+  {
+    "q": "Isotopes posed a challenge to Mendeleev's periodic table because:",
+    "options": ["They have different chemical properties", "They have the same chemical properties but different atomic masses", "They were not known to exist", "They belong to the zero group"],
+    "ans": 1,
+    "topic": "Demerits of Mendeleev's Table",
+    "explain": "Since isotopes of an element have the same chemical properties but different atomic masses, placing them based on atomic mass created ambiguity."
+  },
+  {
+    "q": "Who demonstrated, using X-ray experiments, that the atomic number of an element equals the number of protons in its nucleus?",
+    "options": ["Mendeleev", "Newlands", "Henry Moseley", "Dobereiner"],
+    "ans": 2,
+    "topic": "Modern Periodic Law",
+    "explain": "In 1913, Henry Moseley showed through X-ray experiments that atomic number corresponds to the positive charge (number of protons) in the nucleus."
+  },
+  {
+    "q": "According to the Modern Periodic Law, properties of elements are a periodic function of their:",
+    "options": ["Atomic masses", "Densities", "Atomic numbers", "Melting points"],
+    "ans": 2,
+    "topic": "Modern Periodic Law",
+    "explain": "The modern periodic law states that properties of elements are a periodic function of their atomic numbers, not atomic masses."
+  },
+  {
+    "q": "Which problem of Mendeleev's table was resolved by the Modern Periodic Table?",
+    "options": ["Position of hydrogen", "The ambiguity in the position of cobalt and nickel due to atomic mass", "The existence of noble gases", "The number of groups"],
+    "ans": 1,
+    "topic": "Modern Periodic Law",
+    "explain": "Since cobalt has a lower atomic number than nickel, arranging elements by atomic number resolves their sequence ambiguity, though hydrogen's position issue remains."
+  },
+  {
+    "q": "By the time Mendeleev developed his periodic table, how many elements were known?",
+    "options": ["30", "63", "92", "118"],
+    "ans": 1,
+    "topic": "Mendeleev's Periodic Table",
+    "explain": "Mendeleev arranged the 63 elements known at that time in increasing order of their atomic masses."
+  }
+];
+
+    let currentQ = 0;
+    let userAnswers = new Array(questions.length).fill(null);
+    let studentName = "";
+
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            timeRemaining--;
+            sessionStorage.setItem('time_remaining_' + EXAM_KEY, timeRemaining);
+            updateTimerDisplay();
+            if (timeRemaining <= 0) {
+                clearInterval(timerInterval);
+                submitExam(true);
+            }
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        const mins = Math.floor(timeRemaining / 60);
+        const secs = timeRemaining % 60;
+        document.getElementById('timer-display').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function startExam() {
+        studentName = document.getElementById('student-name').value.trim();
+        if (!studentName) return alert("Please enter your name");
+        sessionStorage.setItem('name_' + EXAM_KEY, studentName);
+        sessionStorage.setItem('in_progress_' + EXAM_KEY, "true");
+        document.getElementById('page-landing').classList.remove('active');
+        document.getElementById('page-exam').classList.add('active');
+        startTimer();
+        renderGrid();
+        showQuestion();
+    }
+
+    function renderGrid() {
+        const grid = document.getElementById('nav-grid');
+        grid.innerHTML = "";
+        questions.forEach((_, i) => {
+            const div = document.createElement('div');
+            div.className = `nav-box ${i === currentQ ? 'current' : ''} ${userAnswers[i] !== null ? 'answered' : ''}`;
+            div.innerText = i + 1;
+            div.onclick = () => jumpTo(i);
+            grid.appendChild(div);
+        });
+    }
+
+    function showQuestion() {
+        const q = questions[currentQ];
+        document.getElementById('q-title').innerText = `Question ${currentQ + 1} of ${questions.length}`;
+        document.getElementById('q-text').innerHTML = q.q;
+        const optCont = document.getElementById('options-container');
+        optCont.innerHTML = "";
+        q.options.forEach((opt, idx) => {
+            const lbl = document.createElement('label');
+            lbl.className = "option-label";
+            lbl.innerHTML = `<input type="radio" name="opt" ${userAnswers[currentQ] === idx ? 'checked' : ''} onchange="saveAns(${idx})"> ${opt}`;
+            optCont.appendChild(lbl);
+        });
+        document.getElementById('next-btn').innerText = currentQ === questions.length - 1 ? "Finish" : "Next";
+        sessionStorage.setItem('currentQ_' + EXAM_KEY, currentQ);
+        renderGrid();
+    }
+
+    function saveAns(idx) {
+        userAnswers[currentQ] = idx;
+        sessionStorage.setItem('answers_' + EXAM_KEY, JSON.stringify(userAnswers));
+        renderGrid();
+    }
+
+    function jumpTo(i) { currentQ = i; showQuestion(); }
+
+    function changeQuestion(dir) {
+        if (dir === 1 && currentQ === questions.length - 1) {
+            submitExam(false);
+        } else if (dir === -1 && currentQ === 0) {
+            return;
+        } else {
+            currentQ += dir;
+            showQuestion();
+        }
+    }
+
+    async function submitExam(isAutoSubmit = false) {
+        if (!isAutoSubmit) {
+            const unansweredCount = userAnswers.filter(ans => ans === null).length;
+            if (unansweredCount > 0) {
+                const confirmSubmit = confirm(`You have left ${unansweredCount} question(s) unanswered. Are you sure you want to finish and submit?`);
+                if (!confirmSubmit) return;
+            }
+        }
+
+        clearInterval(timerInterval);
+        let score = 0;
+        let topicMap = {};
+        let reviewHTML = "";
+        let missedQuestions = [];
+
+        questions.forEach((q, i) => {
+            const correct = userAnswers[i] === q.ans;
+            if (correct) { score++; } else { missedQuestions.push("Q" + (i + 1)); }
+            if (!topicMap[q.topic]) topicMap[q.topic] = { total: 0, correct: 0, failedQ: [] };
+            topicMap[q.topic].total++;
+            if (correct) topicMap[q.topic].correct++;
+            else topicMap[q.topic].failedQ.push(i + 1);
+            reviewHTML += buildReviewCard(q, i, correct);
+        });
+
+        const scoreStr = `${score}/${questions.length}`;
+        let wrongAnswersString = missedQuestions.length > 0 ? missedQuestions.join(", ") : "None";
+
+        document.getElementById('page-exam').classList.remove('active');
+        document.getElementById('page-result').classList.add('active');
+        document.getElementById('res-name').innerText = studentName;
+        document.getElementById('final-score').innerText = scoreStr;
+        document.getElementById('review-list').innerHTML = reviewHTML;
+        document.getElementById('ai-analysis').innerHTML = buildAnalysis(topicMap, score, questions.length);
+
+        fetch(WEB_APP_URL, {
+            method: "POST", mode: "no-cors",
+            body: JSON.stringify({ studentName, standard: HARDCODED_STD, examName: EXAM_NAME, subject: HARDCODED_SUBJECT, score: scoreStr, wrongAnswers: wrongAnswersString })
+        });
+
+        localStorage.setItem('submitted_data_' + EXAM_KEY, JSON.stringify({ name: studentName, answers: userAnswers, score: scoreStr, topicMap }));
+        sessionStorage.removeItem('in_progress_' + EXAM_KEY);
+        sessionStorage.removeItem('answers_' + EXAM_KEY);
+        sessionStorage.removeItem('currentQ_' + EXAM_KEY);
+        sessionStorage.removeItem('time_remaining_' + EXAM_KEY);
+        sessionStorage.removeItem('name_' + EXAM_KEY);
+        window.scrollTo(0, 0);
+    }
+
+    function buildReviewCard(q, i, correct) {
+        const userAns = userAnswers[i];
+        let feedback = "";
+        if (correct) {
+            feedback = `Correct! ${q.explain}`;
+        } else if (userAns === null) {
+            feedback = `You skipped this question. ${q.explain}`;
+        } else {
+            feedback = `Not quite. You chose "${q.options[userAns]}", but the correct answer is "${q.options[q.ans]}". ${q.explain}`;
+        }
+        return `<div class="review-card ${correct ? 'status-correct' : ''}">
+                <strong>Q${i+1}:</strong> ${q.q}<br>
+                Your Answer: <span style="color:${correct ? '#4ade80' : '#f87171'}">${userAns !== null ? q.options[userAns] : 'Skipped'}</span><br>
+                Correct: ${q.options[q.ans]}<br>
+                <em>Feedback: ${feedback}</em></div>`;
+    }
+
+    function buildAnalysis(topicMap, score, totalQ) {
+        const pctOverall = Math.round((score / totalQ) * 100);
+        let analysis = `<strong>AI Analysis Feedback (Question-Specific):</strong><br><br>`;
+        analysis += `Overall Score: ${score}/${totalQ} (${pctOverall}%). `;
+        if (pctOverall >= 80) {
+            analysis += `Excellent work! You have a strong grasp of the Periodic Classification of Elements chapter.<br><br>`;
+        } else if (pctOverall >= 50) {
+            analysis += `You have a fair understanding, but a few key concepts need revision.<br><br>`;
+        } else {
+            analysis += `This chapter needs more revision. Focus on the topics highlighted below.<br><br>`;
+        }
+        for (let t in topicMap) {
+            let pct = (topicMap[t].correct / topicMap[t].total) * 100;
+            if (pct === 100) {
+                analysis += `&bull; <strong>${t}:</strong> Mastery achieved (${topicMap[t].correct}/${topicMap[t].total}). Your concepts here are perfectly clear.<br>`;
+            } else if (pct >= 60) {
+                analysis += `&bull; <strong>${t}:</strong> Strong foundation (${topicMap[t].correct}/${topicMap[t].total}), but review Question(s) ${topicMap[t].failedQ.join(', ')} to clear minor gaps.<br>`;
+            } else {
+                analysis += `&bull; <strong>${t}:</strong> Needs more practice (${topicMap[t].correct}/${topicMap[t].total}). Revisit Question(s) ${topicMap[t].failedQ.join(', ')} and re-read this topic from the textbook before the exam.<br>`;
+            }
+        }
+        return analysis;
+    }
+
+    window.onload = () => {
+        document.getElementById('exam-title-display').innerText = EXAM_NAME;
+        const saved = localStorage.getItem('submitted_data_' + EXAM_KEY);
+        if (saved) {
+            const data = JSON.parse(saved);
+            studentName = data.name;
+            userAnswers = data.answers;
+            showResultsFromStorage(data);
+            return;
+        }
+        if (sessionStorage.getItem('in_progress_' + EXAM_KEY)) {
+            studentName = sessionStorage.getItem('name_' + EXAM_KEY);
+            userAnswers = JSON.parse(sessionStorage.getItem('answers_' + EXAM_KEY)) || userAnswers;
+            currentQ = parseInt(sessionStorage.getItem('currentQ_' + EXAM_KEY)) || 0;
+            timeRemaining = parseInt(sessionStorage.getItem('time_remaining_' + EXAM_KEY)) || 1800;
+            document.getElementById('page-landing').classList.remove('active');
+            document.getElementById('page-exam').classList.add('active');
+            startTimer();
+            updateTimerDisplay();
+            renderGrid();
+            showQuestion();
+        }
+    };
+
+    function showResultsFromStorage(data) {
+        document.getElementById('page-landing').classList.remove('active');
+        document.getElementById('page-result').classList.add('active');
+        document.getElementById('res-name').innerText = data.name;
+        document.getElementById('final-score').innerText = data.score;
+
+        let lockedMsg = document.createElement('div');
+        lockedMsg.className = 'locked-msg';
+        lockedMsg.innerHTML = 'This exam has already been submitted. Showing your previous result below.';
+        document.getElementById('page-result').insertBefore(lockedMsg, document.getElementById('res-name'));
+
+        let reviewHTML = "";
+        questions.forEach((q, i) => {
+            const correct = userAnswers[i] === q.ans;
+            reviewHTML += buildReviewCard(q, i, correct);
+        });
+        document.getElementById('review-list').innerHTML = reviewHTML;
+        const score = parseInt(data.score.split('/')[0]);
+        document.getElementById('ai-analysis').innerHTML = buildAnalysis(data.topicMap, score, questions.length);
+    }
+</script>
+</body>
+</html>
