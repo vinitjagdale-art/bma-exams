@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bright Minds Academy - 8th Maths</title>
+    
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        /* Distinct Blue Theme for Maths */
+        :root {
+            --primary-bg: #1e293b;
+            --text-color: #ffffff;
+            --accent-color: #3b82f6;
+            --error: #ef4444;
+            --correct: #22c55e;
+            --answered: #f59e0b;
+        }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--primary-bg); color: var(--text-color); margin: 0; padding: 10px; display: flex; justify-content: center; }
+        #exam-container { width: 100%; max-width: 850px; background: rgba(255, 255, 255, 0.05); padding: 1.5rem; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+        .page { display: none; }
+        .active { display: block; }
+        
+        /* Circular Navigation Grid */
+        #nav-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 10px; margin-top: 20px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; justify-items: center; }
+        .nav-box { width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #475569; cursor: pointer; font-weight: bold; font-size: 0.9rem; transition: 0.2s; }
+        .nav-box:hover { opacity: 0.8; }
+        .nav-box.current { background: var(--accent-color); border: 2px solid #fff; }
+        .nav-box.answered { background: var(--answered); }
+        
+        .info-box { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 0.9rem; }
+        .header-main { text-align: center; border-bottom: 2px solid var(--accent-color); margin-bottom: 15px; padding-bottom: 10px; }
+        #question-scroll-area { max-height: 60vh; overflow-y: auto; padding-right: 10px; margin-top: 10px; }
+        .option-label { display: block; background: rgba(255,255,255,0.05); margin: 10px 0; padding: 15px; border-radius: 8px; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
+        .option-label:hover { background: rgba(255,255,255,0.12); }
+        input[type="radio"] { margin-right: 12px; transform: scale(1.2); }
+        .btn-container { margin-top: 20px; display: flex; justify-content: space-between; }
+        button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; background: var(--accent-color); color: white; font-weight: bold; transition: 0.2s; }
+        button:hover { background: #2563eb; }
+        .review-card { background: rgba(0,0,0,0.3); padding: 15px; margin: 15px 0; border-radius: 8px; border-left: 5px solid var(--error); }
+        .review-card.status-correct { border-left-color: var(--correct); }
+        #name-error { color: var(--error); display: none; font-size: 0.9rem; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+<div id="exam-container">
+    <div id="page-landing" class="page active">
+        <h1 class="header-main">Bright Minds Academy</h1>
+        <div class="info-box" style="display: block;">
+            <p><strong>Subject:</strong> Maths</p>
+            <p id="exam-title-display"><strong>Topic:</strong> Loading...</p>
+            <p><strong>Standard:</strong> 8th | <strong>Marks:</strong> 20 | <strong>Time:</strong> 30 Mins</p>
+        </div>
+        <div style="margin: 30px 0; text-align: center;">
+            <input type="text" id="student-name" placeholder="Enter Full Student Name" style="width: 80%; padding: 12px; border-radius: 6px; border: none; outline: none;">
+            <div id="name-error">Please enter your full name to start the exam.</div>
+        </div>
+        <div style="text-align: center;"><button onclick="startExam()">Start Assignment</button></div>
+    </div>
+
+    <div id="page-exam" class="page">
+        <div class="header-main" style="font-size: 1.2rem;">Bright Minds Academy</div>
+        <div class="info-box">
+            <span><strong>Time Left:</strong> <span id="timer-display">30:00</span></span>
+            <span><strong>Marks:</strong> 20</span>
+            <span><strong>Questions:</strong> 20</span>
+        </div>
+        <div id="question-scroll-area">
+            <h3 id="q-title"></h3>
+            <p id="q-text" style="font-size: 1.1rem; line-height: 1.6; font-weight: 500;"></p>
+            <div id="options-container"></div>
+        </div>
+        <div class="btn-container">
+            <button id="prev-btn" onclick="changeQuestion(-1)">Back</button>
+            <button id="next-btn" onclick="changeQuestion(1)">Next</button>
+        </div>
+        <div id="nav-grid"></div>
+    </div>
+
+    <div id="page-result" class="page">
+        <h2 id="res-name" style="text-align: center;"></h2>
+        <h1 style="text-align: center;">Score: <span id="final-score"></span></h1>
+        <div id="ai-analysis" style="background: rgba(59, 130, 246, 0.15); padding: 20px; border-radius: 10px; margin: 20px 0; line-height: 1.5;"></div>
+        <h3>Question Review</h3>
+        <div id="review-list"></div>
+    </div>
+</div>
+
+<script>
+    const EXAM_KEY = "8th_Maths_factorization_mixed_test1";
+    const EXAM_NAME = "Factorization & Roots of Quadratic Equations Test 1";
+
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwEutZaKIAodDqKVocXPmgGlsfyO6ma8vuQK4sFgEobmvD73QQwztuH4qbT_R3g1Figtw/exec";
+    const HARDCODED_STD = "8th";
+    const HARDCODED_SUBJECT = "Maths";
+
+    let timerInterval;
+    let timeRemaining = 1800; // 30 minutes
+
+    const questions = [
+        // Questions 1-10: Finding Factors
+        {
+            "q": "Factorize the expression: \\( x^2 + 7x + 12 \\)",
+            "options": ["\\( (x + 3)(x + 4) \\)", "\\( (x - 3)(x - 4) \\)", "\\( (x + 2)(x + 6) \\)", "\\( (x - 2)(x - 6) \\)"],
+            "ans": 0,
+            "topic": "Finding Factors (Positive)",
+            "explain": "We need two numbers that multiply to 12 and add up to 7. The numbers are 3 and 4. Hence, the factors are \\( (x + 3)(x + 4) \\)."
+        },
+        {
+            "q": "Factorize the expression: \\( x^2 - 7x + 12 \\)",
+            "options": ["\\( (x + 3)(x + 4) \\)", "\\( (x - 3)(x - 4) \\)", "\\( (x + 1)(x + 12) \\)", "\\( (x - 1)(x - 12) \\)"],
+            "ans": 1,
+            "topic": "Finding Factors (Negative Middle Term)",
+            "explain": "We need two numbers that multiply to +12 and add up to -7. The numbers are -3 and -4. Hence, \\( (x - 3)(x - 4) \\)."
+        },
+        {
+            "q": "Factorize the expression: \\( x^2 + 2x - 15 \\)",
+            "options": ["\\( (x - 5)(x + 3) \\)", "\\( (x + 5)(x - 3) \\)", "\\( (x + 15)(x - 1) \\)", "\\( (x - 15)(x + 1) \\)"],
+            "ans": 1,
+            "topic": "Finding Factors (Negative Constant)",
+            "explain": "We need two numbers that multiply to -15 and add up to +2. The numbers are +5 and -3. Hence, \\( (x + 5)(x - 3) \\)."
+        },
+        {
+            "q": "Factorize the expression: \\( x^2 - 2x - 15 \\)",
+            "options": ["\\( (x - 5)(x + 3) \\)", "\\( (x + 5)(x - 3) \\)", "\\( (x - 15)(x + 1) \\)", "\\( (x + 15)(x - 1) \\)"],
+            "ans": 0,
+            "topic": "Finding Factors (Negative Constant)",
+            "explain": "We need two numbers that multiply to -15 and add up to -2. The numbers are -5 and +3. Hence, \\( (x - 5)(x + 3) \\)."
+        },
+        {
+            "q": "Factorize the expression: \\( x^2 + 11x + 30 \\)",
+            "options": ["\\( (x + 5)(x + 6) \\)", "\\( (x - 5)(x - 6) \\)", "\\( (x + 3)(x + 10) \\)", "\\( (x + 2)(x + 15) \\)"],
+            "ans": 0,
+            "topic": "Finding Factors (Positive)",
+            "explain": "Numbers multiplying to 30 and adding to 11 are 5 and 6. Hence, \\( (x + 5)(x + 6) \\)."
+        },
+        {
+            "q": "Factorize the expression: \\( x^2 - 23x + 132 \\)",
+            "options": ["\\( (x - 11)(x - 12) \\)", "\\( (x + 11)(x + 12) \\)", "\\( (x - 6)(x - 22) \\)", "\\( (x + 6)(x + 22) \\)"],
+            "ans": 0,
+            "topic": "Finding Factors (3-Digit Constant)",
+            "explain": "We need numbers that multiply to 132 and add to -23. The numbers are -11 and -12. Hence, \\( (x - 11)(x - 12) \\)."
+        },
+        {
+            "q": "Factorize the expression: \\( x^2 + 25x + 156 \\)",
+            "options": ["\\( (x + 12)(x + 13) \\)", "\\( (x - 12)(x - 13) \\)", "\\( (x + 6)(x + 26) \\)", "\\( (x - 6)(x - 26) \\)"],
+            "ans": 0,
+            "topic": "Finding Factors (3-Digit Constant)",
+            "explain": "We need numbers that multiply to 156 and add to 25. The numbers are 12 and 13. Hence, \\( (x + 12)(x + 13) \\)."
+        },
+        {
+            "q": "Factorize the expression: \\( x^2 - x - 156 \\)",
+            "options": ["\\( (x - 13)(x + 12) \\)", "\\( (x + 13)(x - 12) \\)", "\\( (x - 39)(x + 4) \\)", "\\( (x + 39)(x - 4) \\)"],
+            "ans": 0,
+            "topic": "Finding Factors (3-Digit Constant)",
+            "explain": "We need numbers multiplying to -156 and adding to -1. The numbers are -13 and 12. Hence, \\( (x - 13)(x + 12) \\)."
+        },
+        {
+            "q": "Factorize the expression: \\( x^2 - 27x + 180 \\)",
+            "options": ["\\( (x - 12)(x - 15) \\)", "\\( (x + 12)(x + 15) \\)", "\\( (x - 9)(x - 20) \\)", "\\( (x + 9)(x + 20) \\)"],
+            "ans": 0,
+            "topic": "Finding Factors (3-Digit Constant)",
+            "explain": "We need numbers multiplying to 180 and adding to -27. The numbers are -12 and -15. Hence, \\( (x - 12)(x - 15) \\)."
+        },
+        {
+            "q": "Factorize the expression: \\( x^2 + 3x - 180 \\)",
+            "options": ["\\( (x + 15)(x - 12) \\)", "\\( (x - 15)(x + 12) \\)", "\\( (x + 18)(x - 10) \\)", "\\( (x - 18)(x + 10) \\)"],
+            "ans": 0,
+            "topic": "Finding Factors (3-Digit Constant)",
+            "explain": "We need numbers multiplying to -180 and adding to 3. The numbers are 15 and -12. Hence, \\( (x + 15)(x - 12) \\)."
+        },
+        
+        // Questions 11-20: Finding values of x (Roots)
+        {
+            "q": "Find the values of \\( x \\): \\( x^2 - 21x + 110 = 0 \\)",
+            "options": ["10, 11", "-10, -11", "-10, 11", "10, -11"],
+            "ans": 0,
+            "topic": "Finding Roots (Positive)",
+            "explain": "\\( x^2 - 21x + 110 = 0 \\) factors to \\( (x - 10)(x - 11) = 0 \\). Therefore, \\( x = 10 \\) or \\( x = 11 \\)."
+        },
+        {
+            "q": "Find the values of \\( x \\): \\( x^2 + 7x - 120 = 0 \\)",
+            "options": ["15, -8", "-15, 8", "15, 8", "-15, -8"],
+            "ans": 1,
+            "topic": "Finding Roots (Mixed Signs)",
+            "explain": "\\( x^2 + 7x - 120 = 0 \\) factors to \\( (x + 15)(x - 8) = 0 \\). Therefore, \\( x = -15 \\) or \\( x = 8 \\)."
+        },
+        {
+            "q": "Find the values of \\( x \\): \\( x^2 - 14x - 120 = 0 \\)",
+            "options": ["-20, 6", "20, 6", "20, -6", "-20, -6"],
+            "ans": 2,
+            "topic": "Finding Roots (Mixed Signs)",
+            "explain": "\\( x^2 - 14x - 120 = 0 \\) factors to \\( (x - 20)(x + 6) = 0 \\). Therefore, \\( x = 20 \\) or \\( x = -6 \\)."
+        },
+        {
+            "q": "Find the values of \\( x \\): \\( x^2 + 22x + 121 = 0 \\)",
+            "options": ["11", "-11", "121", "None of the above"],
+            "ans": 1,
+            "topic": "Finding Roots (Perfect Squares)",
+            "explain": "\\( x^2 + 22x + 121 = 0 \\) factors to \\( (x + 11)^2 = 0 \\). Therefore, \\( x = -11 \\) (repeated root)."
+        },
+        {
+            "q": "Find the values of \\( x \\): \\( x^2 - 24x + 144 = 0 \\)",
+            "options": ["12", "-12", "144", "None of the above"],
+            "ans": 0,
+            "topic": "Finding Roots (Perfect Squares)",
+            "explain": "\\( x^2 - 24x + 144 = 0 \\) factors to \\( (x - 12)^2 = 0 \\). Therefore, \\( x = 12 \\) (repeated root)."
+        },
+        {
+            "q": "Find the values of \\( x \\): \\( x^2 - 2x - 143 = 0 \\)",
+            "options": ["13, 11", "-13, 11", "13, -11", "-13, -11"],
+            "ans": 2,
+            "topic": "Finding Roots (Mixed Signs)",
+            "explain": "\\( x^2 - 2x - 143 = 0 \\) factors to \\( (x - 13)(x + 11) = 0 \\). Therefore, \\( x = 13 \\) or \\( x = -11 \\)."
+        },
+        {
+            "q": "Find the values of \\( x \\): \\( x^2 + 24x + 143 = 0 \\)",
+            "options": ["11, 13", "-11, 13", "11, -13", "-11, -13"],
+            "ans": 3,
+            "topic": "Finding Roots (Negative)",
+            "explain": "\\( x^2 + 24x + 143 = 0 \\) factors to \\( (x + 11)(x + 13) = 0 \\). Therefore, \\( x = -11 \\) or \\( x = -13 \\)."
+        },
+        {
+            "q": "Find the values of \\( x \\): \\( x^2 - 29x + 210 = 0 \\)",
+            "options": ["-14, -15", "14, 15", "-14, 15", "14, -15"],
+            "ans": 1,
+            "topic": "Finding Roots (Positive)",
+            "explain": "\\( x^2 - 29x + 210 = 0 \\) factors to \\( (x - 14)(x - 15) = 0 \\). Therefore, \\( x = 14 \\) or \\( x = 15 \\)."
+        },
+        {
+            "q": "Find the values of \\( x \\): \\( x^2 + 11x - 210 = 0 \\)",
+            "options": ["21, -10", "-21, -10", "-21, 10", "21, 10"],
+            "ans": 2,
+            "topic": "Finding Roots (Mixed Signs)",
+            "explain": "\\( x^2 + 11x - 210 = 0 \\) factors to \\( (x + 21)(x - 10) = 0 \\). Therefore, \\( x = -21 \\) or \\( x = 10 \\)."
+        },
+        {
+            "q": "Find the values of \\( x \\): \\( x^2 - 31x + 240 = 0 \\)",
+            "options": ["15, 16", "-15, -16", "15, -16", "-15, 16"],
+            "ans": 0,
+            "topic": "Finding Roots (Positive)",
+            "explain": "\\( x^2 - 31x + 240 = 0 \\) factors to \\( (x - 15)(x - 16) = 0 \\). Therefore, \\( x = 15 \\) or \\( x = 16 \\)."
+        }
+    ];
+
+    let currentQ = 0;
+    let userAnswers = new Array(20).fill(null);
+    let studentName = "";
+
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            timeRemaining--;
+            sessionStorage.setItem('time_remaining', timeRemaining);
+            updateTimerDisplay();
+            if (timeRemaining <= 0) { clearInterval(timerInterval); submitExam(true); }
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        const mins = Math.floor(timeRemaining / 60);
+        const secs = timeRemaining % 60;
+        document.getElementById('timer-display').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function startExam() {
+        studentName = document.getElementById('student-name').value.trim();
+        const errorMsg = document.getElementById('name-error');
+        
+        if (!studentName) {
+            errorMsg.style.display = 'block';
+            return;
+        }
+        errorMsg.style.display = 'none';
+        
+        sessionStorage.setItem('name', studentName);
+        sessionStorage.setItem('in_progress_' + EXAM_KEY, "true");
+        document.getElementById('page-landing').classList.remove('active');
+        document.getElementById('page-exam').classList.add('active');
+        document.getElementById('exam-title-display').innerHTML = `<strong>Topic:</strong> ${EXAM_NAME}`;
+        startTimer();
+        renderGrid();
+        showQuestion();
+    }
+
+    function renderGrid() {
+        const grid = document.getElementById('nav-grid');
+        grid.innerHTML = "";
+        questions.forEach((_, i) => {
+            const div = document.createElement('div');
+            div.className = `nav-box ${i === currentQ ? 'current' : ''} ${userAnswers[i] !== null ? 'answered' : ''}`;
+            div.innerText = i + 1;
+            div.onclick = () => jumpTo(i);
+            grid.appendChild(div);
+        });
+    }
+
+    function showQuestion() {
+        const q = questions[currentQ];
+        document.getElementById('q-title').innerText = `Question ${currentQ + 1}`;
+        document.getElementById('q-text').innerHTML = q.q;
+        const optCont = document.getElementById('options-container');
+        optCont.innerHTML = "";
+        q.options.forEach((opt, idx) => {
+            const lbl = document.createElement('label');
+            lbl.className = "option-label";
+            lbl.innerHTML = `<input type="radio" name="opt" ${userAnswers[currentQ] === idx ? 'checked' : ''} onchange="saveAns(${idx})"> ${opt}`;
+            optCont.appendChild(lbl);
+        });
+        document.getElementById('next-btn').innerText = currentQ === questions.length - 1 ? "Finish" : "Next";
+        sessionStorage.setItem('currentQ', currentQ);
+        renderGrid();
+        
+        // Trigger MathJax to process the newly inserted question text safely
+        if (window.MathJax && window.MathJax.typesetPromise) {
+            MathJax.typesetPromise([document.getElementById('question-scroll-area')]).catch((err) => console.log('MathJax error:', err));
+        }
+    }
+
+    function saveAns(idx) {
+        userAnswers[currentQ] = idx;
+        sessionStorage.setItem('answers', JSON.stringify(userAnswers));
+        renderGrid();
+    }
+
+    function jumpTo(i) { currentQ = i; showQuestion(); }
+
+    function changeQuestion(dir) {
+        if (dir === 1 && currentQ === questions.length - 1) {
+            submitExam(false);
+        } else { currentQ += dir; showQuestion(); }
+    }
+
+    async function submitExam(isAutoSubmit = false) {
+        if (!isAutoSubmit) {
+            const unansweredCount = userAnswers.filter(ans => ans === null).length;
+            if (unansweredCount > 0) {
+                const confirmSubmit = confirm(`You have left ${unansweredCount} question(s) unanswered. Are you sure you want to finish and submit?`);
+                if (!confirmSubmit) return;
+            }
+        }
+
+        clearInterval(timerInterval);
+        let score = 0;
+        let topicMap = {};
+        let reviewHTML = "";
+        let missedQuestions = [];
+
+        questions.forEach((q, i) => {
+            const correct = userAnswers[i] === q.ans;
+            if (correct) { score++; } else { missedQuestions.push("Q" + (i + 1)); }
+            if (!topicMap[q.topic]) topicMap[q.topic] = { total: 0, correct: 0, failedQ: [] };
+            topicMap[q.topic].total++;
+            if (correct) topicMap[q.topic].correct++;
+            else topicMap[q.topic].failedQ.push(i + 1);
+
+            reviewHTML += `<div class="review-card ${correct ? 'status-correct' : ''}">
+                <strong>Q${i+1}:</strong> ${q.q}<br>
+                Your Answer: <span style="color:${correct ? '#22c55e' : '#ef4444'}">${userAnswers[i] !== null ? q.options[userAnswers[i]] : 'Skipped'}</span><br>
+                Correct: ${q.options[q.ans]}<br>
+                <em>Explanation: ${q.explain}</em></div>`;
+        });
+
+        const scoreStr = `${score}/${questions.length}`;
+        let wrongAnswersString = missedQuestions.length > 0 ? missedQuestions.join(", ") : "None";
+
+        document.getElementById('page-exam').classList.remove('active');
+        document.getElementById('page-result').classList.add('active');
+        document.getElementById('res-name').innerText = studentName;
+        document.getElementById('final-score').innerText = scoreStr;
+        document.getElementById('review-list').innerHTML = reviewHTML;
+
+        let analysis = `<strong>AI Analysis Feedback (Question-Specific):</strong><br><br>`;
+        for (let t in topicMap) {
+            let pct = (topicMap[t].correct / topicMap[t].total) * 100;
+            if (pct === 100) { analysis += `• Mastery achieved in ${t}. Your concepts are perfectly clear.<br>`; }
+            else if (pct >= 60) { analysis += `• Strong foundation in ${t}, but minor errors occurred in Question(s) ${topicMap[t].failedQ.join(', ')}.<br>`; }
+            else { analysis += `• Weak performance in ${t}. For example, in Question(s) ${topicMap[t].failedQ.join(', ')}, you failed to apply the rules correctly.<br>`; }
+        }
+        document.getElementById('ai-analysis').innerHTML = analysis;
+
+        // Fetch to Google Sheets
+        fetch(WEB_APP_URL, { 
+            method: "POST", 
+            mode: "no-cors", 
+            body: JSON.stringify({ 
+                studentName, 
+                standard: HARDCODED_STD, 
+                examName: EXAM_NAME, 
+                subject: HARDCODED_SUBJECT, 
+                score: scoreStr, 
+                wrongAnswers: wrongAnswersString 
+            }) 
+        });
+        
+        localStorage.setItem('submitted_data_' + EXAM_KEY, JSON.stringify({ name: studentName, answers: userAnswers, score: scoreStr, topicMap }));
+        sessionStorage.clear();
+        window.scrollTo(0, 0);
+        
+        // Trigger MathJax for the results page
+        if (window.MathJax && window.MathJax.typesetPromise) {
+            MathJax.typesetPromise([document.getElementById('page-result')]).catch((err) => console.log('MathJax error:', err));
+        }
+    }
+
+    window.onload = () => {
+        document.getElementById('exam-title-display').innerHTML = `<strong>Topic:</strong> ${EXAM_NAME}`;
+        const saved = localStorage.getItem('submitted_data_' + EXAM_KEY);
+        if (saved) {
+            const data = JSON.parse(saved);
+            studentName = data.name;
+            userAnswers = data.answers;
+            showResultsFromStorage(data);
+        } else if (sessionStorage.getItem('in_progress_' + EXAM_KEY)) {
+            studentName = sessionStorage.getItem('name');
+            userAnswers = JSON.parse(sessionStorage.getItem('answers')) || userAnswers;
+            currentQ = parseInt(sessionStorage.getItem('currentQ')) || 0;
+            timeRemaining = parseInt(sessionStorage.getItem('time_remaining')) || 1800;
+            document.getElementById('page-landing').classList.remove('active');
+            document.getElementById('page-exam').classList.add('active');
+            startTimer();
+            updateTimerDisplay();
+            renderGrid();
+            showQuestion();
+        }
+    };
+
+    function showResultsFromStorage(data) {
+        document.getElementById('page-landing').classList.remove('active');
+        document.getElementById('page-result').classList.add('active');
+        document.getElementById('res-name').innerText = data.name;
+        document.getElementById('final-score').innerText = data.score;
+        let reviewHTML = "";
+        questions.forEach((q, i) => {
+            const correct = userAnswers[i] === q.ans;
+            reviewHTML += `<div class="review-card ${correct ? 'status-correct' : ''}">
+                <strong>Q${i+1}:</strong> ${q.q}<br>
+                Your Answer: <span style="color:${correct ? '#22c55e' : '#ef4444'}">${userAnswers[i] !== null ? q.options[userAnswers[i]] : 'Skipped'}</span><br>
+                Correct: ${q.options[q.ans]}<br>
+                <em>Explanation: ${q.explain}</em></div>`;
+        });
+        document.getElementById('review-list').innerHTML = reviewHTML;
+        let analysis = `<strong>AI Analysis Feedback (Question-Specific):</strong><br><br>`;
+        for (let t in data.topicMap) {
+            let pct = (data.topicMap[t].correct / data.topicMap[t].total) * 100;
+            if (pct === 100) { analysis += `• Mastery achieved in ${t}. Your concepts are perfectly clear.<br>`; }
+            else if (pct >= 60) { analysis += `• Strong foundation in ${t}, but minor errors occurred in Question(s) ${data.topicMap[t].failedQ.join(', ')}.<br>`; }
+            else { analysis += `• Weak performance in ${t}. For example, in Question(s) ${data.topicMap[t].failedQ.join(', ')}, you failed to apply the rules correctly.<br>`; }
+        }
+        document.getElementById('ai-analysis').innerHTML = analysis;
+        
+        // Trigger MathJax for the results page loaded from storage
+        if (window.MathJax && window.MathJax.typesetPromise) {
+            MathJax.typesetPromise([document.getElementById('page-result')]).catch((err) => console.log('MathJax error:', err));
+        }
+    }
+</script>
+</body>
+</html>
