@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8th Std Maths Olympiad - Squares & Square Roots (Exam 3)</title>
+    <script>
+        MathJax = {
+            tex: { inlineMath: [['\\(', '\\)']] },
+            startup: { typeset: false }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <style>
+        :root {
+            --bg-color: #1e293b;
+            --panel-bg: #334155;
+            --accent-color: #3b82f6;
+            --accent-hover: #2563eb;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --danger: #ef4444;
+            --border-radius: 12px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        /* Screens */
+        .screen { display: none; width: 100%; }
+        .screen.active { display: block; animation: fadeIn 0.4s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Typography & Headers */
+        h1, h2, h3 { color: var(--text-main); margin-bottom: 15px; }
+        .subtitle { color: var(--text-muted); margin-bottom: 25px; }
+        
+        .panel {
+            background-color: var(--panel-bg);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+        }
+
+        /* Inputs & Buttons */
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 8px;
+            border: 2px solid #475569;
+            background-color: #0f172a;
+            color: white;
+            font-size: 16px;
+            margin-bottom: 10px;
+            transition: border-color 0.3s;
+        }
+        input[type="text"]:focus { outline: none; border-color: var(--accent-color); }
+        
+        .error-msg {
+            color: var(--danger);
+            font-size: 14px;
+            height: 20px;
+            margin-bottom: 15px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        button.btn-primary {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button.btn-primary:hover { background-color: var(--accent-hover); }
+        button.btn-secondary {
+            background-color: transparent;
+            border: 2px solid var(--accent-color);
+            color: var(--accent-color);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        button.btn-secondary:hover { background-color: rgba(59, 130, 246, 0.1); }
+
+        /* Exam Header */
+        .exam-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--panel-bg);
+            padding: 15px 25px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            position: sticky;
+            top: 10px;
+            z-index: 100;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+        }
+        .timer { font-size: 1.25rem; font-weight: bold; color: var(--accent-color); font-variant-numeric: tabular-nums; }
+        
+        /* Layout Grid */
+        .exam-layout { display: grid; grid-template-columns: 1fr 280px; gap: 20px; }
+        @media (max-width: 768px) { .exam-layout { grid-template-columns: 1fr; } }
+
+        /* Question Area */
+        .question-card {
+            background-color: var(--panel-bg);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            min-height: 350px;
+        }
+        .section-badge {
+            display: inline-block;
+            background-color: rgba(59, 130, 246, 0.2);
+            color: var(--accent-color);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+        }
+        .marks-badge { float: right; color: var(--text-muted); font-size: 14px; }
+        .question-text { font-size: 1.1rem; margin-bottom: 25px; }
+        
+        .options-grid { display: flex; flex-direction: column; gap: 12px; }
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 2px solid #475569;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .option-label:hover { border-color: var(--accent-color); background-color: rgba(59, 130, 246, 0.05); }
+        .option-label input[type="radio"] { margin-right: 15px; transform: scale(1.2); accent-color: var(--accent-color); }
+        .option-label.selected { border-color: var(--accent-color); background-color: rgba(59, 130, 246, 0.1); }
+
+        .nav-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #475569;
+        }
+
+        /* Sidebar Nav - Circular Buttons */
+        .sidebar { background-color: var(--panel-bg); padding: 20px; border-radius: var(--border-radius); }
+        .nav-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+        .nav-btn {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            border: 2px solid #475569;
+            background-color: transparent;
+            color: var(--text-main);
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .nav-btn:hover { border-color: var(--accent-color); }
+        .nav-btn.active { background-color: var(--accent-color); border-color: var(--accent-color); color: white; }
+        .nav-btn.answered { background-color: rgba(59, 130, 246, 0.2); border-color: var(--accent-color); }
+        .nav-btn.answered.active { background-color: var(--accent-color); }
+
+        .submit-btn-container { text-align: center; border-top: 1px solid #475569; padding-top: 20px; }
+
+        /* Review Screen */
+        .score-card { text-align: center; margin-bottom: 30px; padding: 40px 20px; }
+        .score-circle {
+            width: 150px; height: 150px;
+            border-radius: 50%;
+            border: 8px solid var(--accent-color);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            margin: 0 auto 20px auto;
+            font-size: 2.5rem; font-weight: bold;
+        }
+        .feedback-text { font-size: 1.1rem; color: var(--text-muted); max-width: 600px; margin: 0 auto; }
+        
+        .review-item { padding: 20px; border-bottom: 1px solid #475569; margin-bottom: 15px; }
+        .review-item:last-child { border-bottom: none; }
+        .review-q { font-weight: bold; margin-bottom: 10px; font-size: 1.1rem; }
+        .correct-ans { color: var(--success); margin-bottom: 5px; }
+        .wrong-ans { color: var(--danger); margin-bottom: 5px; }
+        .explanation { background-color: #0f172a; padding: 15px; border-radius: 8px; border-left: 4px solid var(--accent-color); margin-top: 10px; font-size: 0.95rem; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <div id="intro-screen" class="screen active panel">
+        <h1>8th Std Maths Olympiad Prep</h1>
+        <p class="subtitle">Exam 3: Squares and Square Roots (Final Assessment)</p>
+        
+        <div style="background-color: #0f172a; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
+            <h3>Instructions:</h3>
+            <ul style="margin-left: 20px; margin-top: 10px; color: var(--text-muted);">
+                <li>Total Questions: 16 (20 Marks total)</li>
+                <li><strong>Mathematical Reasoning:</strong> 8 Questions (1 Mark each)</li>
+                <li><strong>Everyday Mathematics:</strong> 6 Questions (1 Mark each)</li>
+                <li><strong>Achievers Section:</strong> 2 Questions (3 Marks each)</li>
+                <li>Time Limit: 30 Minutes. Timer starts upon clicking 'Start Exam'.</li>
+            </ul>
+        </div>
+
+        <label for="student-name" style="display:block; margin-bottom: 8px; font-weight: 600;">Enter your Full Name to begin:</label>
+        <input type="text" id="student-name" placeholder="E.g. Aryan Sharma" autocomplete="off">
+        <div id="name-error" class="error-msg">Please enter a valid name to proceed.</div>
+        
+        <button class="btn-primary" onclick="startExam()" style="width: 100%;">Start Exam</button>
+    </div>
+
+    <div id="exam-screen" class="screen">
+        <div class="exam-header">
+            <div>
+                <span style="font-weight: bold; font-size: 1.1rem;">Candidate: </span>
+                <span id="display-name" style="color: var(--text-muted);"></span>
+            </div>
+            <div class="timer" id="timer-display">30:00</div>
+        </div>
+
+        <div class="exam-layout">
+            <div class="question-card">
+                <div id="section-badge" class="section-badge">Section</div>
+                <span id="marks-badge" class="marks-badge">1 Mark</span>
+                
+                <div id="question-text" class="question-text">Loading question...</div>
+                
+                <div class="options-grid" id="options-container">
+                    </div>
+
+                <div class="nav-controls">
+                    <button class="btn-secondary" id="btn-prev" onclick="changeQuestion(-1)">← Previous</button>
+                    <button class="btn-primary" id="btn-next" onclick="changeQuestion(1)">Next →</button>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <h3 style="text-align: center; margin-bottom: 15px;">Question Navigator</h3>
+                <div class="nav-grid" id="nav-grid">
+                    </div>
+                <div class="submit-btn-container">
+                    <button class="btn-primary" onclick="confirmSubmit()" style="width: 100%; background-color: var(--danger);">Submit Exam</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="result-screen" class="screen panel">
+        <div class="score-card">
+            <h2>Exam Submitted Successfully!</h2>
+            <p class="subtitle">Here is your detailed performance report for the final exam.</p>
+            
+            <div class="score-circle">
+                <span id="final-score">0/20</span>
+            </div>
+            <p id="ai-feedback" class="feedback-text"></p>
+        </div>
+
+        <h3>Detailed Review</h3>
+        <div id="review-container" style="margin-top: 20px;">
+            </div>
+        
+        <div style="text-align: center; margin-top: 30px;">
+            <button class="btn-primary" onclick="location.reload()">Take Exam Again</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // --- Data Definition ---
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby_DUMMY_URL/exec"; 
+    const EXAM_DURATION = 30 * 60; // 30 minutes in seconds
+
+    const QUESTIONS = [
+        // Mathematical Reasoning (1 Mark)
+        { id: 1, section: "Mathematical Reasoning", marks: 1, text: "Evaluate: \\(\\sqrt{41 - \\sqrt{21 + \\sqrt{19 - \\sqrt{9}}}}\\)", options: ["4", "5", "6", "7"], correct: 2, exp: "Solve from inside out: \\(\\sqrt{9} = 3\\). Next, \\(19 - 3 = 16\\), and \\(\\sqrt{16} = 4\\). Then, \\(21 + 4 = 25\\), and \\(\\sqrt{25} = 5\\). Finally, \\(41 - 5 = 36\\), and \\(\\sqrt{36} = 6\\)." },
+        { id: 2, section: "Mathematical Reasoning", marks: 1, text: "Find the smallest number by which 396 must be multiplied to make it a perfect square.", options: ["2", "3", "7", "11"], correct: 3, exp: "Prime factorization of \\(396 = 2 \\times 2 \\times 3 \\times 3 \\times 11 = 2^2 \\times 3^2 \\times 11\\). To make it a perfect square, we need to pair the remaining factor, which is 11." },
+        { id: 3, section: "Mathematical Reasoning", marks: 1, text: "What is the square root of \\(0.00053361\\)?", options: ["0.0231", "0.231", "0.00231", "0.073"], correct: 0, exp: "We know \\(\\sqrt{53361} = 231\\). The given decimal has 8 decimal places. The square root will have half of that, which is 4 decimal places. Therefore, the square root is \\(0.0231\\)." },
+        { id: 4, section: "Mathematical Reasoning", marks: 1, text: "The sum of the squares of two positive numbers is 356. If one of the numbers is 10, find the other number.", options: ["14", "16", "18", "24"], correct: 1, exp: "Let the other number be \\(x\\). Given, \\(10^2 + x^2 = 356\\). This means \\(100 + x^2 = 356 \\implies x^2 = 256\\). Thus, \\(x = 16\\)." },
+        { id: 5, section: "Mathematical Reasoning", marks: 1, text: "Find the square root of \\(3 \\frac{13}{36}\\).", options: ["\\(1 \\frac{1}{6}\\)", "\\(1 \\frac{5}{6}\\)", "\\(2 \\frac{1}{6}\\)", "\\(\\frac{13}{6}\\)"], correct: 1, exp: "Convert to an improper fraction: \\(3 \\frac{13}{36} = \\frac{108 + 13}{36} = \\frac{121}{36}\\). The square root of \\(\\frac{121}{36}\\) is \\(\\frac{11}{6}\\), which equals \\(1 \\frac{5}{6}\\)." },
+        { id: 6, section: "Mathematical Reasoning", marks: 1, text: "If \\(\\sqrt{18 \\times 14 \\times x} = 84\\), find the value of \\(x\\).", options: ["24", "28", "32", "36"], correct: 1, exp: "Squaring both sides: \\(18 \\times 14 \\times x = 84^2\\). Therefore, \\(252 \\times x = 7056\\). Dividing, we get \\(x = \\frac{7056}{252} = 28\\)." },
+        { id: 7, section: "Mathematical Reasoning", marks: 1, text: "Which of the following digits cannot be the unit digit of a perfect square?", options: ["1", "4", "5", "8"], correct: 3, exp: "A perfect square number never ends in 2, 3, 7, or 8. Therefore, 8 cannot be the unit digit of a perfect square." },
+        { id: 8, section: "Mathematical Reasoning", marks: 1, text: "Evaluate \\(\\sqrt{5^2 + 12^2}\\).", options: ["17", "13", "7", "60"], correct: 1, exp: "\\(5^2 = 25\\) and \\(12^2 = 144\\). Sum = \\(25 + 144 = 169\\). The square root of 169 is 13." },
+        
+        // Everyday Mathematics (1 Mark)
+        { id: 9, section: "Everyday Mathematics", marks: 1, text: "A sports teacher wants to arrange 6000 students in a field such that the number of rows is equal to the number of columns. How many students will be left out after this arrangement?", options: ["48", "64", "71", "84"], correct: 2, exp: "We must find the perfect square closest to (and smaller than) 6000. By long division, the square root of 6000 is approximately 77 (since \\(77^2 = 5929\\) and \\(78^2 = 6084\\)). The students left out = \\(6000 - 5929 = 71\\)." },
+        { id: 10, section: "Everyday Mathematics", marks: 1, text: "The area of a rectangular field whose length is twice its breadth is 4608 sq m. Find the perimeter of the field.", options: ["192 m", "288 m", "384 m", "144 m"], correct: 1, exp: "Let breadth = \\(x\\), then length = \\(2x\\). Area = \\(2x^2 = 4608 \\implies x^2 = 2304 \\implies x = 48\\). Length = 96. Perimeter = \\(2 \\times (L + B) = 2 \\times (96 + 48) = 2 \\times 144 = 288\\) m." },
+        { id: 11, section: "Everyday Mathematics", marks: 1, text: "An army general arranges his soldiers in a solid square. He finds he has 64 soldiers left over. If the total number of soldiers is 8164, find the number of soldiers in the front row.", options: ["80", "90", "88", "92"], correct: 1, exp: "The number of soldiers that make up the perfect square = \\(8164 - 64 = 8100\\). Number of soldiers in the front row = \\(\\sqrt{8100} = 90\\)." },
+        { id: 12, section: "Everyday Mathematics", marks: 1, text: "A man planted 1521 trees in his orchard such that there are as many trees in each row as there are rows. How many rows are there?", options: ["31", "39", "41", "49"], correct: 1, exp: "Let the number of rows be \\(x\\). Then \\(x^2 = 1521\\). The square root of 1521 is 39." },
+        { id: 13, section: "Everyday Mathematics", marks: 1, text: "The cost of leveling a square lawn at ₹12 per square meter is ₹19,200. Find the cost of fencing the lawn along its boundary at ₹22 per meter.", options: ["₹1760", "₹3520", "₹7040", "₹14080"], correct: 1, exp: "Total area = Total Cost / Cost per sq.m = \\(19200 / 12 = 1600\\) sq.m. Side of the lawn = \\(\\sqrt{1600} = 40\\) m. Perimeter = \\(4 \\times 40 = 160\\) m. Cost of fencing = \\(160 \\times 22 = ₹3520\\)." },
+        { id: 14, section: "Everyday Mathematics", marks: 1, text: "A society collected ₹59.29 for a cause. Each member contributed exactly as many paise as there were members. Find the number of members.", options: ["67", "73", "77", "83"], correct: 2, exp: "Total collection in paise = \\(59.29 \\times 100 = 5929\\) paise. If there are \\(x\\) members, \\(x^2 = 5929 \\implies x = 77\\)." },
+
+        // Achievers Section (3 Marks)
+        { id: 15, section: "Achievers Section", marks: 3, text: "Consider the following two statements:<br>Statement I: There are exactly 24 non-perfect square natural numbers between \\(12^2\\) and \\(13^2\\).<br>Statement II: The square of a proper fraction is always greater than the fraction itself.<br>Which of the following options is correct?", options: ["Only Statement I is true", "Only Statement II is true", "Both statements are true", "Both statements are false"], correct: 0, exp: "Statement I is true: The number of non-perfect squares between \\(n^2\\) and \\((n+1)^2\\) is \\(2n\\). Here \\(n=12\\), so \\(2(12) = 24\\). Statement II is false: The square of a proper fraction (e.g., 1/2) is smaller than the fraction itself (1/4 < 1/2)." },
+        { id: 16, section: "Achievers Section", marks: 3, text: "Find the value of \\(\\sqrt{0.0081} + \\sqrt{0.000064} - \\sqrt{0.0001}\\).", options: ["0.088", "0.098", "0.108", "0.078"], correct: 0, exp: "\\(\\sqrt{0.0081} = 0.09\\). \\(\\sqrt{0.000064} = 0.008\\). \\(\\sqrt{0.0001} = 0.01\\). Expression becomes: \\(0.09 + 0.008 - 0.01 = 0.098 - 0.01 = 0.088\\)." }
+    ];
+
+    // --- State Variables ---
+    let currentQuestionIndex = 0;
+    let userAnswers = new Array(QUESTIONS.length).fill(null);
+    let timerInterval;
+    let timeRemaining = EXAM_DURATION;
+    let studentName = "";
+
+    // --- Core Functions ---
+    window.onload = function() {
+        sessionStorage.removeItem("examAnswers");
+        sessionStorage.removeItem("examTime");
+    };
+
+    function startExam() {
+        const nameInput = document.getElementById("student-name").value.trim();
+        const errObj = document.getElementById("name-error");
+        
+        if(nameInput.length < 3) {
+            errObj.style.opacity = 1;
+            errObj.innerText = "Please enter your full name (min 3 characters).";
+            return;
+        }
+        
+        errObj.style.opacity = 0;
+        studentName = nameInput;
+        document.getElementById("display-name").innerText = studentName;
+        
+        const savedTime = sessionStorage.getItem("examTime");
+        if(savedTime) timeRemaining = parseInt(savedTime);
+        
+        const savedAnswers = sessionStorage.getItem("examAnswers");
+        if(savedAnswers) userAnswers = JSON.parse(savedAnswers);
+
+        document.getElementById("intro-screen").classList.remove("active");
+        document.getElementById("exam-screen").classList.add("active");
+        
+        buildNavGrid();
+        loadQuestion(0);
+        startTimer();
+    }
+
+    function buildNavGrid() {
+        const grid = document.getElementById("nav-grid");
+        grid.innerHTML = "";
+        QUESTIONS.forEach((q, i) => {
+            const btn = document.createElement("button");
+            btn.className = "nav-btn";
+            btn.innerText = i + 1;
+            btn.onclick = () => loadQuestion(i);
+            btn.id = `nav-btn-${i}`;
+            if(userAnswers[i] !== null) btn.classList.add("answered");
+            grid.appendChild(btn);
+        });
+    }
+
+    function loadQuestion(index) {
+        if(index < 0 || index >= QUESTIONS.length) return;
+        currentQuestionIndex = index;
+        const q = QUESTIONS[index];
+        
+        document.getElementById("section-badge").innerText = `${q.section}`;
+        document.getElementById("marks-badge").innerText = `${q.marks} Mark${q.marks > 1 ? 's' : ''}`;
+        
+        document.getElementById("question-text").innerHTML = `<strong style="margin-right:10px;">Q${index+1}.</strong> ${q.text}`;
+        
+        const optContainer = document.getElementById("options-container");
+        optContainer.innerHTML = "";
+        q.options.forEach((optText, optIndex) => {
+            const isChecked = userAnswers[index] === optIndex ? "checked" : "";
+            const isSelectedClass = userAnswers[index] === optIndex ? "selected" : "";
+            optContainer.innerHTML += `
+                <label class="option-label ${isSelectedClass}" onclick="selectOption(${index}, ${optIndex})">
+                    <input type="radio" name="q${index}" value="${optIndex}" ${isChecked}>
+                    <span>${String.fromCharCode(65 + optIndex)}) ${optText}</span>
+                </label>
+            `;
+        });
+
+        if (window.MathJax && window.MathJax.typesetPromise) {
+            MathJax.typesetPromise([document.getElementById("question-text"), optContainer]).catch(function(err) {
+                console.error("MathJax error: ", err.message);
+            });
+        }
+
+        document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+        document.getElementById(`nav-btn-${index}`).classList.add("active");
+
+        document.getElementById("btn-prev").style.visibility = index === 0 ? "hidden" : "visible";
+        document.getElementById("btn-next").style.visibility = index === QUESTIONS.length - 1 ? "hidden" : "visible";
+    }
+
+    function selectOption(qIndex, optIndex) {
+        userAnswers[qIndex] = optIndex;
+        sessionStorage.setItem("examAnswers", JSON.stringify(userAnswers));
+        document.getElementById(`nav-btn-${qIndex}`).classList.add("answered");
+        loadQuestion(qIndex); 
+    }
+
+    function changeQuestion(step) {
+        loadQuestion(currentQuestionIndex + step);
+    }
+
+    function startTimer() {
+        const timerDisplay = document.getElementById("timer-display");
+        timerInterval = setInterval(() => {
+            if(timeRemaining <= 0) {
+                clearInterval(timerInterval);
+                submitExam(true);
+            } else {
+                timeRemaining--;
+                sessionStorage.setItem("examTime", timeRemaining);
+                const m = Math.floor(timeRemaining / 60).toString().padStart(2, '0');
+                const s = (timeRemaining % 60).toString().padStart(2, '0');
+                timerDisplay.innerText = `${m}:${s}`;
+                if(timeRemaining <= 300) timerDisplay.style.color = "var(--danger)"; 
+            }
+        }, 1000);
+    }
+
+    function confirmSubmit() {
+        const unans = userAnswers.filter(a => a === null).length;
+        const msg = unans > 0 
+            ? `You have ${unans} unanswered questions. Are you sure you want to submit?`
+            : "Are you ready to submit your exam?";
+        
+        if(window.confirm(msg)) {
+            submitExam(false);
+        }
+    }
+
+    function submitExam(autoSubmit) {
+        clearInterval(timerInterval);
+        
+        let totalScore = 0;
+        let totalMarks = 0;
+        QUESTIONS.forEach((q, i) => {
+            totalMarks += q.marks;
+            if(userAnswers[i] === q.correct) totalScore += q.marks;
+        });
+
+        const payload = {
+            studentName: studentName,
+            score: totalScore,
+            totalMarks: totalMarks,
+            timestamp: new Date().toISOString(),
+            answers: userAnswers
+        };
+
+        fetch(WEB_APP_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        }).catch(err => console.error("Webhook logging failed:", err));
+
+        localStorage.setItem(`result_${new Date().getTime()}`, JSON.stringify(payload));
+        sessionStorage.clear(); 
+
+        showReviewScreen(totalScore, totalMarks);
+    }
+
+    function showReviewScreen(score, max) {
+        document.getElementById("exam-screen").classList.remove("active");
+        document.getElementById("result-screen").classList.add("active");
+        
+        document.getElementById("final-score").innerText = `${score}/${max}`;
+        
+        let feedback = "";
+        const percentage = (score / max) * 100;
+        if(percentage >= 90) feedback = "Absolutely stellar! You have fully mastered the chapter on Squares and Square Roots. You are well prepared to ace the Olympiad.";
+        else if(percentage >= 60) feedback = "Great job finishing the final exam! Your fundamentals are strong. Keep practicing decimal square roots and complex simplifications.";
+        else feedback = "Thank you for completing the exam series. We recommend going back to the foundational concepts of calculating squares via prime factorization and the long division method.";
+        
+        document.getElementById("ai-feedback").innerText = feedback;
+
+        const revContainer = document.getElementById("review-container");
+        revContainer.innerHTML = "";
+        QUESTIONS.forEach((q, i) => {
+            const uAns = userAnswers[i];
+            const isCorrect = uAns === q.correct;
+            
+            const uText = uAns !== null ? q.options[uAns] : "Not Attempted";
+            const cText = q.options[q.correct];
+            
+            const statusColor = isCorrect ? 'var(--success)' : 'var(--danger)';
+            const statusIcon = isCorrect ? '✓ Correct' : '✗ Incorrect';
+
+            let html = `
+                <div class="review-item">
+                    <div class="review-q">Q${i+1}. ${q.text} <span style="float:right; color:${statusColor}; font-size:0.9rem;">${statusIcon} (${isCorrect ? q.marks : 0}/${q.marks})</span></div>
+                    <div class="${isCorrect ? 'correct-ans' : 'wrong-ans'}"><strong>Your Answer:</strong> ${uText}</div>
+                    ${!isCorrect ? `<div class="correct-ans"><strong>Correct Answer:</strong> ${cText}</div>` : ''}
+                    <div class="explanation"><strong>Explanation:</strong><br> ${q.exp}</div>
+                </div>
+            `;
+            revContainer.innerHTML += html;
+        });
+
+        if (window.MathJax && window.MathJax.typesetPromise) {
+            MathJax.typesetPromise([revContainer]).catch(console.error);
+        }
+    }
+</script>
+</body>
+</html>
