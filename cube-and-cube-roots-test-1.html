@@ -1,0 +1,417 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>8th Std Maths Olympiad - Exam Master Template</title>
+<script>MathJax={tex:{inlineMath:[['\\(','\\)']]},startup:{typeset:false}};</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+:root{--bg:#1e293b;--pan:#334155;--acc:#3b82f6;--txt:#f8fafc;--mut:#94a3b8;--suc:#10b981;--dan:#ef4444;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:sans-serif;line-height:1.6;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow-x:hidden;}
+.container{width:100%;max-width:900px;padding:15px;margin-top:10px;}
+.screen{display:none;width:100%;}.screen.active{display:block;}
+h1,h2,h3{margin-bottom:15px;}.subtitle{color:var(--mut);margin-bottom:25px;}
+.panel{background:var(--pan);padding:25px;border-radius:12px;margin-bottom:20px;max-width:100%;overflow-x:auto;}
+input[type="text"]{width:100%;padding:12px;border-radius:8px;border:2px solid #475569;background:#0f172a;color:#fff;font-size:16px;margin-bottom:10px;}
+input[type="text"]:focus{outline:none;border-color:var(--acc);}
+.error-msg{color:var(--dan);font-size:14px;height:20px;margin-bottom:15px;opacity:0;}
+button{cursor:pointer;border-radius:8px;font-size:16px;font-weight:600;transition:0.2s;}
+.btn-primary{background:var(--acc);color:#fff;border:none;padding:12px 24px;}.btn-primary:hover{background:#2563eb;}
+.btn-secondary{background:transparent;border:2px solid var(--acc);color:var(--acc);padding:10px 20px;}
+.exam-header{display:flex;justify-content:space-between;align-items:center;background:var(--pan);padding:15px;border-radius:12px;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
+.timer{font-size:1.25rem;font-weight:bold;color:var(--acc);}
+.exam-layout{display:grid;grid-template-columns:1fr 280px;gap:20px;}
+@media(max-width:768px){.exam-layout{grid-template-columns:1fr;}}
+.question-card{background:var(--pan);padding:20px;border-radius:12px;min-height:350px;max-width:100%;overflow-x:auto;}
+.section-badge{display:inline-block;background:rgba(59,130,246,0.2);color:var(--acc);padding:4px 10px;border-radius:6px;font-size:12px;font-weight:bold;text-transform:uppercase;margin-bottom:15px;}
+.marks-badge{float:right;color:var(--mut);font-size:14px;}
+.question-text{font-size:1.1rem;margin-bottom:25px;word-break:break-word;}
+.options-grid{display:flex;flex-direction:column;gap:12px;}
+.option-label{display:flex;align-items:center;padding:12px;border:2px solid #475569;border-radius:8px;cursor:pointer;max-width:100%;}
+.option-label input{margin-right:12px;transform:scale(1.2);accent-color:var(--acc);flex-shrink:0;}
+.option-label span{flex:1;min-width:0;word-wrap:break-word;overflow-wrap:break-word;overflow-x:auto;}
+.option-label.selected{border-color:var(--acc);background:rgba(59,130,246,0.1);}
+.nav-controls{display:flex;justify-content:space-between;margin-top:25px;padding-top:20px;border-top:1px solid #475569;}
+.sidebar{background:var(--pan);padding:20px;border-radius:12px;}
+.nav-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;place-items:center;}
+.nav-btn{width:42px;height:42px;border-radius:50%;border:2px solid #475569;background:transparent;color:var(--txt);font-weight:bold;display:flex;align-items:center;justify-content:center;}
+.nav-btn.active{background:var(--acc);border-color:var(--acc);color:#fff;}
+.nav-btn.answered{background:rgba(59,130,246,0.2);border-color:var(--acc);}
+.nav-btn.answered.active{background:var(--acc);}
+.submit-btn-container{text-align:center;border-top:1px solid #475569;padding-top:20px;}
+.score-card{text-align:center;margin-bottom:30px;padding:20px;}
+.score-circle{width:120px;height:120px;border-radius:50%;border:8px solid var(--acc);display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 20px auto;font-size:2rem;font-weight:bold;}
+.feedback-text{font-size:1.1rem;color:var(--mut);max-width:600px;margin:0 auto;}
+.review-item{padding:15px;border-bottom:1px solid #475569;margin-bottom:15px;max-width:100%;overflow-x:auto;}
+.review-item:last-child{border-bottom:none;}
+.review-q{font-weight:bold;margin-bottom:10px;font-size:1.1rem;word-break:break-word;}
+.correct-ans{color:var(--suc);margin-bottom:5px;}.wrong-ans{color:var(--dan);margin-bottom:5px;}
+.explanation{background:#0f172a;padding:15px;border-radius:8px;border-left:4px solid var(--acc);margin-top:10px;font-size:0.95rem;word-break:break-word;overflow-x:auto;}
+</style></head><body>
+<div class="container">
+    <div id="intro-screen" class="screen active panel">
+        <h1>8th Std Maths Olympiad Prep</h1>
+        <p class="subtitle" id="intro-subtitle">Exam: [Exam Name]</p>
+        <div style="background:#0f172a;padding:20px;border-radius:8px;margin-bottom:25px;"><h3>Instructions:</h3><ul style="margin-left:20px;margin-top:10px;color:var(--mut);font-size:0.9rem;"><li>Total Questions: 16 (20 Marks total)</li><li><strong>Mathematical Reasoning:</strong> 8 Questions (1 Mark each)</li><li><strong>Everyday Mathematics:</strong> 6 Questions (1 Mark each)</li><li><strong>Achievers Section:</strong> 2 Questions (3 Marks each)</li><li>Time Limit: 30 Minutes. Timer starts upon clicking 'Start Exam'.</li></ul></div>
+        <label style="display:block;margin-bottom:8px;font-weight:600;">Enter your Full Name:</label>
+        <input type="text" id="student-name" placeholder="E.g. Aryan Sharma" autocomplete="off">
+        <div id="name-error" class="error-msg">Please enter a valid name.</div>
+        <button type="button" class="btn-primary" onclick="startExam()" style="width:100%;">Start Exam</button>
+    </div>
+    <div id="exam-screen" class="screen">
+        <div class="exam-header">
+            <div><span style="font-weight:bold;">Candidate: </span><span id="display-name" style="color:var(--mut);"></span></div>
+            <div class="timer" id="timer-display">30:00</div>
+        </div>
+        <div class="exam-layout">
+            <div class="question-card">
+                <div id="section-badge" class="section-badge">Section</div><span id="marks-badge" class="marks-badge">1 Mark</span>
+                <div id="question-text" class="question-text">Loading...</div>
+                <div class="options-grid" id="options-container"></div>
+                <div class="nav-controls">
+                    <button type="button" class="btn-secondary" id="btn-prev" onclick="changeQuestion(-1)">← Prev</button>
+                    <button type="button" class="btn-primary" id="btn-next" onclick="changeQuestion(1)">Next →</button>
+                </div>
+            </div>
+            <div class="sidebar">
+                <h3 style="text-align:center;margin-bottom:15px;">Navigator</h3>
+                <div class="nav-grid" id="nav-grid"></div>
+                <div class="submit-btn-container"><button type="button" class="btn-primary" onclick="confirmSubmit()" style="width:100%;background:var(--dan);">Submit</button></div>
+            </div>
+        </div>
+    </div>
+    <div id="result-screen" class="screen panel">
+        <div class="score-card">
+            <h2 id="result-title">Exam Submitted!</h2><p class="subtitle" id="result-subtitle">Here is your performance report.</p>
+            <h3 id="final-student-name" style="margin-bottom:20px;color:var(--acc);"></h3>
+            <div class="score-circle"><span id="final-score">0/20</span></div>
+            <p id="ai-feedback" class="feedback-text"></p>
+        </div>
+        <h3>Detailed Review</h3><div id="review-container" style="margin-top:20px;"></div>
+        <div style="text-align:center;margin-top:30px;color:var(--mut);"><p><strong>Note:</strong> Results permanently saved on device.</p></div>
+    </div>
+</div>
+<script>
+// =========================================================================
+// ⬇️ EDIT THESE VARIABLES FOR EACH NEW EXAM ⬇️
+// =========================================================================
+
+const EXAM_KEY = "8th_Math_cube_cube_roots_test1"; 
+const EXAM_NAME = "Cube and Cube Roots Test 1"; 
+const HARDCODED_STD = "8th";
+const HARDCODED_SUBJECT = "Maths";
+
+const QUESTIONS = [
+  {
+    "id": 1,
+    "section": "Mathematical Reasoning",
+    "marks": 1,
+    "text": "If \\( m = \\sqrt[3]{140 \\times 2450} \\) and \\( n = \\sqrt[3]{-216} \\), then what is the value of \\( \\sqrt[3]{m+n} \\)?",
+    "options": [
+      "6",
+      "8",
+      "4",
+      "64"
+    ],
+    "correct": 2,
+    "exp": "First, find \\( m \\): \\( 140 \\times 2450 = 14 \\times 10 \\times 245 \\times 10 = 343000 \\). So \\( m = \\sqrt[3]{343000} = 70 \\). Next, \\( n = \\sqrt[3]{-216} = -6 \\). Thus, \\( m + n = 70 - 6 = 64 \\). Therefore, \\( \\sqrt[3]{64} = 4 \\)."
+  },
+  {
+    "id": 2,
+    "section": "Mathematical Reasoning",
+    "marks": 1,
+    "text": "If the ratio of two numbers is 7 : 5 and the difference of their cubes is 5886, find the sum of the two numbers.",
+    "options": [
+      "40",
+      "45",
+      "36",
+      "None of these"
+    ],
+    "correct": 2,
+    "exp": "Let the numbers be \\( 7x \\) and \\( 5x \\). The difference of their cubes is \\( (7x)^3 - (5x)^3 = 343x^3 - 125x^3 = 218x^3 \\). Given \\( 218x^3 = 5886 \\implies x^3 = \\frac{5886}{218} = 27 \\implies x = 3 \\). The numbers are \\( 21 \\) and \\( 15 \\). Their sum is \\( 21 + 15 = 36 \\)."
+  },
+  {
+    "id": 3,
+    "section": "Mathematical Reasoning",
+    "marks": 1,
+    "text": "Which of the following numbers is NOT a perfect cube?",
+    "options": [
+      "1331",
+      "2197",
+      "3375",
+      "4092"
+    ],
+    "correct": 3,
+    "exp": "We know that \\( 11^3 = 1331 \\), \\( 13^3 = 2197 \\), and \\( 15^3 = 3375 \\). However, \\( 4092 \\) is not a perfect cube (the closest perfect cube is \\( 16^3 = 4096 \\))."
+  },
+  {
+    "id": 4,
+    "section": "Mathematical Reasoning",
+    "marks": 1,
+    "text": "Find the smallest natural number by which 3087 must be multiplied so that the product becomes a perfect cube.",
+    "options": [
+      "21",
+      "7",
+      "3",
+      "9"
+    ],
+    "correct": 2,
+    "exp": "The prime factorization of \\( 3087 = 3 \\times 3 \\times 7 \\times 7 \\times 7 = 3^2 \\times 7^3 \\). To make it a perfect cube, the powers of all prime factors must be multiples of 3. We are short of one \\( 3 \\). Therefore, it must be multiplied by \\( 3 \\)."
+  },
+  {
+    "id": 5,
+    "section": "Mathematical Reasoning",
+    "marks": 1,
+    "text": "Evaluate the cube root of \\( 0.000001728 \\).",
+    "options": [
+      "0.012",
+      "0.12",
+      "0.0012",
+      "1.2"
+    ],
+    "correct": 0,
+    "exp": "\\( \\sqrt[3]{0.000001728} = \\sqrt[3]{\\frac{1728}{1000000000}} = \\frac{\\sqrt[3]{1728}}{\\sqrt[3]{10^9}} = \\frac{12}{10^3} = \\frac{12}{1000} = 0.012 \\)."
+  },
+  {
+    "id": 6,
+    "section": "Mathematical Reasoning",
+    "marks": 1,
+    "text": "The volume of a cube is \\( 166.375 \\) cubic meters. Find the length of its side.",
+    "options": [
+      "4.5 m",
+      "5.5 m",
+      "6.5 m",
+      "7.5 m"
+    ],
+    "correct": 1,
+    "exp": "Volume \\( V = a^3 = 166.375 = \\frac{166375}{1000} \\). We know that \\( 55^3 = 166375 \\). Therefore, the side length is \\( a = \\frac{55}{10} = 5.5 \\) m."
+  },
+  {
+    "id": 7,
+    "section": "Mathematical Reasoning",
+    "marks": 1,
+    "text": "If \\( x = \\sqrt[3]{27} + \\sqrt[3]{0.027} + \\sqrt[3]{0.000027} \\), find the value of \\( x \\).",
+    "options": [
+      "3.3",
+      "3.33",
+      "3.033",
+      "3.303"
+    ],
+    "correct": 1,
+    "exp": "\\( \\sqrt[3]{27} = 3 \\). \\( \\sqrt[3]{0.027} = 0.3 \\). \\( \\sqrt[3]{0.000027} = 0.03 \\). Adding them up: \\( 3 + 0.3 + 0.03 = 3.33 \\)."
+  },
+  {
+    "id": 8,
+    "section": "Mathematical Reasoning",
+    "marks": 1,
+    "text": "Evaluate: \\( \\sqrt[3]{\\frac{0.008}{0.125}} \\div \\sqrt[3]{\\frac{0.064}{0.027}} \\)",
+    "options": [
+      "3/5",
+      "3/8",
+      "3/10",
+      "5/8"
+    ],
+    "correct": 2,
+    "exp": "The first term evaluates to \\( \\sqrt[3]{\\frac{8}{125}} = \\frac{2}{5} \\). The second term evaluates to \\( \\sqrt[3]{\\frac{64}{27}} = \\frac{4}{3} \\). Performing the division: \\( \\frac{2}{5} \\div \\frac{4}{3} = \\frac{2}{5} \\times \\frac{3}{4} = \\frac{6}{20} = \\frac{3}{10} \\)."
+  },
+  {
+    "id": 9,
+    "section": "Everyday Mathematics",
+    "marks": 1,
+    "text": "Three cubes of side 4 cm each are joined end to end to form a cuboid. What is the ratio of the surface area of the cuboid to the total surface area of three cubes?",
+    "options": [
+      "7:9",
+      "7:8",
+      "9:7",
+      "8:7"
+    ],
+    "correct": 0,
+    "exp": "The total surface area of 3 separate cubes \\( = 3 \\times 6a^2 = 18 \\times 4^2 = 288 \\text{ cm}^2 \\). When joined, the resulting cuboid has dimensions \\( L = 12 \\), \\( W = 4 \\), and \\( H = 4 \\). Surface area of the cuboid \\( = 2(LW + WH + HL) = 2(12 \\times 4 + 4 \\times 4 + 4 \\times 12) = 2(48 + 16 + 48) = 224 \\text{ cm}^2 \\). The required ratio is \\( 224:288 = 7:9 \\)."
+  },
+  {
+    "id": 10,
+    "section": "Everyday Mathematics",
+    "marks": 1,
+    "text": "A metallic cuboid with dimensions 16 cm \u00d7 8 cm \u00d7 4 cm is melted and recast into a single solid cube. What is the length of the edge of the new cube?",
+    "options": [
+      "6 cm",
+      "8 cm",
+      "10 cm",
+      "12 cm"
+    ],
+    "correct": 1,
+    "exp": "The volume of the original cuboid \\( = 16 \\times 8 \\times 4 = 512 \\text{ cm}^3 \\). Let the edge of the new cube be \\( a \\). Since volumes remain equal during recasting, \\( a^3 = 512 \\implies a = \\sqrt[3]{512} = 8 \\text{ cm} \\)."
+  },
+  {
+    "id": 11,
+    "section": "Everyday Mathematics",
+    "marks": 1,
+    "text": "How many small cubes of side 2 cm can be cut from a larger wooden cube of side 10 cm?",
+    "options": [
+      "125",
+      "100",
+      "25",
+      "250"
+    ],
+    "correct": 0,
+    "exp": "Volume of the larger cube \\( = 10^3 = 1000 \\text{ cm}^3 \\). Volume of one small cube \\( = 2^3 = 8 \\text{ cm}^3 \\). Number of cubes that can be cut \\( = \\frac{1000}{8} = 125 \\)."
+  },
+  {
+    "id": 12,
+    "section": "Everyday Mathematics",
+    "marks": 1,
+    "text": "A water tank is in the shape of a cube. If it can hold 3375 liters of water completely filled, what is the depth of the tank?",
+    "options": [
+      "1.5 m",
+      "1.25 m",
+      "1.75 m",
+      "2.5 m"
+    ],
+    "correct": 0,
+    "exp": "Since 1 cubic meter \\( = 1000 \\text{ liters} \\), the volume of the tank is \\( \\frac{3375}{1000} = 3.375 \\text{ m}^3 \\). The depth (edge length \\( a \\)) is \\( \\sqrt[3]{3.375} = 1.5 \\text{ m} \\)."
+  },
+  {
+    "id": 13,
+    "section": "Everyday Mathematics",
+    "marks": 1,
+    "text": "A certain group of students contributed for a charity. The amount contributed by each student was equal to the square of the total number of students. If the total collection was \u20b9 42875, how many students were there?",
+    "options": [
+      "25",
+      "35",
+      "45",
+      "55"
+    ],
+    "correct": 1,
+    "exp": "Let the number of students be \\( x \\). Each student contributed \\( \\text{\\u20b9 } x^2 \\). Therefore, the total amount collected is \\( x \\times x^2 = x^3 \\). Given \\( x^3 = 42875 \\). We know that \\( 35^3 = 42875 \\), so there were 35 students."
+  },
+  {
+    "id": 14,
+    "section": "Everyday Mathematics",
+    "marks": 1,
+    "text": "Rahul is packing small cubical gift boxes of side 5 cm into a larger cubical carton of volume 1000 cm\u00b3. How many gift boxes can he perfectly pack into the carton?",
+    "options": [
+      "10",
+      "4",
+      "8",
+      "16"
+    ],
+    "correct": 2,
+    "exp": "The volume of one gift box \\( = 5^3 = 125 \\text{ cm}^3 \\). The volume of the carton is \\( 1000 \\text{ cm}^3 \\). The number of boxes he can pack is \\( \\frac{1000}{125} = 8 \\)."
+  },
+  {
+    "id": 15,
+    "section": "Achievers Section",
+    "marks": 3,
+    "text": "Match the following expressions with their evaluated results:<br>(A) \\( \\sqrt[3]{-0.000343} \\) <br> (B) \\( \\sqrt[3]{\\frac{64}{1000}} \\) <br> (C) \\( \\sqrt[3]{\\frac{-2744}{1331}} \\)<br><br>(p) \\( 0.4 \\) <br> (q) \\( -0.07 \\) <br> (r) \\( \\frac{-14}{11} \\)",
+    "options": [
+      "A-q, B-p, C-r",
+      "A-p, B-q, C-r",
+      "A-r, B-p, C-q",
+      "A-q, B-r, C-p"
+    ],
+    "correct": 0,
+    "exp": "(A) \\( \\sqrt[3]{-0.000343} = -0.07 \\) (q). <br>(B) \\( \\sqrt[3]{\\frac{64}{1000}} = \\frac{4}{10} = 0.4 \\) (p). <br>(C) \\( \\sqrt[3]{\\frac{-2744}{1331}} = \\frac{-14}{11} \\) (r). <br>Therefore, the correct match is A-q, B-p, C-r."
+  },
+  {
+    "id": 16,
+    "section": "Achievers Section",
+    "marks": 3,
+    "text": "Find the value of \\( \\frac{\\sqrt[3]{x} - \\sqrt[3]{y}}{\\sqrt[3]{x} + \\sqrt[3]{y}} \\) if \\( x = 1.331 \\) and \\( y = 0.729 \\).",
+    "options": [
+      "1/10",
+      "2/11",
+      "1/5",
+      "1/2"
+    ],
+    "correct": 0,
+    "exp": "First find the cube roots: \\( \\sqrt[3]{1.331} = 1.1 \\) and \\( \\sqrt[3]{0.729} = 0.9 \\).<br> Numerator \\( = 1.1 - 0.9 = 0.2 \\).<br> Denominator \\( = 1.1 + 0.9 = 2.0 \\).<br> Evaluating the fraction gives \\( \\frac{0.2}{2.0} = \\frac{2}{20} = \\frac{1}{10} \\)."
+  }
+];
+
+// =========================================================================
+// ⬆️ DO NOT EDIT BELOW THIS LINE ⬆️
+// =========================================================================
+
+document.getElementById("intro-subtitle").innerText = `Exam: ${EXAM_NAME}`;
+const WEB_APP_URL="https://script.google.com/macros/s/AKfycbwEutZaKIAodDqKVocXPmgGlsfyO6ma8vuQK4sFgEobmvD73QQwztuH4qbT_R3g1Figtw/exec",EXAM_DURATION=1800;
+let currentQuestionIndex=0,userAnswers=new Array(QUESTIONS.length).fill(null),timerInterval,timeRemaining=EXAM_DURATION,studentName="";
+window.onload=function(){
+    const sd=localStorage.getItem(`submitted_data_${EXAM_KEY}`);
+    if(sd){try{const d=JSON.parse(sd);studentName=d.studentName;userAnswers=d.answers||new Array(QUESTIONS.length).fill(null);
+    const sp=d.score.split('/');document.getElementById("intro-screen").classList.remove("active");
+    document.getElementById("result-title").innerText=`Welcome Back!`;
+    document.getElementById("result-subtitle").innerText="Performance report from previous submission.";
+    showReviewScreen(parseInt(sp[0]),parseInt(sp[1]));}catch(e){localStorage.removeItem(`submitted_data_${EXAM_KEY}`);sessionStorage.clear();}}
+    else sessionStorage.clear();
+};
+function startExam(){
+    if(QUESTIONS.length === 0) return alert("Error: No questions found in the array!");
+    const name=document.getElementById("student-name").value.trim(),err=document.getElementById("name-error");
+    if(name.length<3){alert("Enter your full name (min 3 chars).");err.style.opacity=1;return;}
+    err.style.opacity=0;studentName=name;document.getElementById("display-name").innerText=studentName;
+    const st=sessionStorage.getItem("examTime");if(st)timeRemaining=parseInt(st);
+    const sa=sessionStorage.getItem("examAnswers");if(sa)try{userAnswers=JSON.parse(sa);}catch(e){userAnswers=new Array(QUESTIONS.length).fill(null);}
+    document.getElementById("intro-screen").classList.remove("active");document.getElementById("exam-screen").classList.add("active");
+    buildNavGrid();loadQuestion(0);startTimer();
+}
+function buildNavGrid(){
+    const grid=document.getElementById("nav-grid");grid.innerHTML="";
+    QUESTIONS.forEach((q,i)=>{
+        const btn=document.createElement("button");btn.className="nav-btn";btn.innerText=i+1;
+        btn.onclick=()=>loadQuestion(i);btn.id=`nav-btn-${i}`;
+        if(userAnswers[i]!==null)btn.classList.add("answered");grid.appendChild(btn);
+    });
+}
+function loadQuestion(i){
+    if(i<0||i>=QUESTIONS.length)return;currentQuestionIndex=i;const q=QUESTIONS[i];
+    document.getElementById("section-badge").innerText=q.section;
+    document.getElementById("marks-badge").innerText=`${q.marks} Mark${q.marks>1?'s':''}`;
+    document.getElementById("question-text").innerHTML=`<strong style="margin-right:10px;">Q${i+1}.</strong> ${q.text}`;
+    const optContainer=document.getElementById("options-container");optContainer.innerHTML="";
+    q.options.forEach((optText,optIndex)=>{
+        optContainer.innerHTML+=`<label class="option-label ${userAnswers[i]===optIndex?'selected':''}" onclick="selectOption(${i},${optIndex})">
+        <input type="radio" name="q${i}" ${userAnswers[i]===optIndex?'checked':''}><span>${String.fromCharCode(65+optIndex)}) ${optText}</span></label>`;
+    });
+    if(window.MathJax&&window.MathJax.typesetPromise)MathJax.typesetPromise([document.getElementById("question-text"),optContainer]).catch(e=>console.error(e));
+    document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));
+    document.getElementById(`nav-btn-${i}`).classList.add("active");
+    document.getElementById("btn-prev").style.visibility=i===0?"hidden":"visible";
+    document.getElementById("btn-next").style.visibility=i===QUESTIONS.length-1?"hidden":"visible";
+}
+function selectOption(qI,oI){userAnswers[qI]=oI;sessionStorage.setItem("examAnswers",JSON.stringify(userAnswers));document.getElementById(`nav-btn-${qI}`).classList.add("answered");loadQuestion(qI);}
+function changeQuestion(step){loadQuestion(currentQuestionIndex+step);}
+function startTimer(){
+    const td=document.getElementById("timer-display");
+    timerInterval=setInterval(()=>{
+        if(timeRemaining<=0){clearInterval(timerInterval);submitExam();}
+        else{timeRemaining--;sessionStorage.setItem("examTime",timeRemaining);
+        td.innerText=`${Math.floor(timeRemaining/60).toString().padStart(2,'0')}:${(timeRemaining%60).toString().padStart(2,'0')}`;
+        if(timeRemaining<=300)td.style.color="var(--dan)";}
+    },1000);
+}
+function confirmSubmit(){
+    const unans=userAnswers.filter(a=>a===null).length;
+    if(window.confirm(unans>0?`You have ${unans} unanswered questions. Submit?`:"Ready to submit?"))submitExam();
+}
+function submitExam(){
+    clearInterval(timerInterval);let score=0,max=0,miss=[];
+    QUESTIONS.forEach((q,i)=>{max+=q.marks;if(userAnswers[i]===q.correct)score+=q.marks;else miss.push("Q"+(i+1));});
+    const payload={studentName:studentName,standard:HARDCODED_STD,examName:EXAM_NAME,subject:HARDCODED_SUBJECT,score:`${score}/${max}`,wrongAnswers:miss.length>0?miss.join(", "):"None",answers:userAnswers};
+    fetch(WEB_APP_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(payload)}).catch(e=>console.error(e));
+    localStorage.setItem(`submitted_data_${EXAM_KEY}`,JSON.stringify(payload));sessionStorage.clear();
+    showReviewScreen(score,max);
+}
+function showReviewScreen(s,m){
+    document.getElementById("exam-screen").classList.remove("active");document.getElementById("result-screen").classList.add("active");
+    document.getElementById("final-student-name").innerText=`Candidate: ${studentName}`;document.getElementById("final-score").innerText=`${s}/${m}`;
+    const pct=(s/m)*100;
+    document.getElementById("ai-feedback").innerText=pct>=90?"Absolutely stellar! You are well prepared to ace the Olympiad.":pct>=60?"Great job! Your fundamentals are strong. Keep practicing complex simplifications.":"We recommend going back to the foundational concepts and trying again.";
+    const rc=document.getElementById("review-container");rc.innerHTML="";
+    QUESTIONS.forEach((q,i)=>{
+        const isC=userAnswers[i]===q.correct;
+        rc.innerHTML+=`<div class="review-item"><div class="review-q">Q${i+1}. ${q.text} <span style="float:right;color:var(--${isC?'suc':'dan'});font-size:0.9rem;">${isC?'✓ Correct':'✗ Incorrect'} (${isC?q.marks:0}/${q.marks})</span></div>
+        <div class="${isC?'correct-ans':'wrong-ans'}"><strong>Your Answer:</strong> ${userAnswers[i]!==null?q.options[userAnswers[i]]:"Not Attempted"}</div>
+        ${!isC?`<div class="correct-ans"><strong>Correct Answer:</strong> ${q.options[q.correct]}</div>`:''}
+        <div class="explanation"><strong>Explanation:</strong><br> ${q.exp}</div></div>`;
+    });
+    if(window.MathJax&&window.MathJax.typesetPromise)MathJax.typesetPromise([rc]).catch(e=>console.error(e));
+}
+</script></body></html>

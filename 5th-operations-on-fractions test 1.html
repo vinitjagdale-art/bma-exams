@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5th Maths Olympiad - Master Template</title>
+    
+    <script>
+      MathJax = {
+        tex: { inlineMath: [['$', '$']] }
+      };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <style>
+        /* Faint Orange Theme for 5th Maths Olympiad */
+        :root { 
+            --primary-bg: #4a3521; 
+            --text-color: #ffffff; 
+            --accent-color: #e67e22; /* Faint Orange */
+            --error: #ff5252; 
+            --correct: #81c784; 
+            --answered: #ff9800; 
+        }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--primary-bg); color: var(--text-color); margin: 0; padding: 10px; display: flex; justify-content: center; }
+        #exam-container { width: 100%; max-width: 850px; background: rgba(255, 255, 255, 0.1); padding: 1.5rem; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+        .page { display: none; }
+        .active { display: block; }
+        #nav-grid { 
+            display: grid; 
+            grid-template-columns: repeat(10, 35px); 
+            justify-content: center; 
+            gap: 12px; 
+            margin-top: 20px; 
+            background: rgba(0,0,0,0.2); 
+            padding: 15px; 
+            border-radius: 8px; 
+        }
+        .nav-box { 
+            width: 35px; 
+            height: 35px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            border-radius: 50%; 
+            background: rgba(255, 255, 255, 0.05); 
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            cursor: pointer; 
+            font-weight: bold; 
+            font-size: 0.9rem; 
+            transition: all 0.3s ease; 
+        }
+        .nav-box.current { 
+            background: var(--accent-color); 
+            border: 2px solid #fff; 
+            box-shadow: 0 0 10px var(--accent-color), 0 0 20px var(--accent-color); 
+            color: #fff; 
+        }
+        .nav-box.answered { 
+            background: var(--answered); 
+            border: 2px solid #fff;
+            box-shadow: 0 0 8px var(--answered), 0 0 15px var(--answered); 
+            color: #fff;
+        }
+        .info-box { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 0.9rem; }
+        .header-main { text-align: center; border-bottom: 2px solid var(--accent-color); margin-bottom: 15px; padding-bottom: 10px; }
+        #question-scroll-area { max-height: 60vh; overflow-y: auto; padding-right: 10px; margin-top: 10px; }
+        .option-label { display: flex; align-items: center; background: rgba(255,255,255,0.05); margin: 10px 0; padding: 15px; border-radius: 8px; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
+        .option-label:hover { background: rgba(255,255,255,0.12); }
+        input[type="radio"] { margin-right: 15px; transform: scale(1.2); }
+        .btn-container { margin-top: 20px; display: flex; justify-content: space-between; }
+        button { padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; background: var(--accent-color); color: white; font-weight: bold; }
+        .review-card { background: rgba(0,0,0,0.3); padding: 15px; margin: 15px 0; border-radius: 8px; border-left: 5px solid var(--error); }
+        .review-card.status-correct { border-left-color: var(--correct); }
+    </style>
+</head>
+<body>
+
+<div id="exam-container">
+    <div id="page-landing" class="page active">
+        <h1 class="header-main">5th Maths Olympiad</h1>
+        <div class="info-box" style="display: block;">
+            <p><strong>Subject:</strong> <span id="display-subject">Maths</span></p>
+            <p id="exam-title-display"><strong>Topic:</strong> Loading...</p>
+            <p><strong>Standard:</strong> <span id="display-std">5th</span> | <strong>Marks:</strong> <span id="display-total-marks">20</span> | <strong>Time:</strong> <span id="display-total-time">30</span> Mins</p>
+        </div>
+        <div style="margin: 30px 0; text-align: center;">
+            <input type="text" id="student-name" placeholder="Enter Full Student Name" style="width: 80%; padding: 12px; border-radius: 6px; border: none;">
+        </div>
+        <div style="text-align: center;"><button onclick="startExam()">Start Assignment</button></div>
+    </div>
+
+    <div id="page-exam" class="page">
+        <div class="header-main" style="font-size: 1.2rem;">5th Maths Olympiad</div>
+        <div class="info-box">
+            <span><strong>Time Left:</strong> <span id="timer-display">Loading...</span></span>
+            <span><strong>Marks:</strong> <span id="exam-marks-display">20</span></span>
+            <span><strong>Questions:</strong> <span id="exam-questions-display">20</span></span>
+        </div>
+        <div id="question-scroll-area">
+            <h3 id="q-title"></h3>
+            <p id="q-text" style="font-size: 1.1rem; line-height: 1.6;"></p>
+            <div id="options-container"></div>
+        </div>
+        <div class="btn-container">
+            <button id="prev-btn" onclick="changeQuestion(-1)">Back</button>
+            <button id="next-btn" onclick="changeQuestion(1)">Next</button>
+        </div>
+        <div id="nav-grid"></div>
+    </div>
+
+    <div id="page-result" class="page">
+        <h2 id="res-name" style="text-align: center;"></h2>
+        <h1 style="text-align: center;">Score: <span id="final-score"></span></h1>
+        <div id="ai-analysis" style="background: rgba(230, 126, 34, 0.15); padding: 20px; border-radius: 10px; margin: 20px 0; line-height: 1.5;"></div>
+        <h3>Question Review</h3>
+        <div id="review-list"></div>
+    </div>
+</div>
+
+<script>
+    // ==========================================
+    // 1. UPDATE THESE VARIABLES FOR EVERY NEW EXAM
+    // ==========================================
+    const EXAM_KEY = "5th-olympiad-operation-on-fractions-test1"; // Must be unique so localStorage doesn't overlap
+    const EXAM_NAME = "Operation on Fractions Test 1"; 
+    
+    const HARDCODED_STD = "5th";
+    const HARDCODED_SUBJECT = "Maths";
+    
+    let timeRemaining = 1800; // Time in seconds (e.g., 1800 = 30 Minutes)
+
+    // ==========================================
+    // 2. PASTE JSON QUESTION DATA HERE
+    // ==========================================
+    const questions = [
+  {
+    "q": "There are 40 students in a class. If $\\frac{3}{4}$ of them attended a picnic, how many students did not attend the picnic?",
+    "options": ["10", "20", "30", "40"],
+    "ans": 0,
+    "topic": "Fraction of a Quantity",
+    "explain": "First, find the number of students who attended: $\\frac{3}{4}$ of 40 = 30 students. The number of students who did not attend is the total minus the attendees: 40 - 30 = 10."
+  },
+  {
+    "q": "A cake weighting 2 kg is divided into five equal parts. Then again each part is divided into four equal parts. Find the weight of each part.",
+    "options": ["60 g", "80 g", "100 g", "120 g"],
+    "ans": 2,
+    "topic": "Division of Fractions",
+    "explain": "Convert 2 kg to 2000 g. Divided into 5 equal parts, each part is $\\frac{2000}{5} = 400$ g. When each of these is divided into 4 parts, the weight becomes $\\frac{400}{4} = 100$ g."
+  },
+  {
+    "q": "The distance between two stations is 25 km. A train starts from one station and goes 15 km towards the other station. What fraction of the total distance is left to be covered by the train?",
+    "options": ["$\\frac{3}{5}$", "$\\frac{4}{5}$", "$\\frac{2}{5}$", "$\\frac{1}{4}$"],
+    "ans": 2,
+    "topic": "Fractional Representation",
+    "explain": "The total distance is 25 km, and 15 km is covered. The remaining distance is 25 - 15 = 10 km. The fraction left to be covered is $\\frac{10}{25}$, which simplifies to $\\frac{2}{5}$."
+  },
+  {
+    "q": "A man sold $\\frac{1}{2}$ of his land. He gave $\\frac{1}{2}$ of the remaining portion to his son. What fraction of the total land is left with him?",
+    "options": ["$\\frac{1}{2}$", "$\\frac{1}{3}$", "$\\frac{1}{4}$", "$\\frac{1}{5}$"],
+    "ans": 2,
+    "topic": "Successive Fractions",
+    "explain": "After selling $\\frac{1}{2}$, he has $\\frac{1}{2}$ remaining. He gives $\\frac{1}{2}$ of this remainder to his son, which is $\\frac{1}{2} \\times \\frac{1}{2} = \\frac{1}{4}$. The fraction left with him is $\\frac{1}{2} - \\frac{1}{4} = \\frac{1}{4}$."
+  },
+  {
+    "q": "If $C = \\frac{4}{15} - \\frac{9}{15} + \\frac{6}{15}$, $A = \\frac{5}{15} - \\frac{3}{15}$, and $B = \\frac{4}{5} - \\frac{3}{5} + \\frac{9}{5}$, then find the value of $\\frac{A+B+C}{2}$.",
+    "options": ["$\\frac{11}{10}$", "$\\frac{10}{11}$", "$\\frac{9}{10}$", "$\\frac{7}{10}$"],
+    "ans": 0,
+    "topic": "Operations on Multiple Fractions",
+    "explain": "Calculate each: $C = \\frac{1}{15}$, $A = \\frac{2}{15}$, $B = \\frac{10}{5} = \\frac{30}{15}$. Sum $A+B+C = \\frac{2+30+1}{15} = \\frac{33}{15}$. Halving this gives $\\frac{33}{30}$, which simplifies to $\\frac{11}{10}$."
+  },
+  {
+    "q": "A is twice of B. If $A = \\frac{12}{15}$, then find the value of $A+B$.",
+    "options": ["$\\frac{3}{5}$", "$\\frac{4}{5}$", "$\\frac{2}{5}$", "$\\frac{6}{5}$"],
+    "ans": 3,
+    "topic": "Algebraic Fractions",
+    "explain": "Since A is twice B, $B = A \\div 2$. So, $B = \\frac{12}{15} \\div 2 = \\frac{6}{15}$. The sum $A+B = \\frac{12}{15} + \\frac{6}{15} = \\frac{18}{15}$, which simplifies to $\\frac{6}{5}$."
+  },
+  {
+    "q": "Which one of the following numbers should be multiplied by $\\frac{15}{36}$ such that the resulting fraction becomes $\\frac{5}{6}$?",
+    "options": ["2", "3", "4", "5"],
+    "ans": 0,
+    "topic": "Multiplication of Fractions",
+    "explain": "Let the number be $x$. So, $x \\times \\frac{15}{36} = \\frac{5}{6}$. Solving for $x$, we get $x = \\frac{5}{6} \\times \\frac{36}{15} = 2$."
+  },
+  {
+    "q": "A is a fraction. When A is added with $\\frac{7}{15}$, the sum becomes $\\frac{3}{5}$. Find the value of A.",
+    "options": ["$\\frac{2}{15}$", "$\\frac{4}{5}$", "$\\frac{11}{15}$", "$\\frac{1}{15}$"],
+    "ans": 0,
+    "topic": "Addition of Fractions",
+    "explain": "We have $A + \\frac{7}{15} = \\frac{3}{5}$. To find A, subtract: $A = \\frac{3}{5} - \\frac{7}{15}$. Convert $\\frac{3}{5}$ to $\\frac{9}{15}$. $A = \\frac{9}{15} - \\frac{7}{15} = \\frac{2}{15}$."
+  },
+  {
+    "q": "Which one of the following fractions should be subtracted from $\\frac{9}{15}$ such that the difference becomes $\\frac{11}{20}$?",
+    "options": ["$\\frac{1}{15}$", "$\\frac{1}{20}$", "$\\frac{1}{30}$", "$\\frac{1}{60}$"],
+    "ans": 1,
+    "topic": "Subtraction of Fractions",
+    "explain": "Let the fraction be $x$. $\\frac{9}{15} - x = \\frac{11}{20}$. Simplify $\\frac{9}{15}$ to $\\frac{3}{5}$. So, $x = \\frac{3}{5} - \\frac{11}{20} = \\frac{12}{20} - \\frac{11}{20} = \\frac{1}{20}$."
+  },
+  {
+    "q": "Christina reads $\\frac{5}{7}$ of a book and still she has to read 140 pages to finish the book. How many pages are there in the book?",
+    "options": ["420", "440", "470", "490"],
+    "ans": 3,
+    "topic": "Fraction of a Quantity",
+    "explain": "If she read $\\frac{5}{7}$, then $\\frac{2}{7}$ of the book is left. We know $\\frac{2}{7}$ equals 140 pages. Therefore, $\\frac{1}{7}$ equals 70 pages, making the total book $70 \\times 7 = 490$ pages."
+  },
+  {
+    "q": "Simplify the following expression: $\\frac{2}{3} + \\frac{3}{4} - \\frac{1}{2}$",
+    "options": ["$\\frac{11}{12}$", "$\\frac{5}{12}$", "$\\frac{7}{12}$", "$\\frac{1}{2}$"],
+    "ans": 0,
+    "topic": "Operations on Multiple Fractions",
+    "explain": "Find the lowest common denominator, which is 12. Convert all fractions: $\\frac{8}{12} + \\frac{9}{12} - \\frac{6}{12} = \\frac{17}{12} - \\frac{6}{12} = \\frac{11}{12}$."
+  },
+  {
+    "q": "Find the product of $\\frac{3}{8}$ and $\\frac{16}{21}$.",
+    "options": ["$\\frac{1}{7}$", "$\\frac{2}{7}$", "$\\frac{3}{7}$", "$\\frac{4}{7}$"],
+    "ans": 1,
+    "topic": "Multiplication of Fractions",
+    "explain": "Cross-simplify before multiplying: 3 goes into 21 exactly 7 times, and 8 goes into 16 exactly 2 times. The result is $\\frac{1 \\times 2}{1 \\times 7} = \\frac{2}{7}$."
+  },
+  {
+    "q": "How many minutes are there in $\\frac{5}{6}$ of an hour?",
+    "options": ["40 minutes", "45 minutes", "50 minutes", "55 minutes"],
+    "ans": 2,
+    "topic": "Fraction of a Quantity",
+    "explain": "One hour is 60 minutes. To find $\\frac{5}{6}$ of an hour, multiply 60 by $\\frac{5}{6}$. $60 \\div 6 = 10$, and $10 \\times 5 = 50$ minutes."
+  },
+  {
+    "q": "A ribbon is $5\\frac{1}{2}$ meters long. It is cut into small pieces measuring $\\frac{1}{2}$ meter each. How many pieces will be formed?",
+    "options": ["10", "11", "12", "13"],
+    "ans": 1,
+    "topic": "Division of Mixed Fractions",
+    "explain": "Convert the mixed fraction to an improper fraction: $5\\frac{1}{2} = \\frac{11}{2}$. Divide this by the piece length: $\\frac{11}{2} \\div \\frac{1}{2} = \\frac{11}{2} \\times \\frac{2}{1} = 11$ pieces."
+  },
+  {
+    "q": "Which of the following fractions is the greatest?",
+    "options": ["$\\frac{3}{4}$", "$\\frac{4}{5}$", "$\\frac{5}{6}$", "$\\frac{6}{7}$"],
+    "ans": 3,
+    "topic": "Comparing Fractions",
+    "explain": "Notice the pattern: the difference between the numerator and denominator is always 1. As the numbers get larger in this pattern, the fraction's value gets closer to a whole 1. Therefore, $\\frac{6}{7}$ is the greatest."
+  },
+  {
+    "q": "Divide $\\frac{7}{9}$ by $\\frac{14}{27}$.",
+    "options": ["$\\frac{3}{2}$", "$\\frac{2}{3}$", "$\\frac{9}{14}$", "$\\frac{1}{3}$"],
+    "ans": 0,
+    "topic": "Division of Fractions",
+    "explain": "Multiply the first fraction by the reciprocal of the second: $\\frac{7}{9} \\times \\frac{27}{14}$. Simplify crosswise to get $\\frac{1}{1} \\times \\frac{3}{2} = \\frac{3}{2}$."
+  },
+  {
+    "q": "A boy spent $\\frac{1}{3}$ of his allowance on food, $\\frac{1}{4}$ on books, and $\\frac{1}{6}$ on travel. What fraction of his allowance is left?",
+    "options": ["$\\frac{1}{2}$", "$\\frac{1}{3}$", "$\\frac{1}{4}$", "$\\frac{1}{6}$"],
+    "ans": 2,
+    "topic": "Word Problems on Fractions",
+    "explain": "First, sum up his expenses using a common denominator of 12: $\\frac{4}{12} + \\frac{3}{12} + \\frac{2}{12} = \\frac{9}{12}$. This simplifies to $\\frac{3}{4}$. The fraction left is $1 - \\frac{3}{4} = \\frac{1}{4}$."
+  },
+  {
+    "q": "Find the difference between $3\\frac{1}{4}$ and $1\\frac{3}{4}$.",
+    "options": ["$1\\frac{1}{4}$", "$1\\frac{1}{2}$", "$2\\frac{1}{4}$", "$2\\frac{1}{2}$"],
+    "ans": 1,
+    "topic": "Subtraction of Mixed Fractions",
+    "explain": "Convert to improper fractions: $\\frac{13}{4} - \\frac{7}{4} = \\frac{6}{4}$. Simplifying this gives $\\frac{3}{2}$, which is equal to $1\\frac{1}{2}$."
+  },
+  {
+    "q": "If $\\frac{3}{5}$ of a certain number is 45, what is $\\frac{1}{3}$ of that same number?",
+    "options": ["20", "25", "30", "35"],
+    "ans": 1,
+    "topic": "Algebraic Fractions",
+    "explain": "Let the number be N. $\\frac{3}{5} \\times N = 45$. This means N = $45 \\times \\frac{5}{3} = 75$. Now find $\\frac{1}{3}$ of 75, which is $75 \\div 3 = 25$."
+  },
+  {
+    "q": "What is the equivalent fraction of $\\frac{4}{7}$ with a denominator of 35?",
+    "options": ["$\\frac{16}{35}$", "$\\frac{20}{35}$", "$\\frac{24}{35}$", "$\\frac{28}{35}$"],
+    "ans": 1,
+    "topic": "Equivalent Fractions",
+    "explain": "To change the denominator from 7 to 35, you must multiply it by 5. Whatever you do to the bottom, you must do to the top: $4 \\times 5 = 20$. The equivalent fraction is $\\frac{20}{35}$."
+  }
+];
+
+    // ==========================================
+    // DO NOT CHANGE ANYTHING BELOW THIS LINE
+    // ==========================================
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwEutZaKIAodDqKVocXPmgGlsfyO6ma8vuQK4sFgEobmvD73QQwztuH4qbT_R3g1Figtw/exec";
+    
+    let timerInterval;
+    let currentQ = 0;
+    let userAnswers = []; 
+    let studentName = "";
+
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            timeRemaining--;
+            sessionStorage.setItem('time_remaining', timeRemaining);
+            updateTimerDisplay();
+            if (timeRemaining <= 0) { 
+                clearInterval(timerInterval); 
+                submitExam(true); 
+            }
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        const mins = Math.floor(timeRemaining / 60);
+        const secs = timeRemaining % 60;
+        document.getElementById('timer-display').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function startExam() {
+        studentName = document.getElementById('student-name').value.trim();
+        if (!studentName) return alert("Please enter your name");
+        sessionStorage.setItem('name', studentName);
+        sessionStorage.setItem('in_progress_' + EXAM_KEY, "true");
+        document.getElementById('page-landing').classList.remove('active');
+        document.getElementById('page-exam').classList.add('active');
+        startTimer();
+        renderGrid();
+        showQuestion();
+    }
+
+    function renderGrid() {
+        const grid = document.getElementById('nav-grid');
+        grid.innerHTML = "";
+        questions.forEach((_, i) => {
+            const div = document.createElement('div');
+            div.className = `nav-box ${i === currentQ ? 'current' : ''} ${userAnswers[i] !== null ? 'answered' : ''}`;
+            div.innerText = i + 1;
+            div.onclick = () => jumpTo(i);
+            grid.appendChild(div);
+        });
+    }
+
+    function showQuestion() {
+        const q = questions[currentQ];
+        document.getElementById('q-title').innerText = `Question ${currentQ + 1}`;
+        document.getElementById('q-text').innerHTML = q.q;
+        const optCont = document.getElementById('options-container');
+        optCont.innerHTML = "";
+        q.options.forEach((opt, idx) => {
+            const lbl = document.createElement('label');
+            lbl.className = "option-label";
+            lbl.innerHTML = `<input type="radio" name="opt" ${userAnswers[currentQ] === idx ? 'checked' : ''} onchange="saveAns(${idx})"> <div>${opt}</div>`;
+            optCont.appendChild(lbl);
+        });
+        document.getElementById('next-btn').innerText = currentQ === questions.length - 1 ? "Finish" : "Next";
+        sessionStorage.setItem('currentQ', currentQ);
+        renderGrid();
+        
+        // Tells MathJax to render the newly injected LaTeX formulas
+        if (window.MathJax) {
+            MathJax.typesetPromise();
+        }
+    }
+
+    function saveAns(idx) {
+        userAnswers[currentQ] = idx;
+        sessionStorage.setItem('answers', JSON.stringify(userAnswers));
+        renderGrid();
+    }
+
+    function jumpTo(i) { currentQ = i; showQuestion(); }
+
+    function changeQuestion(dir) {
+        if (dir === 1 && currentQ === questions.length - 1) {
+            submitExam(false); 
+        } else { 
+            currentQ += dir; 
+            showQuestion(); 
+        }
+    }
+
+    async function submitExam(isAutoSubmit = false) {
+        if (!isAutoSubmit) {
+            const unansweredCount = userAnswers.filter(ans => ans === null).length;
+            if (unansweredCount > 0) {
+                const confirmSubmit = confirm(`You have left ${unansweredCount} question(s) unanswered. Are you sure you want to finish and submit?`);
+                if (!confirmSubmit) return; 
+            }
+        }
+
+        clearInterval(timerInterval);
+        let score = 0;
+        let topicMap = {};
+        let reviewHTML = "";
+        let missedQuestions = [];
+
+        questions.forEach((q, i) => {
+            const correct = userAnswers[i] === q.ans;
+            if (correct) {
+                score++;
+            } else {
+                missedQuestions.push("Q" + (i + 1));
+            }
+            if (!topicMap[q.topic]) topicMap[q.topic] = { total: 0, correct: 0, failedQ: [] };
+            topicMap[q.topic].total++;
+            if (correct) topicMap[q.topic].correct++;
+            else topicMap[q.topic].failedQ.push(i + 1);
+
+            reviewHTML += `<div class="review-card ${correct ? 'status-correct' : ''}">
+                <strong>Q${i+1}:</strong> ${q.q}<br>
+                Your Answer: <span style="color:${correct ? '#81c784' : '#ff5252'}">${userAnswers[i] !== null ? q.options[userAnswers[i]] : 'Skipped'}</span><br>
+                Correct: ${q.options[q.ans]}<br>
+                <em>Explanation: ${q.explain}</em></div>`;
+        });
+
+        const scoreStr = `${score}/${questions.length}`;
+        let wrongAnswersString = missedQuestions.length > 0 ? missedQuestions.join(", ") : "None";
+
+        document.getElementById('page-exam').classList.remove('active');
+        document.getElementById('page-result').classList.add('active');
+        document.getElementById('res-name').innerText = studentName;
+        document.getElementById('final-score').innerText = scoreStr;
+        document.getElementById('review-list').innerHTML = reviewHTML;
+
+        let analysis = `<strong>AI Analysis Feedback (Question-Specific):</strong><br><br>`;
+        for (let t in topicMap) {
+            let pct = (topicMap[t].correct / topicMap[t].total) * 100;
+            if (pct === 100) {
+                analysis += `• Mastery achieved in ${t}. Your concepts are perfectly clear.<br>`;
+            } else if (pct >= 60) {
+                analysis += `• Strong foundation in ${t}, but minor errors occurred in Question(s) ${topicMap[t].failedQ.join(', ')}.<br>`;
+            } else {
+                analysis += `• Weak performance in ${t}. For example, in Question(s) ${topicMap[t].failedQ.join(', ')}, you failed to apply the rules correctly.<br>`;
+            }
+        }
+        document.getElementById('ai-analysis').innerHTML = analysis;
+
+        // Render MathJax in the review section
+        if (window.MathJax) {
+            MathJax.typesetPromise();
+        }
+
+        fetch(WEB_APP_URL, { 
+            method: "POST", 
+            mode: "no-cors", 
+            body: JSON.stringify({ 
+                studentName, 
+                standard: HARDCODED_STD, 
+                examName: EXAM_NAME, 
+                subject: HARDCODED_SUBJECT,
+                score: scoreStr, 
+                wrongAnswers: wrongAnswersString 
+            }) 
+        });
+        
+        localStorage.setItem('submitted_data_' + EXAM_KEY, JSON.stringify({ name: studentName, answers: userAnswers, score: scoreStr, topicMap }));
+        sessionStorage.clear();
+        window.scrollTo(0, 0);
+    }
+
+    window.onload = () => {
+        // Initialize dynamic UI elements based on variables
+        userAnswers = new Array(questions.length).fill(null);
+        document.getElementById('exam-title-display').innerHTML = `<strong>Topic:</strong> ${EXAM_NAME}`;
+        document.getElementById('display-subject').innerText = HARDCODED_SUBJECT;
+        document.getElementById('display-std').innerText = HARDCODED_STD;
+        document.getElementById('display-total-marks').innerText = questions.length;
+        document.getElementById('exam-marks-display').innerText = questions.length;
+        document.getElementById('exam-questions-display').innerText = questions.length;
+        document.getElementById('display-total-time').innerText = Math.floor(timeRemaining / 60);
+
+        const saved = localStorage.getItem('submitted_data_' + EXAM_KEY);
+        if (saved) {
+            const data = JSON.parse(saved);
+            studentName = data.name;
+            userAnswers = data.answers;
+            showResultsFromStorage(data);
+        } else if (sessionStorage.getItem('in_progress_' + EXAM_KEY)) {
+            studentName = sessionStorage.getItem('name');
+            userAnswers = JSON.parse(sessionStorage.getItem('answers')) || userAnswers;
+            currentQ = parseInt(sessionStorage.getItem('currentQ')) || 0;
+            timeRemaining = parseInt(sessionStorage.getItem('time_remaining')) || timeRemaining;
+            document.getElementById('page-landing').classList.remove('active');
+            document.getElementById('page-exam').classList.add('active');
+            startTimer();
+            updateTimerDisplay();
+            renderGrid();
+            showQuestion();
+        } else {
+            updateTimerDisplay();
+        }
+    };
+
+    function showResultsFromStorage(data) {
+        document.getElementById('page-landing').classList.remove('active');
+        document.getElementById('page-result').classList.add('active');
+        document.getElementById('res-name').innerText = data.name;
+        document.getElementById('final-score').innerText = data.score;
+        let reviewHTML = "";
+        questions.forEach((q, i) => {
+            const correct = userAnswers[i] === q.ans;
+            reviewHTML += `<div class="review-card ${correct ? 'status-correct' : ''}">
+                <strong>Q${i+1}:</strong> ${q.q}<br>
+                Your Answer: <span style="color:${correct ? '#81c784' : '#ff5252'}">${userAnswers[i] !== null ? q.options[userAnswers[i]] : 'Skipped'}</span><br>
+                Correct: ${q.options[q.ans]}<br>
+                <em>Explanation: ${q.explain}</em></div>`;
+        });
+        document.getElementById('review-list').innerHTML = reviewHTML;
+        let analysis = `<strong>AI Analysis Feedback (Question-Specific):</strong><br><br>`;
+        for (let t in data.topicMap) {
+            let pct = (data.topicMap[t].correct / data.topicMap[t].total) * 100;
+            if (pct === 100) {
+                analysis += `• Mastery achieved in ${t}. Your concepts are perfectly clear.<br>`;
+            } else if (pct >= 60) {
+                analysis += `• Strong foundation in ${t}, but minor errors occurred in Question(s) ${data.topicMap[t].failedQ.join(', ')}.<br>`;
+            } else {
+                analysis += `• Weak performance in ${t}. For example, in Question(s) ${data.topicMap[t].failedQ.join(', ')}, you failed to apply the rules correctly.<br>`;
+            }
+        }
+        document.getElementById('ai-analysis').innerHTML = analysis;
+        
+        // Render MathJax in the loaded review section
+        if (window.MathJax) {
+            MathJax.typesetPromise();
+        }
+    }
+</script>
+</body>
+</html>
