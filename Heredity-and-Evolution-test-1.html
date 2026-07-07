@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bright Minds Academy - 10th Science Heredity and Evolution</title>
+    <style>
+        :root {
+            --primary-bg: #0e1726;
+            --panel-bg: #16223a;
+            --panel-soft: #1d2c47;
+            --text-color: #e6ecf5;
+            --text-muted: #97a6c0;
+            --accent: #2dd4bf;
+            --accent-soft: rgba(45, 212, 191, 0.12);
+            --border: #2a3a5a;
+            --error: #f87171;
+            --correct: #4ade80;
+            --answered: #38bdf8;
+        }
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--primary-bg); color: var(--text-color); margin: 0; padding: 16px; display: flex; justify-content: center; }
+        #exam-container { width: 100%; max-width: 860px; background: var(--panel-bg); padding: 2rem; border-radius: 14px; border: 1px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.4); }
+        .page { display: none; }
+        .active { display: block; }
+
+        .header-main { text-align: center; margin: 0 0 4px; font-size: 1.5rem; letter-spacing: 0.5px; font-weight: 600; }
+        .header-sub { text-align: center; color: var(--accent); font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; }
+        .divider { height: 1px; background: var(--border); margin: 18px 0; }
+
+        #nav-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 10px; margin-top: 22px; background: var(--panel-soft); padding: 16px; border-radius: 10px; border: 1px solid var(--border); }
+        .nav-box {
+            aspect-ratio: 1; width: 100%;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%;
+            background: transparent; color: var(--text-muted);
+            cursor: pointer; font-weight: 600; font-size: 0.85rem;
+            border: 1.5px solid var(--border);
+            transition: all 0.18s ease;
+        }
+        .nav-box:hover { border-color: var(--accent); color: var(--text-color); }
+        .nav-box.current { background: var(--accent); border-color: var(--accent); color: #08131f; }
+        .nav-box.answered { border-color: var(--answered); color: var(--answered); }
+        .nav-box.current.answered { background: var(--accent); color: #08131f; }
+
+        .info-box { background: var(--panel-soft); padding: 16px; border-radius: 10px; margin-bottom: 22px; text-align: center; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 0.9rem; border: 1px solid var(--border); }
+        .info-box span strong { color: var(--text-muted); font-weight: 500; }
+
+        .detail-card { background: var(--panel-soft); padding: 8px 24px; border-radius: 12px; margin-bottom: 24px; border: 1px solid var(--border); }
+        .detail-row { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+        .detail-row:last-child { border-bottom: none; }
+        .detail-label { color: var(--text-muted); font-size: 0.95rem; flex-shrink: 0; }
+        .detail-value { color: var(--text-color); font-weight: 600; font-size: 1.02rem; text-align: right; }
+
+        #question-scroll-area { max-height: 58vh; overflow-y: auto; padding-right: 12px; margin-top: 10px; }
+        #q-title { color: var(--accent); font-size: 0.85rem; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+        #q-text { font-size: 1.12rem; line-height: 1.6; margin-top: 0; }
+        .option-label { display: block; background: var(--panel-soft); margin: 12px 0; padding: 15px 16px; border-radius: 9px; cursor: pointer; transition: all 0.18s ease; border: 1.5px solid var(--border); }
+        .option-label:hover { border-color: var(--accent); }
+        input[type="radio"] { margin-right: 12px; transform: scale(1.15); accent-color: var(--accent); }
+
+        input[type="text"] { width: 80%; padding: 13px 16px; border-radius: 9px; border: 1.5px solid var(--border); background: var(--panel-soft); color: var(--text-color); font-size: 1rem; outline: none; }
+        input[type="text"]:focus { border-color: var(--accent); }
+
+        .btn-container { margin-top: 22px; display: flex; justify-content: space-between; }
+        button { padding: 12px 30px; border: none; border-radius: 8px; cursor: pointer; background: var(--accent); color: #08131f; font-weight: 600; font-size: 0.95rem; transition: all 0.18s ease; }
+        button:hover { background: #5eead4; }
+        #prev-btn { background: transparent; color: var(--text-muted); border: 1.5px solid var(--border); }
+        #prev-btn:hover { color: var(--text-color); border-color: var(--accent); }
+
+        .review-card { background: var(--panel-soft); padding: 16px; margin: 14px 0; border-radius: 9px; border: 1px solid var(--border); border-left: 4px solid var(--error); line-height: 1.55; }
+        .review-card.status-correct { border-left-color: var(--correct); }
+        #timer-display { color: var(--accent); font-weight: 600; }
+        #ai-analysis { background: var(--accent-soft); padding: 22px; border-radius: 11px; margin: 22px 0; line-height: 1.6; border: 1px solid var(--border); }
+        #final-score { color: var(--accent); }
+        .locked-msg { text-align: center; padding: 16px; background: var(--accent-soft); border: 1px solid var(--accent); border-radius: 9px; margin-bottom: 18px; font-size: 0.92rem; }
+    </style>
+</head>
+<body>
+
+<div id="exam-container">
+    <div id="page-landing" class="page active">
+        <h1 class="header-main">Bright Minds Academy</h1>
+        <div class="header-sub">Examination Portal</div>
+        <div class="detail-card">
+            <div class="detail-row"><span class="detail-label">Subject</span><span class="detail-value">Science 2</span></div>
+            <div class="detail-row"><span class="detail-label">Topic</span><span class="detail-value" id="exam-title-display">Heredity and Evolution - Test 1</span></div>
+            <div class="detail-row"><span class="detail-label">Standard</span><span class="detail-value">10th</span></div>
+            <div class="detail-row"><span class="detail-label">Total Marks</span><span class="detail-value">30</span></div>
+            <div class="detail-row"><span class="detail-label">Total Questions</span><span class="detail-value">30</span></div>
+	    <div class="detail-row"><span class="detail-label">Time Allowed</span><span class="detail-value">30 Minutes</span></div>
+        </div>
+        <div style="margin: 28px 0; text-align: center;">
+            <input type="text" id="student-name" placeholder="Enter Full Student Name">
+        </div>
+        <div style="text-align: center;"><button onclick="startExam()">Start Assignment</button></div>
+    </div>
+
+    <div id="page-exam" class="page">
+        <h1 class="header-main" style="font-size: 1.2rem;">Bright Minds Academy</h1>
+        <div class="info-box">
+            <span><strong>Time Left:</strong> <span id="timer-display">30:00</span></span>
+            <span><strong>Marks:</strong> 30</span>
+            <span><strong>Questions:</strong> 30</span>
+        </div>
+        <div id="question-scroll-area">
+            <h3 id="q-title"></h3>
+            <p id="q-text"></p>
+            <div id="options-container"></div>
+        </div>
+        <div class="btn-container">
+            <button id="prev-btn" onclick="changeQuestion(-1)">Back</button>
+            <button id="next-btn" onclick="changeQuestion(1)">Next</button>
+        </div>
+        <div id="nav-grid"></div>
+    </div>
+
+    <div id="page-result" class="page">
+        <h2 id="res-name" style="text-align: center;"></h2>
+        <h1 style="text-align: center;">Score: <span id="final-score"></span></h1>
+        <div id="ai-analysis"></div>
+        <div class="divider"></div>
+        <h3>Question Review</h3>
+        <div id="review-list"></div>
+    </div>
+</div>
+
+<script>
+    const EXAM_KEY = "10th_Sci2_HeredityEvolution_Test1";
+    const EXAM_NAME = "Heredity and Evolution - Test 1";
+
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwEutZaKIAodDqKVocXPmgGlsfyO6ma8vuQK4sFgEobmvD73QQwztuH4qbT_R3g1Figtw/exec";
+    const HARDCODED_STD = "10th";
+    const HARDCODED_SUBJECT = "Science 2";
+
+    let timerInterval;
+    let timeRemaining = 1800;
+
+    const questions = [
+  {
+    "q": "Heredity is the transfer of biological characters from one generation to the next through:",
+    "options": ["Genes", "Enzymes", "Hormones", "Vitamins"],
+    "ans": 0,
+    "topic": "Heredity & Genetic Material",
+    "explain": "Heredity is the transfer of biological characters from one generation to another via genes."
+  },
+  {
+    "q": "Who is regarded as the pioneer (father) of modern genetics?",
+    "options": ["Charles Darwin", "Gregor Johann Mendel", "Hugo de Vries", "Jean-Baptiste Lamarck"],
+    "ans": 1,
+    "topic": "Heredity & Genetic Material",
+    "explain": "Gregor Johann Mendel is the pioneer of modern genetics; his work on heredity forms the basis of the subject."
+  },
+  {
+    "q": "The mutational theory that explained the reason behind sudden changes (1901) was proposed by:",
+    "options": ["Walter Sutton", "Oswald Avery", "Hugo de Vries", "Francois Jacob"],
+    "ans": 2,
+    "topic": "Heredity & Genetic Material",
+    "explain": "In 1901, the reasons behind sudden changes were understood due to the mutational theory of Hugo de Vries."
+  },
+  {
+    "q": "Except for viruses, the genetic material in all living organisms is:",
+    "options": ["RNA", "DNA", "Protein", "Lipid"],
+    "ans": 1,
+    "topic": "Heredity & Genetic Material",
+    "explain": "Avery, McCarty and McLeod proved that except viruses, all living organisms have DNA as their genetic material."
+  },
+  {
+    "q": "In 1902, Walter Sutton observed the paired chromosomes in the cells of:",
+    "options": ["Grasshopper", "Fruit fly", "Pea plant", "Bacteria"],
+    "ans": 0,
+    "topic": "Heredity & Genetic Material",
+    "explain": "Walter Sutton observed the paired chromosomes in the cells of the grasshopper, which was not known before then."
+  },
+  {
+    "q": "The transfer of information from a molecule of DNA to mRNA is called the ________ process.",
+    "options": ["Translation", "Transcription", "Translocation", "Mutation"],
+    "ans": 1,
+    "topic": "Central Dogma",
+    "explain": "The synthesis of mRNA according to the nucleotide sequence of DNA is called transcription."
+  },
+  {
+    "q": "In RNA, which base is present instead of the thymine found in DNA?",
+    "options": ["Adenine", "Guanine", "Cytosine", "Uracil"],
+    "ans": 3,
+    "topic": "Central Dogma",
+    "explain": "In RNA there is uracil in place of the thymine that is present in DNA."
+  },
+  {
+    "q": "The synthesis of proteins by DNA with the help of RNA is called:",
+    "options": ["Central Dogma", "Mutation", "Speciation", "Fertilization"],
+    "ans": 0,
+    "topic": "Central Dogma",
+    "explain": "Proteins are synthesized by DNA through RNA, and this overall process is called the Central Dogma."
+  },
+  {
+    "q": "The code for each amino acid, consisting of three nucleotides, is called a:",
+    "options": ["Anticodon", "Triplet codon", "Gene", "Ribosome"],
+    "ans": 1,
+    "topic": "Central Dogma",
+    "explain": "The code for each amino acid consists of three nucleotides and is called a triplet codon."
+  },
+  {
+    "q": "To bring in the correct amino acid, tRNA has an ________ complementary to the codon on mRNA.",
+    "options": ["Anticodon", "Enzyme", "Antibody", "Nucleus"],
+    "ans": 0,
+    "topic": "Central Dogma",
+    "explain": "tRNA has an anticodon having a sequence complementary to the codon on mRNA."
+  },
+  {
+    "q": "The process in which amino acids brought by tRNA are bonded together as per the mRNA message is called:",
+    "options": ["Transcription", "Translation", "Translocation", "Replication"],
+    "ans": 1,
+    "topic": "Central Dogma",
+    "explain": "The bonding of amino acids as per the codon sequence on mRNA is called translation."
+  },
+  {
+    "q": "The movement of the ribosome along the mRNA by the distance of one triplet codon is called:",
+    "options": ["Transcription", "Translation", "Translocation", "Mutation"],
+    "ans": 2,
+    "topic": "Central Dogma",
+    "explain": "The ribosome moving along mRNA by one triplet codon distance during protein synthesis is called translocation."
+  },
+  {
+    "q": "A minor change that occurs when any nucleotide of a gene suddenly changes its position is called:",
+    "options": ["Transcription", "Translocation", "Mutation", "Translation"],
+    "ans": 2,
+    "topic": "Mutation",
+    "explain": "When any nucleotide of a gene changes its position, it causes a minor change which is nothing but a mutation."
+  },
+  {
+    "q": "The genetic disorder sickle cell anaemia may be caused due to:",
+    "options": ["Mutation", "Translation", "Translocation", "Transcription"],
+    "ans": 0,
+    "topic": "Mutation",
+    "explain": "Some mutations can be considerable; for example, mutation may cause genetic disorders like sickle cell anaemia."
+  },
+  {
+    "q": "Evolution means a ________ change occurring in living organisms over a long duration.",
+    "options": ["Quick", "Gradual", "Internal", "External"],
+    "ans": 1,
+    "topic": "Evolution",
+    "explain": "Evolution is the gradual change occurring in living organisms over a long duration."
+  },
+  {
+    "q": "According to the theory of evolution, the first living material (protoplasm) was formed in the:",
+    "options": ["Air", "Soil", "Ocean", "Rocks"],
+    "ans": 2,
+    "topic": "Evolution",
+    "explain": "According to the theory of evolution, the first living material (protoplasm) was formed in the ocean."
+  },
+  {
+    "q": "The similarity in the bone structure of the human hand, foreleg of ox and flipper of whale is an example of:",
+    "options": ["Morphological evidence", "Anatomical evidence", "Embryological evidence", "Palaeontological evidence"],
+    "ans": 1,
+    "topic": "Evidences of Evolution",
+    "explain": "The similarity in structure of bones and joints of these organs is an anatomical evidence indicating a common ancestor."
+  },
+  {
+    "q": "Degenerated or underdeveloped useless organs of organisms are called:",
+    "options": ["Vestigial organs", "Vital organs", "Connecting links", "Fossils"],
+    "ans": 0,
+    "topic": "Evidences of Evolution",
+    "explain": "Degenerated or underdeveloped useless organs of organisms are called vestigial organs."
+  },
+  {
+    "q": "Which of the following is a vestigial organ present in the human body that is proof of evolution?",
+    "options": ["Human hand", "Appendix", "Heart", "Liver"],
+    "ans": 1,
+    "topic": "Evidences of Evolution",
+    "explain": "The appendix is a vestigial organ in the human body; other examples include the coccyx (tail-bone) and wisdom teeth."
+  },
+  {
+    "q": "The appendix, which is useless to humans, is a useful and fully functional organ in:",
+    "options": ["Monkeys", "Ruminants", "Birds", "Fishes"],
+    "ans": 1,
+    "topic": "Evidences of Evolution",
+    "explain": "The appendix is useless in humans but is a functional organ in ruminants (animals that chew the cud)."
+  },
+  {
+    "q": "The preserved remnants and impressions of ancient organisms found buried underground are called:",
+    "options": ["Vestiges", "Fossils", "Embryos", "Codons"],
+    "ans": 1,
+    "topic": "Evidences of Evolution",
+    "explain": "Remnants and impressions of buried organisms that remain preserved underground are called fossils."
+  },
+  {
+    "q": "The carbon dating method used to find the age of fossils is based on the radioactive decay of:",
+    "options": ["Carbon-12", "Carbon-14", "Uranium-235", "Nitrogen-14"],
+    "ans": 1,
+    "topic": "Evidences of Evolution",
+    "explain": "Carbon dating is based on the radioactive decay of naturally occurring C-14, and was developed by Willard Libby."
+  },
+  {
+    "q": "Peripatus is regarded as a connecting link between:",
+    "options": ["Annelida and Arthropoda", "Reptiles and Mammals", "Fishes and Amphibians", "Birds and Mammals"],
+    "ans": 0,
+    "topic": "Evidences of Evolution",
+    "explain": "Peripatus shows characters of both annelids and arthropods, so it is a connecting link between Annelida and Arthropoda."
+  },
+  {
+    "q": "Being a fish, I perform respiration with the help of lungs. Who am I?",
+    "options": ["Pomfret", "Lungfish", "Peripatus", "Duckbill platypus"],
+    "ans": 1,
+    "topic": "Evidences of Evolution",
+    "explain": "The lungfish performs respiration with the help of lungs even though it is a fish, indicating amphibians evolved from fishes."
+  },
+  {
+    "q": "Charles Darwin published his theory of natural selection in the book titled:",
+    "options": ["The Origin of Species", "Principia", "Philosophie Zoologique", "Systema Naturae"],
+    "ans": 0,
+    "topic": "Darwin's Theory of Natural Selection",
+    "explain": "Darwin published his theory of natural selection in his book titled 'Origin of Species'."
+  },
+  {
+    "q": "Darwin's theory of natural selection is based on the principle of:",
+    "options": ["Use and disuse of organs", "Survival of the fittest", "Inheritance of acquired characters", "Spontaneous generation"],
+    "ans": 1,
+    "topic": "Darwin's Theory of Natural Selection",
+    "explain": "Darwin's theory of natural selection preaches the survival of the fittest; nature selects only organisms fit to live."
+  },
+  {
+    "q": "Which of the following is an objection that was raised against Darwin's theory of natural selection?",
+    "options": ["It explained slow and abrupt changes clearly", "Natural selection is not the only factor responsible for evolution", "It supported inheritance of acquired characters", "It was based on the use and disuse of organs"],
+    "ans": 1,
+    "topic": "Darwin's Theory of Natural Selection",
+    "explain": "One main objection was that natural selection is not the only factor responsible for evolution."
+  },
+  {
+    "q": "Lamarck's theory of evolution is based on the principle of:",
+    "options": ["Survival of the fittest", "Use and disuse of organs", "Natural selection", "Mutation"],
+    "ans": 1,
+    "topic": "Lamarckism",
+    "explain": "Lamarck proposed that morphological changes occur due to the 'use or disuse of organs', which he said drives evolution."
+  },
+  {
+    "q": "A group of organisms that can produce fertile individuals through natural reproduction is called a:",
+    "options": ["Genus", "Species", "Family", "Population"],
+    "ans": 1,
+    "topic": "Speciation",
+    "explain": "A species is a group of organisms that can produce fertile individuals through natural reproduction."
+  },
+  {
+    "q": "The first record of a human-like animal (ape), found in North India and East Africa, is:",
+    "options": ["Australopithecus", "Neanderthal man", "Ramapithecus", "Cro-Magnon man"],
+    "ans": 2,
+    "topic": "Human Evolution",
+    "explain": "The first record of a human-like animal is the 'Ramapithecus' ape from North India and East Africa."
+  }
+];
+
+    let currentQ = 0;
+    let userAnswers = new Array(questions.length).fill(null);
+    let studentName = "";
+
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            timeRemaining--;
+            sessionStorage.setItem('time_remaining_' + EXAM_KEY, timeRemaining);
+            updateTimerDisplay();
+            if (timeRemaining <= 0) {
+                clearInterval(timerInterval);
+                submitExam(true);
+            }
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        const mins = Math.floor(timeRemaining / 60);
+        const secs = timeRemaining % 60;
+        document.getElementById('timer-display').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function startExam() {
+        studentName = document.getElementById('student-name').value.trim();
+        if (!studentName) return alert("Please enter your name");
+        sessionStorage.setItem('name_' + EXAM_KEY, studentName);
+        sessionStorage.setItem('in_progress_' + EXAM_KEY, "true");
+        document.getElementById('page-landing').classList.remove('active');
+        document.getElementById('page-exam').classList.add('active');
+        startTimer();
+        renderGrid();
+        showQuestion();
+    }
+
+    function renderGrid() {
+        const grid = document.getElementById('nav-grid');
+        grid.innerHTML = "";
+        questions.forEach((_, i) => {
+            const div = document.createElement('div');
+            div.className = `nav-box ${i === currentQ ? 'current' : ''} ${userAnswers[i] !== null ? 'answered' : ''}`;
+            div.innerText = i + 1;
+            div.onclick = () => jumpTo(i);
+            grid.appendChild(div);
+        });
+    }
+
+    function showQuestion() {
+        const q = questions[currentQ];
+        document.getElementById('q-title').innerText = `Question ${currentQ + 1} of ${questions.length}`;
+        document.getElementById('q-text').innerHTML = q.q;
+        const optCont = document.getElementById('options-container');
+        optCont.innerHTML = "";
+        q.options.forEach((opt, idx) => {
+            const lbl = document.createElement('label');
+            lbl.className = "option-label";
+            lbl.innerHTML = `<input type="radio" name="opt" ${userAnswers[currentQ] === idx ? 'checked' : ''} onchange="saveAns(${idx})"> ${opt}`;
+            optCont.appendChild(lbl);
+        });
+        document.getElementById('next-btn').innerText = currentQ === questions.length - 1 ? "Finish" : "Next";
+        sessionStorage.setItem('currentQ_' + EXAM_KEY, currentQ);
+        renderGrid();
+    }
+
+    function saveAns(idx) {
+        userAnswers[currentQ] = idx;
+        sessionStorage.setItem('answers_' + EXAM_KEY, JSON.stringify(userAnswers));
+        renderGrid();
+    }
+
+    function jumpTo(i) { currentQ = i; showQuestion(); }
+
+    function changeQuestion(dir) {
+        if (dir === 1 && currentQ === questions.length - 1) {
+            submitExam(false);
+        } else if (dir === -1 && currentQ === 0) {
+            return;
+        } else {
+            currentQ += dir;
+            showQuestion();
+        }
+    }
+
+    async function submitExam(isAutoSubmit = false) {
+        if (!isAutoSubmit) {
+            const unansweredCount = userAnswers.filter(ans => ans === null).length;
+            if (unansweredCount > 0) {
+                const confirmSubmit = confirm(`You have left ${unansweredCount} question(s) unanswered. Are you sure you want to finish and submit?`);
+                if (!confirmSubmit) return;
+            }
+        }
+
+        clearInterval(timerInterval);
+        let score = 0;
+        let topicMap = {};
+        let reviewHTML = "";
+        let missedQuestions = [];
+
+        questions.forEach((q, i) => {
+            const correct = userAnswers[i] === q.ans;
+            if (correct) { score++; } else { missedQuestions.push("Q" + (i + 1)); }
+            if (!topicMap[q.topic]) topicMap[q.topic] = { total: 0, correct: 0, failedQ: [] };
+            topicMap[q.topic].total++;
+            if (correct) topicMap[q.topic].correct++;
+            else topicMap[q.topic].failedQ.push(i + 1);
+            reviewHTML += buildReviewCard(q, i, correct);
+        });
+
+        const scoreStr = `${score}/${questions.length}`;
+        let wrongAnswersString = missedQuestions.length > 0 ? missedQuestions.join(", ") : "None";
+
+        document.getElementById('page-exam').classList.remove('active');
+        document.getElementById('page-result').classList.add('active');
+        document.getElementById('res-name').innerText = studentName;
+        document.getElementById('final-score').innerText = scoreStr;
+        document.getElementById('review-list').innerHTML = reviewHTML;
+        document.getElementById('ai-analysis').innerHTML = buildAnalysis(topicMap, score, questions.length);
+
+        fetch(WEB_APP_URL, {
+            method: "POST", mode: "no-cors",
+            body: JSON.stringify({ studentName, standard: HARDCODED_STD, examName: EXAM_NAME, subject: HARDCODED_SUBJECT, score: scoreStr, wrongAnswers: wrongAnswersString })
+        });
+
+        localStorage.setItem('submitted_data_' + EXAM_KEY, JSON.stringify({ name: studentName, answers: userAnswers, score: scoreStr, topicMap }));
+        sessionStorage.removeItem('in_progress_' + EXAM_KEY);
+        sessionStorage.removeItem('answers_' + EXAM_KEY);
+        sessionStorage.removeItem('currentQ_' + EXAM_KEY);
+        sessionStorage.removeItem('time_remaining_' + EXAM_KEY);
+        sessionStorage.removeItem('name_' + EXAM_KEY);
+        window.scrollTo(0, 0);
+    }
+
+    function buildReviewCard(q, i, correct) {
+        const userAns = userAnswers[i];
+        let feedback = "";
+        if (correct) {
+            feedback = `Correct! ${q.explain}`;
+        } else if (userAns === null) {
+            feedback = `You skipped this question. ${q.explain}`;
+        } else {
+            feedback = `Not quite. You chose "${q.options[userAns]}", but the correct answer is "${q.options[q.ans]}". ${q.explain}`;
+        }
+        return `<div class="review-card ${correct ? 'status-correct' : ''}">
+                <strong>Q${i+1}:</strong> ${q.q}<br>
+                Your Answer: <span style="color:${correct ? '#4ade80' : '#f87171'}">${userAns !== null ? q.options[userAns] : 'Skipped'}</span><br>
+                Correct: ${q.options[q.ans]}<br>
+                <em>Feedback: ${feedback}</em></div>`;
+    }
+
+    function buildAnalysis(topicMap, score, totalQ) {
+        const pctOverall = Math.round((score / totalQ) * 100);
+        let analysis = `<strong>AI Analysis Feedback (Question-Specific):</strong><br><br>`;
+        analysis += `Overall Score: ${score}/${totalQ} (${pctOverall}%). `;
+        if (pctOverall >= 80) {
+            analysis += `Excellent work! You have a strong grasp of the Heredity and Evolution chapter.<br><br>`;
+        } else if (pctOverall >= 50) {
+            analysis += `You have a fair understanding, but a few key concepts need revision.<br><br>`;
+        } else {
+            analysis += `This chapter needs more revision. Focus on the topics highlighted below.<br><br>`;
+        }
+        for (let t in topicMap) {
+            let pct = (topicMap[t].correct / topicMap[t].total) * 100;
+            if (pct === 100) {
+                analysis += `&bull; <strong>${t}:</strong> Mastery achieved (${topicMap[t].correct}/${topicMap[t].total}). Your concepts here are perfectly clear.<br>`;
+            } else if (pct >= 60) {
+                analysis += `&bull; <strong>${t}:</strong> Strong foundation (${topicMap[t].correct}/${topicMap[t].total}), but review Question(s) ${topicMap[t].failedQ.join(', ')} to clear minor gaps.<br>`;
+            } else {
+                analysis += `&bull; <strong>${t}:</strong> Needs more practice (${topicMap[t].correct}/${topicMap[t].total}). Revisit Question(s) ${topicMap[t].failedQ.join(', ')} and re-read this topic from the textbook before the exam.<br>`;
+            }
+        }
+        return analysis;
+    }
+
+    window.onload = () => {
+        document.getElementById('exam-title-display').innerText = EXAM_NAME;
+        const saved = localStorage.getItem('submitted_data_' + EXAM_KEY);
+        if (saved) {
+            const data = JSON.parse(saved);
+            studentName = data.name;
+            userAnswers = data.answers;
+            showResultsFromStorage(data);
+            return;
+        }
+        if (sessionStorage.getItem('in_progress_' + EXAM_KEY)) {
+            studentName = sessionStorage.getItem('name_' + EXAM_KEY);
+            userAnswers = JSON.parse(sessionStorage.getItem('answers_' + EXAM_KEY)) || userAnswers;
+            currentQ = parseInt(sessionStorage.getItem('currentQ_' + EXAM_KEY)) || 0;
+            timeRemaining = parseInt(sessionStorage.getItem('time_remaining_' + EXAM_KEY)) || 1800;
+            document.getElementById('page-landing').classList.remove('active');
+            document.getElementById('page-exam').classList.add('active');
+            startTimer();
+            updateTimerDisplay();
+            renderGrid();
+            showQuestion();
+        }
+    };
+
+    function showResultsFromStorage(data) {
+        document.getElementById('page-landing').classList.remove('active');
+        document.getElementById('page-result').classList.add('active');
+        document.getElementById('res-name').innerText = data.name;
+        document.getElementById('final-score').innerText = data.score;
+
+        let lockedMsg = document.createElement('div');
+        lockedMsg.className = 'locked-msg';
+        lockedMsg.innerHTML = 'This exam has already been submitted. Showing your previous result below.';
+        document.getElementById('page-result').insertBefore(lockedMsg, document.getElementById('res-name'));
+
+        let reviewHTML = "";
+        questions.forEach((q, i) => {
+            const correct = userAnswers[i] === q.ans;
+            reviewHTML += buildReviewCard(q, i, correct);
+        });
+        document.getElementById('review-list').innerHTML = reviewHTML;
+        const score = parseInt(data.score.split('/')[0]);
+        document.getElementById('ai-analysis').innerHTML = buildAnalysis(data.topicMap, score, questions.length);
+    }
+</script>
+</body>
+</html>

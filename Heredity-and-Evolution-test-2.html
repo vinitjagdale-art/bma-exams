@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bright Minds Academy - 10th Science Heredity and Evolution</title>
+    <style>
+        :root {
+            --primary-bg: #0e1726;
+            --panel-bg: #16223a;
+            --panel-soft: #1d2c47;
+            --text-color: #e6ecf5;
+            --text-muted: #97a6c0;
+            --accent: #2dd4bf;
+            --accent-soft: rgba(45, 212, 191, 0.12);
+            --border: #2a3a5a;
+            --error: #f87171;
+            --correct: #4ade80;
+            --answered: #38bdf8;
+        }
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--primary-bg); color: var(--text-color); margin: 0; padding: 16px; display: flex; justify-content: center; }
+        #exam-container { width: 100%; max-width: 860px; background: var(--panel-bg); padding: 2rem; border-radius: 14px; border: 1px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.4); }
+        .page { display: none; }
+        .active { display: block; }
+
+        .header-main { text-align: center; margin: 0 0 4px; font-size: 1.5rem; letter-spacing: 0.5px; font-weight: 600; }
+        .header-sub { text-align: center; color: var(--accent); font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; }
+        .divider { height: 1px; background: var(--border); margin: 18px 0; }
+
+        #nav-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 10px; margin-top: 22px; background: var(--panel-soft); padding: 16px; border-radius: 10px; border: 1px solid var(--border); }
+        .nav-box {
+            aspect-ratio: 1; width: 100%;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%;
+            background: transparent; color: var(--text-muted);
+            cursor: pointer; font-weight: 600; font-size: 0.85rem;
+            border: 1.5px solid var(--border);
+            transition: all 0.18s ease;
+        }
+        .nav-box:hover { border-color: var(--accent); color: var(--text-color); }
+        .nav-box.current { background: var(--accent); border-color: var(--accent); color: #08131f; }
+        .nav-box.answered { border-color: var(--answered); color: var(--answered); }
+        .nav-box.current.answered { background: var(--accent); color: #08131f; }
+
+        .info-box { background: var(--panel-soft); padding: 16px; border-radius: 10px; margin-bottom: 22px; text-align: center; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 0.9rem; border: 1px solid var(--border); }
+        .info-box span strong { color: var(--text-muted); font-weight: 500; }
+
+        .detail-card { background: var(--panel-soft); padding: 8px 24px; border-radius: 12px; margin-bottom: 24px; border: 1px solid var(--border); }
+        .detail-row { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+        .detail-row:last-child { border-bottom: none; }
+        .detail-label { color: var(--text-muted); font-size: 0.95rem; flex-shrink: 0; }
+        .detail-value { color: var(--text-color); font-weight: 600; font-size: 1.02rem; text-align: right; }
+
+        #question-scroll-area { max-height: 58vh; overflow-y: auto; padding-right: 12px; margin-top: 10px; }
+        #q-title { color: var(--accent); font-size: 0.85rem; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+        #q-text { font-size: 1.12rem; line-height: 1.6; margin-top: 0; }
+        .option-label { display: block; background: var(--panel-soft); margin: 12px 0; padding: 15px 16px; border-radius: 9px; cursor: pointer; transition: all 0.18s ease; border: 1.5px solid var(--border); }
+        .option-label:hover { border-color: var(--accent); }
+        input[type="radio"] { margin-right: 12px; transform: scale(1.15); accent-color: var(--accent); }
+
+        input[type="text"] { width: 80%; padding: 13px 16px; border-radius: 9px; border: 1.5px solid var(--border); background: var(--panel-soft); color: var(--text-color); font-size: 1rem; outline: none; }
+        input[type="text"]:focus { border-color: var(--accent); }
+
+        .btn-container { margin-top: 22px; display: flex; justify-content: space-between; }
+        button { padding: 12px 30px; border: none; border-radius: 8px; cursor: pointer; background: var(--accent); color: #08131f; font-weight: 600; font-size: 0.95rem; transition: all 0.18s ease; }
+        button:hover { background: #5eead4; }
+        #prev-btn { background: transparent; color: var(--text-muted); border: 1.5px solid var(--border); }
+        #prev-btn:hover { color: var(--text-color); border-color: var(--accent); }
+
+        .review-card { background: var(--panel-soft); padding: 16px; margin: 14px 0; border-radius: 9px; border: 1px solid var(--border); border-left: 4px solid var(--error); line-height: 1.55; }
+        .review-card.status-correct { border-left-color: var(--correct); }
+        #timer-display { color: var(--accent); font-weight: 600; }
+        #ai-analysis { background: var(--accent-soft); padding: 22px; border-radius: 11px; margin: 22px 0; line-height: 1.6; border: 1px solid var(--border); }
+        #final-score { color: var(--accent); }
+        .locked-msg { text-align: center; padding: 16px; background: var(--accent-soft); border: 1px solid var(--accent); border-radius: 9px; margin-bottom: 18px; font-size: 0.92rem; }
+    </style>
+</head>
+<body>
+
+<div id="exam-container">
+    <div id="page-landing" class="page active">
+        <h1 class="header-main">Bright Minds Academy</h1>
+        <div class="header-sub">Examination Portal</div>
+        <div class="detail-card">
+            <div class="detail-row"><span class="detail-label">Subject</span><span class="detail-value">Science 2</span></div>
+            <div class="detail-row"><span class="detail-label">Topic</span><span class="detail-value" id="exam-title-display">Heredity and Evolution - Test 2</span></div>
+            <div class="detail-row"><span class="detail-label">Standard</span><span class="detail-value">10th</span></div>
+            <div class="detail-row"><span class="detail-label">Total Marks</span><span class="detail-value">30</span></div>
+            <div class="detail-row"><span class="detail-label">Time Allowed</span><span class="detail-value">30 Minutes</span></div>
+        </div>
+        <div style="margin: 28px 0; text-align: center;">
+            <input type="text" id="student-name" placeholder="Enter Full Student Name">
+        </div>
+        <div style="text-align: center;"><button onclick="startExam()">Start Assignment</button></div>
+    </div>
+
+    <div id="page-exam" class="page">
+        <h1 class="header-main" style="font-size: 1.2rem;">Bright Minds Academy</h1>
+        <div class="info-box">
+            <span><strong>Time Left:</strong> <span id="timer-display">30:00</span></span>
+            <span><strong>Marks:</strong> 30</span>
+            <span><strong>Questions:</strong> 30</span>
+        </div>
+        <div id="question-scroll-area">
+            <h3 id="q-title"></h3>
+            <p id="q-text"></p>
+            <div id="options-container"></div>
+        </div>
+        <div class="btn-container">
+            <button id="prev-btn" onclick="changeQuestion(-1)">Back</button>
+            <button id="next-btn" onclick="changeQuestion(1)">Next</button>
+        </div>
+        <div id="nav-grid"></div>
+    </div>
+
+    <div id="page-result" class="page">
+        <h2 id="res-name" style="text-align: center;"></h2>
+        <h1 style="text-align: center;">Score: <span id="final-score"></span></h1>
+        <div id="ai-analysis"></div>
+        <div class="divider"></div>
+        <h3>Question Review</h3>
+        <div id="review-list"></div>
+    </div>
+</div>
+
+<script>
+    const EXAM_KEY = "10th_Sci2_HeredityEvolution_Test2";
+    const EXAM_NAME = "Heredity and Evolution - Test 2";
+
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwEutZaKIAodDqKVocXPmgGlsfyO6ma8vuQK4sFgEobmvD73QQwztuH4qbT_R3g1Figtw/exec";
+    const HARDCODED_STD = "10th";
+    const HARDCODED_SUBJECT = "Science 2";
+
+    let timerInterval;
+    let timeRemaining = 1800;
+
+    const questions = [
+  {
+    "q": "The technique of recombinant DNA technology has a vast scope in the field of:",
+    "options": ["Genetic engineering", "Weather forecasting", "Space research", "Metallurgy"],
+    "ans": 0,
+    "topic": "Heredity & Genetic Material",
+    "explain": "Recombinant DNA technology emerged from decoding genetic codes and has vast scope in the field of genetic engineering."
+  },
+  {
+    "q": "The model for the process of protein synthesis in bacterial cells (1961) was proposed by:",
+    "options": ["Avery and McCarty", "Francois Jacob and Jacques Monod", "Watson and Crick", "Beadle and Tatum"],
+    "ans": 1,
+    "topic": "Heredity & Genetic Material",
+    "explain": "In 1961, French geneticists Francois Jacob and Jacques Monod proposed a model for protein synthesis in bacterial cells."
+  },
+  {
+    "q": "The genes, which carry the hereditary characters, are carried from generation to generation via the:",
+    "options": ["Ribosomes", "Chromosomes", "Mitochondria", "Vacuoles"],
+    "ans": 1,
+    "topic": "Heredity & Genetic Material",
+    "explain": "Research proved that genes are carried via chromosomes, which transmit hereditary characters to the next generation."
+  },
+  {
+    "q": "The science of heredity is useful for the diagnosis, treatment and prevention of:",
+    "options": ["Infectious diseases", "Hereditary disorders", "Nutritional deficiencies", "Physical injuries"],
+    "ans": 1,
+    "topic": "Heredity & Genetic Material",
+    "explain": "The science of heredity is useful for the diagnosis, treatment and prevention of hereditary disorders, and in producing hybrids."
+  },
+  {
+    "q": "During transcription, how many of the two strands of DNA are used for the synthesis of mRNA?",
+    "options": ["Both strands", "Only one strand", "No strand", "Three strands"],
+    "ans": 1,
+    "topic": "Central Dogma",
+    "explain": "Only one of the two strands of DNA is used during transcription for the synthesis of mRNA."
+  },
+  {
+    "q": "The mRNA formed in the nucleus brings in the coded message from DNA into the:",
+    "options": ["Cytoplasm", "Cell wall", "Nucleolus", "Golgi body"],
+    "ans": 0,
+    "topic": "Central Dogma",
+    "explain": "The mRNA formed in the nucleus comes into the cytoplasm, carrying the coded message from the DNA."
+  },
+  {
+    "q": "During translation, the amino acids are supplied as per the message on mRNA by:",
+    "options": ["mRNA", "rRNA", "tRNA", "DNA"],
+    "ans": 2,
+    "topic": "Central Dogma",
+    "explain": "As per the message on mRNA, the required amino acids are supplied by the tRNA during translation."
+  },
+  {
+    "q": "Dr. Har Govind Khorana was awarded the Nobel Prize (1968) for discovering the triplet codons for how many amino acids?",
+    "options": ["10", "20", "46", "64"],
+    "ans": 1,
+    "topic": "Central Dogma",
+    "explain": "Dr. Har Govind Khorana made an important contribution in the discovery of triplet codons for 20 amino acids."
+  },
+  {
+    "q": "The sudden changes that occur in genes, which may be either minor or considerable, are called:",
+    "options": ["Mutations", "Translations", "Transcriptions", "Fossils"],
+    "ans": 0,
+    "topic": "Mutation",
+    "explain": "Sometimes sudden changes occur in genes; these changes, minor or considerable, are called mutations."
+  },
+  {
+    "q": "The fact that a mutation can cause a serious genetic disorder like sickle cell anaemia shows that some mutations are:",
+    "options": ["Always harmless", "Minor", "Considerable", "Impossible"],
+    "ans": 2,
+    "topic": "Mutation",
+    "explain": "Some mutations may be minor but some may be considerable; for example, a mutation may cause sickle cell anaemia."
+  },
+  {
+    "q": "According to the theory of evolution, life had been non-existent on the Earth about how many years ago?",
+    "options": ["3.5 billion years", "1 million years", "5000 years", "500 years"],
+    "ans": 0,
+    "topic": "Evolution",
+    "explain": "About 3.5 billion years ago, life had been non-existent on the Earth; simple compounds later gave rise to life."
+  },
+  {
+    "q": "The slow-going process through which the gradual development of organisms is achieved over a long duration is called:",
+    "options": ["Respiration", "Evolution", "Digestion", "Transcription"],
+    "ans": 1,
+    "topic": "Evolution",
+    "explain": "Evolution is a very slow-going process through which the development of organisms is achieved over a long duration."
+  },
+  {
+    "q": "The first primitive type of cells are said to have been formed from a mixture of different types of:",
+    "options": ["Metals and minerals", "Organic and inorganic compounds", "Gases only", "Water and salt"],
+    "ans": 1,
+    "topic": "Evolution",
+    "explain": "The first primitive cells may have formed from a mixture of different types of organic and inorganic compounds."
+  },
+  {
+    "q": "Similarities in characters such as leaf shape, leaf venation and leaf petiole among plants are examples of:",
+    "options": ["Morphological evidence", "Anatomical evidence", "Embryological evidence", "Palaeontological evidence"],
+    "ans": 0,
+    "topic": "Evidences of Evolution",
+    "explain": "Similarities in external features like leaf shape, venation and petiole are morphological evidences of a common origin."
+  },
+  {
+    "q": "Complete the correlation: Wisdom teeth : Vestigial organ :: Lungfish : ________",
+    "options": ["Fossil", "Connecting link", "Vestigial organ", "Embryo"],
+    "ans": 1,
+    "topic": "Evidences of Evolution",
+    "explain": "Just as wisdom teeth are a vestigial organ, the lungfish is an example of a connecting link (between fishes and amphibians)."
+  },
+  {
+    "q": "Pick the odd one out from the following:",
+    "options": ["Duckbill platypus", "Pomfret", "Lungfish", "Peripatus"],
+    "ans": 1,
+    "topic": "Evidences of Evolution",
+    "explain": "Duckbill platypus, lungfish and peripatus are all connecting links; the pomfret is an ordinary fish, so it is the odd one out."
+  },
+  {
+    "q": "The muscles of the ear pinna, which are useless in humans, are useful for movement of the ear pinna in:",
+    "options": ["Monkeys", "Snakes", "Fishes", "Frogs"],
+    "ans": 0,
+    "topic": "Evidences of Evolution",
+    "explain": "The ear pinna muscles are useless (vestigial) in humans but are functional in monkeys for moving the ear pinna."
+  },
+  {
+    "q": "The comparative study of the embryonic developmental stages of various vertebrates provides which type of evidence?",
+    "options": ["Anatomical", "Morphological", "Embryological", "Palaeontological"],
+    "ans": 2,
+    "topic": "Evidences of Evolution",
+    "explain": "Comparing embryonic developmental stages of vertebrates gives embryological evidence of evolution."
+  },
+  {
+    "q": "Extreme similarities in the initial embryonic stages of different vertebrates indicate their:",
+    "options": ["Different origin", "Common origin", "Extinction", "Vestigial nature"],
+    "ans": 1,
+    "topic": "Evidences of Evolution",
+    "explain": "The extreme similarities during the initial embryonic stages indicate the common origin of these animals."
+  },
+  {
+    "q": "The duckbill platypus lays eggs like reptiles but is also related to mammals because it possesses:",
+    "options": ["Gills and fins", "Mammary glands and hair", "Feathers and wings", "A shell"],
+    "ans": 1,
+    "topic": "Evidences of Evolution",
+    "explain": "The duckbill platypus lays eggs like reptiles but shows relationship with mammals due to mammary glands and hair."
+  },
+  {
+    "q": "The duckbill platypus is regarded as a connecting link between reptiles and:",
+    "options": ["Birds", "Mammals", "Amphibians", "Fishes"],
+    "ans": 1,
+    "topic": "Evidences of Evolution",
+    "explain": "The duckbill platypus is a connecting link between reptiles and mammals, indicating mammals evolved from reptiles."
+  },
+  {
+    "q": "According to Darwin, all organisms reproduce prolifically and compete with each other in a:",
+    "options": ["Friendly manner", "Life-threatening manner", "Cooperative manner", "Random manner"],
+    "ans": 1,
+    "topic": "Darwin's Theory of Natural Selection",
+    "explain": "Darwin stated that all organisms reproduce prolifically and compete with each other in a life-threatening manner."
+  },
+  {
+    "q": "One of the main objections raised against Darwin's theory was that he gave no explanation about:",
+    "options": ["Survival of the fittest", "Useful and useless modifications", "Reproduction of organisms", "Competition among organisms"],
+    "ans": 1,
+    "topic": "Darwin's Theory of Natural Selection",
+    "explain": "An objection to Darwin's theory was that he did not explain useful and useless modifications, nor slow and abrupt changes."
+  },
+  {
+    "q": "Nature selecting only those organisms which are fit to live while the rest perish is the essence of the theory of:",
+    "options": ["Lamarckism", "Natural selection", "Mutation", "Inheritance of acquired characters"],
+    "ans": 1,
+    "topic": "Darwin's Theory of Natural Selection",
+    "explain": "In natural selection, nature selects only the organisms fit to live and the rest perish; the fit ones reproduce."
+  },
+  {
+    "q": "According to Lamarck, the neck of the giraffe became very long because of:",
+    "options": ["A sudden mutation", "Browsing on leaves of tall plants over generations", "Living in water", "Natural selection"],
+    "ans": 1,
+    "topic": "Lamarckism",
+    "explain": "Lamarck said the giraffe's neck became long due to browsing on tall plants by extending the neck over several generations."
+  },
+  {
+    "q": "The transfer of characters acquired by an organism during its lifetime to the next generation is called inheritance of:",
+    "options": ["Acquired characters", "Vestigial organs", "Fossils", "Mutations"],
+    "ans": 0,
+    "topic": "Lamarckism",
+    "explain": "Lamarck proposed that characters acquired by an organism in its lifetime are passed on — the inheritance of acquired characters."
+  },
+  {
+    "q": "Which part of Lamarck's theory was disproved and rejected by later scientists?",
+    "options": ["Development of organs due to use", "Degeneration of organs due to disuse", "Transfer of acquired characters to the next generation", "Existence of vestigial organs"],
+    "ans": 2,
+    "topic": "Lamarckism",
+    "explain": "The use and disuse of organs was accepted, but the transfer of acquired characters to the next generation was disproved."
+  },
+  {
+    "q": "Geographical or reproductive ________ of organisms gradually leads to speciation.",
+    "options": ["Isolation", "Nutrition", "Respiration", "Migration"],
+    "ans": 0,
+    "topic": "Speciation",
+    "explain": "Geographical or reproductive isolation of organisms gradually leads to the formation of new species (speciation)."
+  },
+  {
+    "q": "Which of the following can be considered the first example of the 'wise man' (Homo sapiens)?",
+    "options": ["Australopithecus", "Neanderthal man", "Ramapithecus", "Dryopithecus"],
+    "ans": 1,
+    "topic": "Human Evolution",
+    "explain": "Neanderthal man, with a sufficiently evolved brain, can be considered the first example of the wise-man (Homo sapiens)."
+  },
+  {
+    "q": "The ________ man evolved about 50 thousand years ago, after which human evolution became faster than before.",
+    "options": ["Cro-Magnon", "Neanderthal", "Skilled", "Java"],
+    "ans": 0,
+    "topic": "Human Evolution",
+    "explain": "The Cro-Magnon man evolved about 50 thousand years ago, and afterwards this evolution had been faster than earlier."
+  }
+];
+
+    let currentQ = 0;
+    let userAnswers = new Array(questions.length).fill(null);
+    let studentName = "";
+
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            timeRemaining--;
+            sessionStorage.setItem('time_remaining_' + EXAM_KEY, timeRemaining);
+            updateTimerDisplay();
+            if (timeRemaining <= 0) {
+                clearInterval(timerInterval);
+                submitExam(true);
+            }
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        const mins = Math.floor(timeRemaining / 60);
+        const secs = timeRemaining % 60;
+        document.getElementById('timer-display').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function startExam() {
+        studentName = document.getElementById('student-name').value.trim();
+        if (!studentName) return alert("Please enter your name");
+        sessionStorage.setItem('name_' + EXAM_KEY, studentName);
+        sessionStorage.setItem('in_progress_' + EXAM_KEY, "true");
+        document.getElementById('page-landing').classList.remove('active');
+        document.getElementById('page-exam').classList.add('active');
+        startTimer();
+        renderGrid();
+        showQuestion();
+    }
+
+    function renderGrid() {
+        const grid = document.getElementById('nav-grid');
+        grid.innerHTML = "";
+        questions.forEach((_, i) => {
+            const div = document.createElement('div');
+            div.className = `nav-box ${i === currentQ ? 'current' : ''} ${userAnswers[i] !== null ? 'answered' : ''}`;
+            div.innerText = i + 1;
+            div.onclick = () => jumpTo(i);
+            grid.appendChild(div);
+        });
+    }
+
+    function showQuestion() {
+        const q = questions[currentQ];
+        document.getElementById('q-title').innerText = `Question ${currentQ + 1} of ${questions.length}`;
+        document.getElementById('q-text').innerHTML = q.q;
+        const optCont = document.getElementById('options-container');
+        optCont.innerHTML = "";
+        q.options.forEach((opt, idx) => {
+            const lbl = document.createElement('label');
+            lbl.className = "option-label";
+            lbl.innerHTML = `<input type="radio" name="opt" ${userAnswers[currentQ] === idx ? 'checked' : ''} onchange="saveAns(${idx})"> ${opt}`;
+            optCont.appendChild(lbl);
+        });
+        document.getElementById('next-btn').innerText = currentQ === questions.length - 1 ? "Finish" : "Next";
+        sessionStorage.setItem('currentQ_' + EXAM_KEY, currentQ);
+        renderGrid();
+    }
+
+    function saveAns(idx) {
+        userAnswers[currentQ] = idx;
+        sessionStorage.setItem('answers_' + EXAM_KEY, JSON.stringify(userAnswers));
+        renderGrid();
+    }
+
+    function jumpTo(i) { currentQ = i; showQuestion(); }
+
+    function changeQuestion(dir) {
+        if (dir === 1 && currentQ === questions.length - 1) {
+            submitExam(false);
+        } else if (dir === -1 && currentQ === 0) {
+            return;
+        } else {
+            currentQ += dir;
+            showQuestion();
+        }
+    }
+
+    async function submitExam(isAutoSubmit = false) {
+        if (!isAutoSubmit) {
+            const unansweredCount = userAnswers.filter(ans => ans === null).length;
+            if (unansweredCount > 0) {
+                const confirmSubmit = confirm(`You have left ${unansweredCount} question(s) unanswered. Are you sure you want to finish and submit?`);
+                if (!confirmSubmit) return;
+            }
+        }
+
+        clearInterval(timerInterval);
+        let score = 0;
+        let topicMap = {};
+        let reviewHTML = "";
+        let missedQuestions = [];
+
+        questions.forEach((q, i) => {
+            const correct = userAnswers[i] === q.ans;
+            if (correct) { score++; } else { missedQuestions.push("Q" + (i + 1)); }
+            if (!topicMap[q.topic]) topicMap[q.topic] = { total: 0, correct: 0, failedQ: [] };
+            topicMap[q.topic].total++;
+            if (correct) topicMap[q.topic].correct++;
+            else topicMap[q.topic].failedQ.push(i + 1);
+            reviewHTML += buildReviewCard(q, i, correct);
+        });
+
+        const scoreStr = `${score}/${questions.length}`;
+        let wrongAnswersString = missedQuestions.length > 0 ? missedQuestions.join(", ") : "None";
+
+        document.getElementById('page-exam').classList.remove('active');
+        document.getElementById('page-result').classList.add('active');
+        document.getElementById('res-name').innerText = studentName;
+        document.getElementById('final-score').innerText = scoreStr;
+        document.getElementById('review-list').innerHTML = reviewHTML;
+        document.getElementById('ai-analysis').innerHTML = buildAnalysis(topicMap, score, questions.length);
+
+        fetch(WEB_APP_URL, {
+            method: "POST", mode: "no-cors",
+            body: JSON.stringify({ studentName, standard: HARDCODED_STD, examName: EXAM_NAME, subject: HARDCODED_SUBJECT, score: scoreStr, wrongAnswers: wrongAnswersString })
+        });
+
+        localStorage.setItem('submitted_data_' + EXAM_KEY, JSON.stringify({ name: studentName, answers: userAnswers, score: scoreStr, topicMap }));
+        sessionStorage.removeItem('in_progress_' + EXAM_KEY);
+        sessionStorage.removeItem('answers_' + EXAM_KEY);
+        sessionStorage.removeItem('currentQ_' + EXAM_KEY);
+        sessionStorage.removeItem('time_remaining_' + EXAM_KEY);
+        sessionStorage.removeItem('name_' + EXAM_KEY);
+        window.scrollTo(0, 0);
+    }
+
+    function buildReviewCard(q, i, correct) {
+        const userAns = userAnswers[i];
+        let feedback = "";
+        if (correct) {
+            feedback = `Correct! ${q.explain}`;
+        } else if (userAns === null) {
+            feedback = `You skipped this question. ${q.explain}`;
+        } else {
+            feedback = `Not quite. You chose "${q.options[userAns]}", but the correct answer is "${q.options[q.ans]}". ${q.explain}`;
+        }
+        return `<div class="review-card ${correct ? 'status-correct' : ''}">
+                <strong>Q${i+1}:</strong> ${q.q}<br>
+                Your Answer: <span style="color:${correct ? '#4ade80' : '#f87171'}">${userAns !== null ? q.options[userAns] : 'Skipped'}</span><br>
+                Correct: ${q.options[q.ans]}<br>
+                <em>Feedback: ${feedback}</em></div>`;
+    }
+
+    function buildAnalysis(topicMap, score, totalQ) {
+        const pctOverall = Math.round((score / totalQ) * 100);
+        let analysis = `<strong>AI Analysis Feedback (Question-Specific):</strong><br><br>`;
+        analysis += `Overall Score: ${score}/${totalQ} (${pctOverall}%). `;
+        if (pctOverall >= 80) {
+            analysis += `Excellent work! You have a strong grasp of the Heredity and Evolution chapter.<br><br>`;
+        } else if (pctOverall >= 50) {
+            analysis += `You have a fair understanding, but a few key concepts need revision.<br><br>`;
+        } else {
+            analysis += `This chapter needs more revision. Focus on the topics highlighted below.<br><br>`;
+        }
+        for (let t in topicMap) {
+            let pct = (topicMap[t].correct / topicMap[t].total) * 100;
+            if (pct === 100) {
+                analysis += `&bull; <strong>${t}:</strong> Mastery achieved (${topicMap[t].correct}/${topicMap[t].total}). Your concepts here are perfectly clear.<br>`;
+            } else if (pct >= 60) {
+                analysis += `&bull; <strong>${t}:</strong> Strong foundation (${topicMap[t].correct}/${topicMap[t].total}), but review Question(s) ${topicMap[t].failedQ.join(', ')} to clear minor gaps.<br>`;
+            } else {
+                analysis += `&bull; <strong>${t}:</strong> Needs more practice (${topicMap[t].correct}/${topicMap[t].total}). Revisit Question(s) ${topicMap[t].failedQ.join(', ')} and re-read this topic from the textbook before the exam.<br>`;
+            }
+        }
+        return analysis;
+    }
+
+    window.onload = () => {
+        document.getElementById('exam-title-display').innerText = EXAM_NAME;
+        const saved = localStorage.getItem('submitted_data_' + EXAM_KEY);
+        if (saved) {
+            const data = JSON.parse(saved);
+            studentName = data.name;
+            userAnswers = data.answers;
+            showResultsFromStorage(data);
+            return;
+        }
+        if (sessionStorage.getItem('in_progress_' + EXAM_KEY)) {
+            studentName = sessionStorage.getItem('name_' + EXAM_KEY);
+            userAnswers = JSON.parse(sessionStorage.getItem('answers_' + EXAM_KEY)) || userAnswers;
+            currentQ = parseInt(sessionStorage.getItem('currentQ_' + EXAM_KEY)) || 0;
+            timeRemaining = parseInt(sessionStorage.getItem('time_remaining_' + EXAM_KEY)) || 1800;
+            document.getElementById('page-landing').classList.remove('active');
+            document.getElementById('page-exam').classList.add('active');
+            startTimer();
+            updateTimerDisplay();
+            renderGrid();
+            showQuestion();
+        }
+    };
+
+    function showResultsFromStorage(data) {
+        document.getElementById('page-landing').classList.remove('active');
+        document.getElementById('page-result').classList.add('active');
+        document.getElementById('res-name').innerText = data.name;
+        document.getElementById('final-score').innerText = data.score;
+
+        let lockedMsg = document.createElement('div');
+        lockedMsg.className = 'locked-msg';
+        lockedMsg.innerHTML = 'This exam has already been submitted. Showing your previous result below.';
+        document.getElementById('page-result').insertBefore(lockedMsg, document.getElementById('res-name'));
+
+        let reviewHTML = "";
+        questions.forEach((q, i) => {
+            const correct = userAnswers[i] === q.ans;
+            reviewHTML += buildReviewCard(q, i, correct);
+        });
+        document.getElementById('review-list').innerHTML = reviewHTML;
+        const score = parseInt(data.score.split('/')[0]);
+        document.getElementById('ai-analysis').innerHTML = buildAnalysis(data.topicMap, score, questions.length);
+    }
+</script>
+</body>
+</html>
