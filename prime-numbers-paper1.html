@@ -301,183 +301,209 @@ const MARKS_PER_Q = 2;
    RULES (do not break these):
    - Array must open with the exact statement below and close with a
      semicolon-terminated bracket on its own line (parser dependency).
-   - Each question needs: q, options (4 items), ans (0-based index), topic, explain
-   - topic must match canonical subtopic names exactly
+   - Each question needs: q, options (4 items), ans (0-based index),
+     topic, subtopic, explain
+   - topic = Unit name (broad); subtopic = canonical skill name (exact match)
 ════════════════════════════════════════ */
 const questions = [
     {
         q: "How many total prime numbers are there from 1 to 60?",
         options: ["12", "15", "16", "17"],
         ans: 3,
-        topic: "Number Types",
+        topic: "Number Work",
+        subtopic: "Number Types",
         explain: "Prime numbers from 1 to 60: 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59 — that's 17 prime numbers."
     },
     {
         q: "What is the average of prime numbers from 60 to 70?",
         options: ["64", "65", "75", "128"],
         ans: 0,
-        topic: "Number Types",
+        topic: "Number Work",
+        subtopic: "Number Types",
         explain: "Prime numbers between 60 and 70 are 61 and 67. Average = (61 + 67) / 2 = 128 / 2 = 64."
     },
     {
         q: "Sum of prime numbers from 11 to 25.",
         options: ["70", "77", "83", "81"],
         ans: 2,
-        topic: "Number Types",
+        topic: "Number Work",
+        subtopic: "Number Types",
         explain: "Prime numbers from 11 to 25 are 11, 13, 17, 19, 23. Sum = 11+13+17+19+23 = 83."
     },
     {
         q: "Prime numbers have only ______ divisors.",
         options: ["3", "2", "1", "0"],
         ans: 1,
-        topic: "Number Types",
+        topic: "Number Work",
+        subtopic: "Number Types",
         explain: "A prime number has exactly two divisors: 1 and the number itself."
     },
     {
         q: "Sum of two digit prime numbers from 1 to 100 having digit 3 at their units place.",
         options: ["288", "290", "210", "244"],
         ans: 0,
-        topic: "Number Types",
+        topic: "Number Work",
+        subtopic: "Number Types",
         explain: "Two-digit primes ending in 3: 13, 23, 43, 53, 73, 83. Sum = 13+23+43+53+73+83 = 288."
     },
     {
         q: "How many pairs of twin prime numbers from 1 to 100?",
         options: ["7", "6", "4", "8"],
         ans: 3,
-        topic: "Number Types",
+        topic: "Number Work",
+        subtopic: "Number Types",
         explain: "Twin prime pairs (differ by 2) from 1 to 100: (3,5), (5,7), (11,13), (17,19), (29,31), (41,43), (59,61), (71,73) — 8 pairs in total."
     },
     {
         q: "2, 3, 5, 7, 11, 13, 17, ___",
         options: ["18", "19", "23", "31"],
         ans: 1,
-        topic: "Number Types",
+        topic: "Number Work",
+        subtopic: "Number Types",
         explain: "This is the sequence of prime numbers in order. The prime number right after 17 is 19."
     },
     {
         q: "Which number is the odd one out?",
         options: ["35", "37", "43", "47"],
         ans: 0,
-        topic: "Number Types",
+        topic: "Number Work",
+        subtopic: "Number Types",
         explain: "37, 43 and 47 are all prime numbers. 35 = 5 × 7, so it is composite — making it the odd one out."
     },
     {
         q: "97, 89, 83, 79, 73, ___",
         options: ["67", "72", "71", "53"],
         ans: 2,
-        topic: "Number Types",
+        topic: "Number Work",
+        subtopic: "Number Types",
         explain: "This is the sequence of prime numbers in descending order. The prime number right before 73 (in descending order) is 71."
     },
     {
         q: "8, 10, 13, 18, 25, 36, ___",
         options: ["48", "49", "54", "53"],
         ans: 1,
-        topic: "Number Types",
+        topic: "Number Work",
+        subtopic: "Number Types",
         explain: "The differences between consecutive terms are consecutive prime numbers: 8+2=10, 10+3=13, 13+5=18, 18+7=25, 25+11=36, 36+13=49."
     },
     {
         q: "1923, 2931, 3741, 4347, ___",
         options: ["5289", "5351", "5459", "5359"],
         ans: 3,
-        topic: "Number Types",
+        topic: "Number Work",
+        subtopic: "Number Types",
         explain: "Each term is formed by joining two consecutive primes from the list 19,23,29,31,37,41,43,47,53,59,...: (19,23)→1923, (29,31)→2931, (37,41)→3741, (43,47)→4347. The next pair is (53,59) → 5359."
     },
     {
         q: "Product of two digit prime numbers having 8 at their tens place?",
         options: ["7378", "7957", "7387", "6987"],
         ans: 2,
-        topic: "Number Types",
+        topic: "Number Work",
+        subtopic: "Number Types",
         explain: "Two-digit primes with 8 in the tens place: 83 and 89. Product = 83 × 89 = 7387."
     },
     {
         q: "Sum of smallest two digit prime number & greatest two digit prime number.",
         options: ["108", "100", "99", "97"],
         ans: 0,
-        topic: "Number Types",
+        topic: "Number Work",
+        subtopic: "Number Types",
         explain: "Smallest two-digit prime = 11, greatest two-digit prime = 97. Sum = 11 + 97 = 108."
     },
     {
         q: "Greatest one digit prime number.",
         options: ["9", "2", "7", "5"],
         ans: 2,
-        topic: "Number Types",
+        topic: "Number Work",
+        subtopic: "Number Types",
         explain: "One-digit prime numbers are 2, 3, 5, 7. The greatest among them is 7."
     },
     {
         q: "Which number is the odd one out?",
         options: ["37", "13", "97", "43"],
         ans: 3,
-        topic: "Number Types",
+        topic: "Number Work",
+        subtopic: "Number Types",
         explain: "Reversing the digits of 37, 13 and 97 gives 73, 31 and 79 — all prime. Reversing 43 gives 34, which is not prime (34 = 2 × 17). So 43 is the odd one out."
     },
     {
         q: "79, 98, 38, 97, 37, ___",
         options: ["17", "35", "72", "47"],
         ans: 0,
-        topic: "Number Types",
+        topic: "Number Work",
+        subtopic: "Number Types",
         explain: "Reversing every term gives the prime numbers 97, 89, 83, 79, 73 — a descending sequence of primes. The next prime in that descending sequence is 71, and reversing 71 gives 17."
     },
     {
         q: "17 : 23 :: 43 : ___",
         options: ["64", "48", "37", "53"],
         ans: 3,
-        topic: "Number Types",
+        topic: "Number Work",
+        subtopic: "Number Types",
         explain: "17 and 23 are primes with exactly one prime (19) between them. Applying the same rule to 43: the primes after it are 47, 53 — skipping 47 gives 53."
     },
     {
         q: "Product of one digit odd prime number.",
         options: ["210", "105", "126", "265"],
         ans: 1,
-        topic: "Number Types",
+        topic: "Number Work",
+        subtopic: "Number Types",
         explain: "One-digit odd primes are 3, 5, 7. Product = 3 × 5 × 7 = 105."
     },
     {
         q: "The numbers which are not prime numbers are called ______.",
         options: ["Real numbers", "Square numbers", "Composite numbers", "Cube numbers"],
         ans: 2,
-        topic: "Number Types",
+        topic: "Number Work",
+        subtopic: "Number Types",
         explain: "Numbers greater than 1 that have more than two factors are called composite numbers."
     },
     {
         q: "Sum of twin prime numbers from 70 to 100.",
         options: ["144", "256", "120", "186"],
         ans: 0,
-        topic: "Number Types",
+        topic: "Number Work",
+        subtopic: "Number Types",
         explain: "The only twin prime pair between 70 and 100 is (71, 73). Sum = 71 + 73 = 144."
     },
     {
         q: "Smallest one digit odd prime number.",
         options: ["2", "3", "5", "7"],
         ans: 1,
-        topic: "Number Types",
+        topic: "Number Work",
+        subtopic: "Number Types",
         explain: "One-digit odd primes are 3, 5, 7 (2 is even). The smallest of these is 3."
     },
     {
         q: "Find the missing number:<br><table style='margin:10px auto;border-collapse:collapse;text-align:center;'><tr><td style='border:1px solid var(--border);padding:8px 16px;'>19</td><td style='border:1px solid var(--border);padding:8px 16px;'>29</td><td style='border:1px solid var(--border);padding:8px 16px;'>23</td></tr><tr><td style='border:1px solid var(--border);padding:8px 16px;'>7</td><td style='border:1px solid var(--border);padding:8px 16px;'>11</td><td style='border:1px solid var(--border);padding:8px 16px;'>5</td></tr><tr><td style='border:1px solid var(--border);padding:8px 16px;'>13</td><td style='border:1px solid var(--border);padding:8px 16px;'>?</td><td style='border:1px solid var(--border);padding:8px 16px;'>3</td></tr></table>",
         options: ["22", "15", "37", "17"],
         ans: 3,
-        topic: "Number Types",
+        topic: "Number Work",
+        subtopic: "Number Types",
         explain: "The 8 known numbers are 3, 5, 7, 11, 13, 19, 23, 29. Arranged in ascending order they should form a run of consecutive prime numbers: 3, 5, 7, 11, 13, 17, 19, 23, 29 — the missing prime is 17."
     },
     {
         q: "How many two digit prime numbers are there such that reversing their digits also gives a different prime number, from 1 to 100?",
         options: ["9", "7", "8", "6"],
         ans: 2,
-        topic: "Number Types",
+        topic: "Number Work",
+        subtopic: "Number Types",
         explain: "Two-digit primes whose digit-reversal is also a (different) prime: 13, 17, 31, 37, 71, 73, 79, 97 — that's 8 numbers."
     },
     {
         q: "How many pairs of consecutive prime numbers from 1 to 100 have a difference of 6 between them?",
         options: ["9", "6", "7", "8"],
         ans: 2,
-        topic: "Number Types",
+        topic: "Number Work",
+        subtopic: "Number Types",
         explain: "Checking consecutive primes (next prime in the list) for a gap of 6: (23,29), (31,37), (47,53), (53,59), (61,67), (73,79), (83,89) — 7 such pairs."
     },
     {
         q: "There is a difference of ______ between twin prime numbers.",
         options: ["3", "1", "0", "2"],
         ans: 3,
-        topic: "Number Types",
+        topic: "Number Work",
+        subtopic: "Number Types",
         explain: "Twin prime numbers are pairs of primes that differ by exactly 2, e.g. (11,13), (17,19)."
     }
 ];
@@ -527,7 +553,7 @@ function renderQ() {
     const q = questions[curQ];
     document.getElementById('qnum').textContent     = curQ + 1;
     document.getElementById('q-circle').textContent = curQ + 1;
-    document.getElementById('q-tag').textContent    = q.topic;
+    document.getElementById('q-tag').textContent    = q.topic + ' · ' + q.subtopic;
     document.getElementById('q-text').innerHTML     = q.q;
     document.getElementById('next-btn').textContent =
         curQ === questions.length - 1 ? 'Finish ✓' : 'Next →';
@@ -599,10 +625,11 @@ async function submit(auto = false) {
         if (ok) raw++;
         else missedQs.push('Q' + (i + 1));
 
-        if (!topicMap[q.topic]) topicMap[q.topic] = { total:0, correct:0, failedQ:[] };
-        topicMap[q.topic].total++;
-        if (ok) topicMap[q.topic].correct++;
-        else topicMap[q.topic].failedQ.push(i + 1);
+        const skillKey = q.topic + ' > ' + q.subtopic;
+        if (!topicMap[skillKey]) topicMap[skillKey] = { total:0, correct:0, failedQ:[] };
+        topicMap[skillKey].total++;
+        if (ok) topicMap[skillKey].correct++;
+        else topicMap[skillKey].failedQ.push(i + 1);
 
         const uAns = answers[i] !== null ? q.options[answers[i]] : 'Skipped';
         revHTML += `<div class="rcard ${ok ? 'ok' : ''}">
