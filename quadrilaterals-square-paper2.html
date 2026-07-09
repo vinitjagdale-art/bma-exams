@@ -307,186 +307,216 @@ const MARKS_PER_Q = 2;
    RULES (do not break these):
    • The question-list opener line and its closing bracket line must each
      sit on their own line (the portal's question parser depends on this).
-   • Each question needs: q, options (4 items), ans (0-based index), topic, explain
-   • topic must match canonical subtopic names EXACTLY.
-     Canonical subtopics used in this paper:
-       Squares & Square Roots, Area, Perimeter, Properties of Quadrilaterals,
-       Algebraic Identities, Ratio & Proportion, Percentage
+   • Each question needs: q, options (4 items), ans (0-based index),
+     topic, subtopic, explain
+   • topic = Unit name (broad); subtopic = canonical skill name (exact match).
+     Unit > Subtopic pairs used in this paper:
+       Operations on Numbers > Squares & Square Roots
+       Mensuration > Area,  Mensuration > Perimeter
+       Geometry > Properties of Quadrilaterals
+       Algebra > Algebraic Identities
+       Operations on Numbers > Ratio & Proportion
+       Applied Maths > Percentage
 ════════════════════════════════════════ */
 const questions = [
     {
         q: "What is the perimeter of a square having side 53 cm?",
         options: ["212 cm", "200 cm", "224 cm", "265 cm"],
         ans: 0,
-        topic: "Perimeter",
+        topic: "Mensuration",
+        subtopic: "Perimeter",
         explain: "Perimeter of a square = 4 × side = 4 × 53 = 212 cm."
     },
     {
         q: "If 2 squares of side 9 cm join to each other, then find the perimeter of the new figure.",
         options: ["36 cm", "54 cm", "72 cm", "45 cm"],
         ans: 1,
-        topic: "Perimeter",
+        topic: "Mensuration",
+        subtopic: "Perimeter",
         explain: "Two 9 cm squares joined side by side form an 18 cm × 9 cm rectangle. Perimeter = 2(18 + 9) = 54 cm."
     },
     {
         q: "What is the length of the diagonal if the side of the square is 8 cm?",
         options: ["16 cm", "\\(8\\sqrt{2}\\) cm", "\\(8\\sqrt{3}\\) cm", "\\(10\\sqrt{2}\\) cm"],
         ans: 1,
-        topic: "Properties of Quadrilaterals",
+        topic: "Geometry",
+        subtopic: "Properties of Quadrilaterals",
         explain: "Diagonal of a square = side × \\(\\sqrt{2}\\) = \\(8\\sqrt{2}\\) cm."
     },
     {
         q: "What is the area of a square if the side of the square is 84 cm?",
         options: ["7056 cm²", "6056 cm²", "7065 cm²", "6556 cm²"],
         ans: 0,
-        topic: "Area",
+        topic: "Mensuration",
+        subtopic: "Area",
         explain: "Area = side² = 84² = 7056 cm²."
     },
     {
         q: "69 : 225 :: 84 : ___",
         options: ["144", "121", "169", "196"],
         ans: 0,
-        topic: "Squares & Square Roots",
+        topic: "Operations on Numbers",
+        subtopic: "Squares & Square Roots",
         explain: "The pattern is (sum of digits)². 6 + 9 = 15, and 15² = 225. For 84: 8 + 4 = 12, and 12² = 144."
     },
     {
         q: "If the diagonal of the square is 16 cm, find the area of the square.",
         options: ["128 cm²", "256 cm²", "144 cm²", "120 cm²"],
         ans: 0,
-        topic: "Area",
+        topic: "Mensuration",
+        subtopic: "Area",
         explain: "Area of a square from its diagonal = d²/2 = 16²/2 = 256/2 = 128 cm²."
     },
     {
         q: "39 : 144 :: 63 : ___",
         options: ["81", "100", "121", "144"],
         ans: 0,
-        topic: "Squares & Square Roots",
+        topic: "Operations on Numbers",
+        subtopic: "Squares & Square Roots",
         explain: "The pattern is (sum of digits)². 3 + 9 = 12, and 12² = 144. For 63: 6 + 3 = 9, and 9² = 81."
     },
     {
         q: "One tree is planted on each corner of a square-shaped garden and 18 trees are planted on each side. How many total trees are planted around the garden?",
         options: ["72", "64", "68", "60"],
         ans: 2,
-        topic: "Perimeter",
+        topic: "Mensuration",
+        subtopic: "Perimeter",
         explain: "Each side has 18 trees, but the corner trees are shared between two sides. Counting 16 trees strictly between the corners on each side (4 × 16 = 64) plus the 4 corner trees gives 64 + 4 = 68."
     },
     {
         q: "Side of one square is 13 cm and the diagonal of another square is 6 cm. Find the sum of the areas of these two squares.",
         options: ["187 cm²", "205 cm²", "169 cm²", "223 cm²"],
         ans: 0,
-        topic: "Area",
+        topic: "Mensuration",
+        subtopic: "Area",
         explain: "Area₁ = 13² = 169 cm². Area₂ = d²/2 = 6²/2 = 18 cm². Sum = 169 + 18 = 187 cm²."
     },
     {
         q: "If the perimeter of a square is 72 cm, what is the area of the square?",
         options: ["324 cm²", "288 cm²", "360 cm²", "400 cm²"],
         ans: 0,
-        topic: "Area",
+        topic: "Mensuration",
+        subtopic: "Area",
         explain: "Side = perimeter/4 = 72/4 = 18 cm. Area = 18² = 324 cm²."
     },
     {
         q: "If 64 is the first square number, then what is the 9th square number after 64?",
         options: ["289", "256", "324", "225"],
         ans: 0,
-        topic: "Squares & Square Roots",
+        topic: "Operations on Numbers",
+        subtopic: "Squares & Square Roots",
         explain: "64 = 8². Counting nine perfect squares onward (9², 10², …, 17²), the 9th is 17² = 289."
     },
     {
         q: "The diagonals of the square are equal and ___.",
         options: ["parallel", "perpendicular", "unequal", "none of these"],
         ans: 1,
-        topic: "Properties of Quadrilaterals",
+        topic: "Geometry",
+        subtopic: "Properties of Quadrilaterals",
         explain: "The diagonals of a square are equal in length and bisect each other at right angles, i.e. they are perpendicular."
     },
     {
         q: "If the area of the square is 529 cm², what is its perimeter?",
         options: ["92 cm", "88 cm", "96 cm", "84 cm"],
         ans: 0,
-        topic: "Perimeter",
+        topic: "Mensuration",
+        subtopic: "Perimeter",
         explain: "Side = \\(\\sqrt{529}\\) = 23 cm. Perimeter = 4 × 23 = 92 cm."
     },
     {
         q: "If 2 squares of side 8 cm join to each other, what is the area of the new figure?",
         options: ["256 cm²", "64 cm²", "128 cm²", "96 cm²"],
         ans: 2,
-        topic: "Area",
+        topic: "Mensuration",
+        subtopic: "Area",
         explain: "Each square has area 8² = 64 cm². The joined figure has area 64 + 64 = 128 cm² (a 16 cm × 8 cm rectangle)."
     },
     {
         q: "Find the odd man out.",
         options: ["289", "441", "350", "625"],
         ans: 2,
-        topic: "Squares & Square Roots",
+        topic: "Operations on Numbers",
+        subtopic: "Squares & Square Roots",
         explain: "289 = 17², 441 = 21², and 625 = 25² are perfect squares. 350 is not a perfect square, so it is the odd one out."
     },
     {
         q: "Find the next term: 49, 1625, 3649, 6481, ___",
         options: ["100121", "10121", "1000121", "100120"],
         ans: 0,
-        topic: "Squares & Square Roots",
+        topic: "Operations on Numbers",
+        subtopic: "Squares & Square Roots",
         explain: "Each term joins two consecutive squares: (4, 9) → 49, (16, 25) → 1625, (36, 49) → 3649, (64, 81) → 6481, so (100, 121) → 100121."
     },
     {
         q: "If 121 is the first square number, then the 7th square number is ___.",
         options: ["289", "256", "324", "225"],
         ans: 0,
-        topic: "Squares & Square Roots",
+        topic: "Operations on Numbers",
+        subtopic: "Squares & Square Roots",
         explain: "121 = 11². Counting the perfect squares 11², 12², …, the 7th is 17² = 289."
     },
     {
         q: "Find the next term: 5, 6, 10, 19, 35, ___",
         options: ["60", "54", "66", "51"],
         ans: 0,
-        topic: "Squares & Square Roots",
+        topic: "Operations on Numbers",
+        subtopic: "Squares & Square Roots",
         explain: "The differences are consecutive squares: 1, 4, 9, 16, then 25. So 35 + 25 = 60."
     },
     {
         q: "Expand: \\((3x + 7y)^2\\)",
         options: ["\\(9x^2 + 42xy + 49y^2\\)", "\\(9x^2 + 21xy + 49y^2\\)", "\\(9x^2 + 42xy + 49y\\)", "\\(9x + 42xy + 49y^2\\)"],
         ans: 0,
-        topic: "Algebraic Identities",
+        topic: "Algebra",
+        subtopic: "Algebraic Identities",
         explain: "\\((a+b)^2 = a^2 + 2ab + b^2\\). So \\((3x+7y)^2 = 9x^2 + 2(3x)(7y) + 49y^2 = 9x^2 + 42xy + 49y^2\\)."
     },
     {
         q: "The sum of three angles of a square is ___.",
         options: ["270°", "180°", "360°", "240°"],
         ans: 0,
-        topic: "Properties of Quadrilaterals",
+        topic: "Geometry",
+        subtopic: "Properties of Quadrilaterals",
         explain: "Each angle of a square is 90°, so the sum of three angles is 3 × 90° = 270°."
     },
     {
         q: "If the ratio of the sides of two squares is 3 : 4, then what is the ratio of their areas?",
         options: ["3 : 4", "9 : 16", "4 : 3", "16 : 9"],
         ans: 1,
-        topic: "Ratio & Proportion",
+        topic: "Operations on Numbers",
+        subtopic: "Ratio & Proportion",
         explain: "Ratio of areas = (ratio of sides)² = 3² : 4² = 9 : 16."
     },
     {
         q: "If the diagonal of the square is \\(9\\sqrt{2}\\) cm, then the side of the square is ___.",
         options: ["9 cm", "18 cm", "81 cm", "27 cm"],
         ans: 0,
-        topic: "Properties of Quadrilaterals",
+        topic: "Geometry",
+        subtopic: "Properties of Quadrilaterals",
         explain: "Side = diagonal ÷ \\(\\sqrt{2}\\) = \\(9\\sqrt{2} \\div \\sqrt{2}\\) = 9 cm."
     },
     {
         q: "If the side of a square is increased by 20%, then its area increases by how many percent?",
         options: ["40%", "44%", "20%", "24%"],
         ans: 1,
-        topic: "Percentage",
+        topic: "Applied Maths",
+        subtopic: "Percentage",
         explain: "New side = 1.2 × side, so new area = (1.2)² = 1.44 times the original — that is, the area becomes 144% of the original."
     },
     {
         q: "Expand: \\((7x - 2y)^2\\)",
         options: ["\\(49x^2 - 28xy + 4y^2\\)", "\\(49x^2 - 14xy + 4y^2\\)", "\\(49x^2 + 28xy + 4y^2\\)", "\\(49x^2 - 28xy - 4y^2\\)"],
         ans: 0,
-        topic: "Algebraic Identities",
+        topic: "Algebra",
+        subtopic: "Algebraic Identities",
         explain: "\\((a-b)^2 = a^2 - 2ab + b^2\\). So \\((7x-2y)^2 = 49x^2 - 2(7x)(2y) + 4y^2 = 49x^2 - 28xy + 4y^2\\)."
     },
     {
         q: "A square has ___ diagonals.",
         options: ["one", "two", "three", "four"],
         ans: 1,
-        topic: "Properties of Quadrilaterals",
+        topic: "Geometry",
+        subtopic: "Properties of Quadrilaterals",
         explain: "A square has exactly 2 diagonals, each joining a pair of opposite vertices."
     }
 ];
@@ -536,7 +566,7 @@ function renderQ() {
     const q = questions[curQ];
     document.getElementById('qnum').textContent     = curQ + 1;
     document.getElementById('q-circle').textContent = curQ + 1;
-    document.getElementById('q-tag').textContent    = q.topic;
+    document.getElementById('q-tag').textContent    = q.topic + ' · ' + q.subtopic;
     document.getElementById('q-text').innerHTML     = q.q;
     document.getElementById('next-btn').textContent =
         curQ === questions.length - 1 ? 'Finish ✓' : 'Next →';
@@ -608,10 +638,11 @@ async function submit(auto = false) {
         if (ok) raw++;
         else missedQs.push('Q' + (i + 1));
 
-        if (!topicMap[q.topic]) topicMap[q.topic] = { total:0, correct:0, failedQ:[] };
-        topicMap[q.topic].total++;
-        if (ok) topicMap[q.topic].correct++;
-        else topicMap[q.topic].failedQ.push(i + 1);
+        const skillKey = q.topic + ' > ' + q.subtopic;
+        if (!topicMap[skillKey]) topicMap[skillKey] = { total:0, correct:0, failedQ:[] };
+        topicMap[skillKey].total++;
+        if (ok) topicMap[skillKey].correct++;
+        else topicMap[skillKey].failedQ.push(i + 1);
 
         const uAns = answers[i] !== null ? q.options[answers[i]] : 'Skipped';
         revHTML += `<div class="rcard ${ok ? 'ok' : ''}">
