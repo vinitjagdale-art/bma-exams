@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- CUSTOMIZE: Page title -->
+<title>BMA · शब्दसमूहाबद्दल एक शब्द Paper 1 · 4th Scholarship Marathi</title>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+:root {
+    --bg:       #0e1f17;
+    --card:     rgba(255,255,255,0.06);
+    --accent:   #3ecf8e;
+    --adark:    #1f8a5f;
+    --aglow:    rgba(62,207,142,0.3);
+    --gold:     #f0c040;
+    --text:     #e9f5ee;
+    --muted:    #8ec0a6;
+    --border:   rgba(62,207,142,0.2);
+    --correct:  #4caf82;
+    --error:    #f05c5c;
+}
+* { box-sizing: border-box; margin:0; padding:0; }
+body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    background-image:
+        radial-gradient(ellipse at 20% 10%, rgba(31,138,95,0.18) 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 90%, rgba(62,207,142,0.10) 0%, transparent 55%);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 16px;
+}
+#wrap { width:100%; max-width:780px; }
+
+/* ── pages ── */
+.page { display:none; }
+.page.active { display:block; }
+
+/* ── landing ── */
+.lhdr { text-align:center; padding:28px 16px 20px; border-bottom:2px solid var(--accent); margin-bottom:22px; }
+.badge {
+    display:inline-block;
+    background:linear-gradient(135deg,var(--adark),var(--accent));
+    color:#fff; font-size:0.7rem; font-weight:700; letter-spacing:2px;
+    text-transform:uppercase; padding:4px 14px; border-radius:20px; margin-bottom:12px;
+}
+.lhdr h1 { font-size:1.85rem; font-weight:800; color:#fff; }
+.lhdr h1 span { color:var(--accent); }
+.lhdr p { color:var(--muted); font-size:0.9rem; margin-top:6px; }
+
+.meta-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:20px; }
+.mc { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:13px; text-align:center; }
+.mc .ml { font-size:0.68rem; text-transform:uppercase; letter-spacing:1.2px; color:var(--muted); margin-bottom:4px; }
+.mc .mv { font-size:1.1rem; font-weight:700; color:var(--accent); }
+
+.topics-panel { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:16px 18px; margin-bottom:20px; }
+.topics-panel h3 { font-size:0.72rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--accent); margin-bottom:10px; }
+.chips { display:flex; flex-wrap:wrap; gap:8px; }
+.chip { background:rgba(62,207,142,0.12); border:1px solid rgba(62,207,142,0.3); border-radius:20px; padding:5px 13px; font-size:0.8rem; }
+.chip .dot { display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--accent); margin-right:6px; vertical-align:middle; }
+
+.instr { background:rgba(240,192,64,0.07); border:1px solid rgba(240,192,64,0.25); border-radius:10px; padding:13px 16px; margin-bottom:20px; font-size:0.84rem; color:var(--muted); line-height:1.7; }
+.instr strong { color:var(--gold); }
+
+.name-sec { margin-bottom:20px; }
+.name-sec label { display:block; font-size:0.78rem; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-bottom:7px; }
+.name-sec input { width:100%; padding:13px 15px; background:var(--card); border:1.5px solid var(--border); border-radius:8px; color:#fff; font-size:1rem; outline:none; transition:border-color 0.2s; }
+.name-sec input:focus { border-color:var(--accent); }
+.name-sec input::placeholder { color:var(--muted); }
+
+.btn-start { width:100%; padding:15px; background:linear-gradient(135deg,var(--adark),var(--accent)); border:none; border-radius:8px; color:#fff; font-size:1.05rem; font-weight:700; cursor:pointer; letter-spacing:0.5px; transition:opacity 0.2s,transform 0.15s; }
+.btn-start:hover { opacity:0.9; transform:translateY(-1px); }
+
+/* ── exam ── */
+.topbar { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; background:var(--card); border:1px solid var(--border); border-radius:10px; padding:11px 16px; margin-bottom:14px; }
+.topbar-title { font-size:0.78rem; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:1px; }
+.timer { background:rgba(62,207,142,0.15); border:1.5px solid var(--accent); border-radius:20px; padding:6px 16px; font-size:1rem; font-weight:800; color:#fff; font-variant-numeric:tabular-nums; letter-spacing:1px; }
+.timer.warn { border-color:var(--error); color:var(--error); background:rgba(240,92,92,0.12); }
+.topbar-info { text-align:right; font-size:0.78rem; color:var(--muted); }
+.topbar-info span { color:var(--accent); font-weight:700; }
+
+.prog-outer { background:rgba(255,255,255,0.08); border-radius:4px; height:4px; margin-bottom:14px; overflow:hidden; }
+.prog-inner { height:100%; background:linear-gradient(90deg,var(--adark),var(--accent)); border-radius:4px; transition:width 0.4s ease; }
+
+.qcard { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:20px 22px; margin-bottom:14px; }
+.qbadge { display:inline-flex; align-items:center; gap:6px; font-size:0.73rem; text-transform:uppercase; letter-spacing:1.2px; color:var(--accent); margin-bottom:10px; }
+.qbadge .num { background:var(--accent); color:var(--bg); font-weight:900; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.73rem; }
+#q-tag { float:right; background:rgba(62,207,142,0.12); border:1px solid rgba(62,207,142,0.25); border-radius:12px; padding:3px 10px; font-size:0.68rem; color:var(--muted); }
+#q-text { font-size:1.12rem; line-height:1.75; clear:both; }
+
+#opts { margin-top:16px; }
+.opt {
+    display:flex; align-items:center; gap:12px;
+    background:rgba(255,255,255,0.04); border:1.5px solid rgba(255,255,255,0.1);
+    border-radius:8px; padding:12px 15px; margin-bottom:10px;
+    cursor:pointer; transition:all 0.2s; font-size:0.97rem;
+}
+.opt:hover { background:rgba(62,207,142,0.1); border-color:var(--accent); }
+.opt.selected { background:rgba(62,207,142,0.15); border-color:var(--accent); }
+.opt input { display:none; }
+.ocircle {
+    width:30px; height:30px; flex-shrink:0; border-radius:50%;
+    border:2px solid rgba(255,255,255,0.2);
+    display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:0.78rem; color:var(--muted); transition:all 0.2s;
+}
+.opt.selected .ocircle { background:var(--accent); border-color:var(--accent); color:var(--bg); }
+
+.btn-row { display:flex; gap:10px; margin-bottom:14px; }
+.btn-nav { flex:1; padding:12px; border:1.5px solid var(--border); border-radius:8px; background:var(--card); color:var(--text); font-size:0.95rem; font-weight:600; cursor:pointer; transition:all 0.2s; }
+.btn-nav:hover { background:rgba(62,207,142,0.15); border-color:var(--accent); }
+.btn-nav.primary { background:linear-gradient(135deg,var(--adark),var(--accent)); border-color:transparent; color:#fff; }
+.btn-nav.primary:hover { opacity:0.88; }
+
+/* nav circles */
+#navgrid { display:grid; grid-template-columns:repeat(10,1fr); gap:7px; background:var(--card); border:1px solid var(--border); border-radius:10px; padding:12px; }
+.nb { aspect-ratio:1; display:flex; align-items:center; justify-content:center; border-radius:50%; border:1.5px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.03); color:var(--muted); font-weight:700; font-size:0.78rem; cursor:pointer; transition:all 0.2s; }
+.nb:hover { border-color:var(--accent); color:#fff; background:rgba(62,207,142,0.1); }
+.nb.current { background:var(--accent); border-color:var(--accent); color:var(--bg); box-shadow:0 0 12px var(--aglow); }
+.nb.answered { background:rgba(62,207,142,0.22); border-color:var(--accent); color:#fff; }
+.nb.current.answered { background:var(--accent); color:var(--bg); }
+
+/* ── result ── */
+.res-hdr { text-align:center; padding:26px 16px; border-bottom:1px solid var(--border); margin-bottom:22px; }
+.res-hdr h2 { font-size:1rem; color:var(--muted); font-weight:400; margin-bottom:6px; }
+.score-big { font-size:3.5rem; font-weight:900; color:#fff; line-height:1; }
+/* CUSTOMIZE: Update /TotalMarks in the denom span in HTML below to match TOTAL_MARKS */
+.score-big .denom { font-size:1.4rem; color:var(--muted); }
+.grade-badge { display:inline-block; margin-top:10px; padding:5px 18px; border-radius:20px; font-size:0.84rem; font-weight:700; }
+
+#ai-box { background:rgba(62,207,142,0.07); border:1px solid var(--border); border-left:4px solid var(--accent); border-radius:10px; padding:18px 20px; margin-bottom:22px; }
+#ai-box h3 { font-size:0.75rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--accent); margin-bottom:12px; }
+.fb-row { display:flex; align-items:flex-start; gap:10px; margin-bottom:10px; font-size:0.88rem; }
+.fb-icon { flex-shrink:0; width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.68rem; margin-top:1px; }
+.fi-m { background:var(--correct); color:#fff; }
+.fi-s { background:var(--gold); color:#000; }
+.fi-w { background:var(--error); color:#fff; }
+
+#rev-list h3 { font-size:0.75rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--muted); margin-bottom:12px; }
+.rcard { background:var(--card); border:1px solid rgba(255,255,255,0.08); border-left:4px solid var(--error); border-radius:10px; padding:14px 16px; margin-bottom:10px; font-size:0.87rem; line-height:1.7; }
+.rcard.ok { border-left-color:var(--correct); }
+.rq { font-weight:700; color:#fff; margin-bottom:7px; }
+.al { margin-bottom:3px; }
+.exp { color:var(--muted); font-style:italic; margin-top:6px; }
+.ac { color:var(--correct); font-weight:600; }
+.aw { color:var(--error); font-weight:600; }
+
+.scroll-area { max-height:58vh; overflow-y:auto; padding-right:4px; }
+.scroll-area::-webkit-scrollbar { width:4px; }
+.scroll-area::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+@media(max-width:500px){
+    .meta-grid { grid-template-columns:1fr 1fr; }
+    #navgrid { grid-template-columns:repeat(5,1fr); }
+    .score-big { font-size:2.5rem; }
+    .topbar { grid-template-columns:1fr; gap:6px; text-align:center; }
+    .topbar-info { text-align:center; }
+}
+</style>
+</head>
+<body>
+<div id="wrap">
+
+<!-- ══════════════ LANDING ══════════════ -->
+<div id="pg-land" class="page active">
+    <div class="lhdr">
+        <!-- CUSTOMIZE: badge label e.g. "Paper 1" / "Paper 2" / "Demo Test" -->
+        <div class="badge">Paper 1</div>
+        <!-- CUSTOMIZE: Exam title — main + highlighted word -->
+        <h1>शब्दसमूहाबद्दल <span>एक शब्द</span></h1>
+        <!-- CUSTOMIZE: Short subtitle e.g. "Algebra · Geometry · Fractions" -->
+        <p>शब्दसंपत्ती &middot; 4th Scholarship &middot; Marathi (तृतीय भाषा)</p>
+    </div>
+
+    <div class="meta-grid">
+        <!-- CUSTOMIZE: Update all values to match the exam -->
+        <div class="mc"><div class="ml">Total Marks</div><div class="mv">60</div></div>
+        <div class="mc"><div class="ml">Questions</div><div class="mv">30</div></div>
+        <div class="mc"><div class="ml">Time Limit</div><div class="mv">30 Min</div></div>
+        <div class="mc"><div class="ml">Marks / Q</div><div class="mv">2</div></div>
+        <div class="mc"><div class="ml">Negative Marking</div><div class="mv" style="color:var(--error)">None</div></div>
+        <div class="mc"><div class="ml">Type</div><div class="mv">MCQ</div></div>
+    </div>
+
+    <div class="topics-panel">
+        <h3>📚 Topics Covered</h3>
+        <div class="chips">
+            <!-- CUSTOMIZE: One <span class="chip"> per topic. Use canonical subtopic names exactly. -->
+            <span class="chip"><span class="dot"></span>शब्दसमूहाबद्दल एक शब्द</span>
+        </div>
+    </div>
+
+    <div class="instr">
+        <strong>Instructions:</strong><br>
+        <!-- CUSTOMIZE: Update marks per question if different -->
+        • Each question carries <strong>2 marks</strong>. There is <strong>no negative marking</strong>.<br>
+        • Use the number grid to jump between questions.<br>
+        • The exam auto-submits when the timer reaches zero.
+    </div>
+
+    <div class="name-sec">
+        <label>Student Full Name</label>
+        <input type="text" id="sname" placeholder="Enter your full name here…">
+    </div>
+    <button class="btn-start" onclick="startExam()">▶ Start Test</button>
+</div>
+
+<!-- ══════════════ EXAM ══════════════ -->
+<div id="pg-exam" class="page">
+    <div class="topbar">
+        <!-- CUSTOMIZE: Short exam label shown during the exam -->
+        <div class="topbar-title">शब्दसमूहाबद्दल एक शब्द · Paper 1</div>
+        <!-- CUSTOMIZE: Update timer display to match TIME_LIMIT below e.g. "30:00" -->
+        <div class="timer" id="timer">30:00</div>
+        <!-- CUSTOMIZE: Update /TotalQuestions and TotalMarks -->
+        <div class="topbar-info">Q <span id="qnum">1</span>/30 &nbsp;|&nbsp; <span>60</span> Marks</div>
+    </div>
+
+    <div class="prog-outer"><div class="prog-inner" id="prog" style="width:4%"></div></div>
+
+    <div class="qcard">
+        <div style="overflow:hidden;margin-bottom:8px;">
+            <span id="q-tag">Topic</span>
+            <div class="qbadge">
+                <span class="num" id="q-circle">1</span>
+                <span>Question</span>
+            </div>
+        </div>
+        <div class="scroll-area">
+            <p id="q-text"></p>
+            <div id="opts"></div>
+        </div>
+    </div>
+
+    <div class="btn-row">
+        <button class="btn-nav" onclick="go(-1)">← Back</button>
+        <button class="btn-nav primary" id="next-btn" onclick="go(1)">Next →</button>
+    </div>
+
+    <div id="navgrid"></div>
+</div>
+
+<!-- ══════════════ RESULT ══════════════ -->
+<div id="pg-res" class="page">
+    <div class="res-hdr">
+        <h2 id="res-name"></h2>
+        <div class="score-big">
+            <span id="res-score">0</span>
+            <!-- CUSTOMIZE: Update to match TOTAL_MARKS -->
+            <span class="denom"> / 60</span>
+        </div>
+        <div id="res-grade" class="grade-badge"></div>
+    </div>
+    <div id="ai-box">
+        <h3>🤖 AI Feedback — Topic-wise Analysis</h3>
+        <div id="ai-content"></div>
+    </div>
+    <div id="rev-list">
+        <h3>📋 Question Review</h3>
+        <div id="rev-cards"></div>
+    </div>
+</div>
+
+</div><!-- end wrap -->
+
+<script>
+/* ════════════════════════════════════════
+   CONFIG  ← CUSTOMIZE ALL VALUES HERE
+════════════════════════════════════════ */
+// Unique key for sessionStorage/localStorage — must be unique per exam file
+// Format: "SubjectTitle_PaperX"  e.g. "MixedMaths_Paper1"
+const EXAM_KEY  = "ShabdSamuhaEkShabd_Paper1";
+
+// Full readable name shown in Sheets and AI feedback
+const EXAM_NAME = "शब्दसमूहाबद्दल एक शब्द Paper 1";
+
+// Standard
+const STD       = "4th";
+
+// Subject — must match SkillLedger subject grouping
+const SUBJ      = "Marathi";
+
+// Google Apps Script endpoint — DO NOT CHANGE
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwEutZaKIAodDqKVocXPmgGlsfyO6ma8vuQK4sFgEobmvD73QQwztuH4qbT_R3g1Figtw/exec";
+
+// Time limit in seconds — e.g. 1800 = 30 min, 900 = 15 min
+const TIME_LIMIT  = 1800;
+
+// Total marks — used for score display and grade calculation
+const TOTAL_MARKS = 60;
+
+// Marks per correct question
+const MARKS_PER_Q = 2;
+
+/* ════════════════════════════════════════
+   QUESTIONS
+   ─────────────────────────────────────
+   RULES (do not break these):
+   • The question-list opener line and its closing bracket line must each
+     sit on their own line (the portal's question parser depends on this).
+   • Each question needs: q, options (4 items), ans (0-based index),
+     topic, subtopic, explain
+   • topic = Unit name (broad); subtopic = canonical skill name (exact match).
+     Unit > Subtopic pairs used in this paper:
+       शब्दसंपत्ती > शब्दसमूहाबद्दल एक शब्द
+════════════════════════════════════════ */
+const questions = [
+    {
+        q: "खालील शब्दसमूहाबद्दल योग्य शब्द ओळखा:<br><strong>'पटकन पेट घेणारा'</strong>",
+        options: ["ज्वलंत", "इंधन", "अग्नि", "ज्वालाग्राही"],
+        ans: 3,
+        topic: "शब्दसंपत्ती",
+        subtopic: "शब्दसमूहाबद्दल एक शब्द",
+        explain: "'ज्वालाग्राही' म्हणजे पटकन पेट घेणारा पदार्थ. 'ज्वलंत' म्हणजे जळणारा/प्रखर, तर 'इंधन' म्हणजे जाळण्यासाठी वापरला जाणारा पदार्थ."
+    },
+    {
+        q: "खालील शब्दसमूहाबद्दल योग्य शब्द ओळखा:<br><strong>'शोध लावणारा'</strong>",
+        options: ["शोधक", "संशोधक", "दर्यावर्दी", "एडिसन"],
+        ans: 1,
+        topic: "शब्दसंपत्ती",
+        subtopic: "शब्दसमूहाबद्दल एक शब्द",
+        explain: "'संशोधक' म्हणजे नवीन शोध लावणारा. एडिसन हे एका संशोधकाचे नाव आहे, शब्दसमूहासाठी योग्य शब्द नव्हे."
+    },
+    {
+        q: "खालील शब्दसमूहाबद्दल योग्य शब्द ओळखा:<br><strong>'लढाईत शौर्याने लढणारी स्त्री'</strong>",
+        options: ["सैनिक", "वीरबाला", "वीरांगना", "नृत्यांगना"],
+        ans: 2,
+        topic: "शब्दसंपत्ती",
+        subtopic: "शब्दसमूहाबद्दल एक शब्द",
+        explain: "'वीरांगना' म्हणजे लढाईत शौर्याने लढणारी स्त्री. 'नृत्यांगना' म्हणजे नृत्य करणारी स्त्री."
+    },
+    {
+        q: "खालील शब्दसमूहाबद्दल योग्य शब्द ओळखा:<br><strong>'बारा दारे असलेली इमारत'</strong>",
+        options: ["बारादरी", "बाराबंदी", "बारमहल", "बारगीर"],
+        ans: 0,
+        topic: "शब्दसंपत्ती",
+        subtopic: "शब्दसमूहाबद्दल एक शब्द",
+        explain: "'बारादरी' म्हणजे बारा दारे असलेली इमारत."
+    },
+    {
+        q: "खालील शब्दसमूहाबद्दल योग्य शब्द ओळखा:<br><strong>'चांगला बदल घडवून आणण्यासाठी प्रयत्न करणारा'</strong>",
+        options: ["सुधारक", "नेता", "पुढारी", "क्रांतिकारक"],
+        ans: 0,
+        topic: "शब्दसंपत्ती",
+        subtopic: "शब्दसमूहाबद्दल एक शब्द",
+        explain: "'सुधारक' म्हणजे समाजात चांगला बदल घडवून आणण्यासाठी प्रयत्न करणारा."
+    },
+    {
+        q: "खालील शब्दसमूहाबद्दल योग्य शब्द ओळखा:<br><strong>'डोळ्याच्या कोपऱ्यातून पाहणे'</strong>",
+        options: ["लक्ष", "कटाक्ष", "दृष्टी", "नजर"],
+        ans: 1,
+        topic: "शब्दसंपत्ती",
+        subtopic: "शब्दसमूहाबद्दल एक शब्द",
+        explain: "'कटाक्ष' म्हणजे डोळ्याच्या कोपऱ्यातून पाहणे."
+    },
+    {
+        q: "खालील शब्दसमूहाबद्दल योग्य शब्द ओळखा:<br><strong>'हिरव्या रंगाचे मूल्यवान रत्न'</strong>",
+        options: ["माणिक", "हिरा", "पाचू", "निलमणी"],
+        ans: 2,
+        topic: "शब्दसंपत्ती",
+        subtopic: "शब्दसमूहाबद्दल एक शब्द",
+        explain: "'पाचू' हे हिरव्या रंगाचे मूल्यवान रत्न. 'माणिक' लाल रंगाचे, तर 'हिरा' पांढऱ्या/पारदर्शक रंगाचा असतो."
+    },
+    {
+        q: "खालील शब्दसमूहाबद्दल योग्य शब्द ओळखा:<br><strong>'संगीतातील राग गाण्यासाठी केलेले काव्य'</strong>",
+        options: ["चीज", "लकेर", "तराणा", "रागदारी"],
+        ans: 0,
+        topic: "शब्दसंपत्ती",
+        subtopic: "शब्दसमूहाबद्दल एक शब्द",
+        explain: "'चीज' म्हणजे संगीतातील राग गाण्यासाठी केलेले काव्य (बंदिश)."
+    },
+    {
+        q: "खालील शब्दसमूहाबद्दल योग्य शब्द ओळखा:<br><strong>'मजकुराची निवड व मांडणी करणारा'</strong>",
+        options: ["वार्ताहर", "संकलक", "निर्माता", "संपादक"],
+        ans: 3,
+        topic: "शब्दसंपत्ती",
+        subtopic: "शब्दसमूहाबद्दल एक शब्द",
+        explain: "'संपादक' म्हणजे मजकुराची निवड व मांडणी करणारा. 'वार्ताहर' म्हणजे बातमी आणून देणारा."
+    },
+    {
+        q: "खालील शब्दसमूहाबद्दल योग्य शब्द ओळखा:<br><strong>'ज्याच्याजवळ शस्त्र नाही असा'</strong>",
+        options: ["अनवाणी", "नि:शस्त्र", "रिकामा", "शरणागत"],
+        ans: 1,
+        topic: "शब्दसंपत्ती",
+        subtopic: "शब्दसमूहाबद्दल एक शब्द",
+        explain: "'नि:शस्त्र' म्हणजे ज्याच्याजवळ शस्त्र नाही असा. 'अनवाणी' म्हणजे पायात काहीही न घालता चालणारा."
+    },
+    {
+        q: "खालील शब्दसमूहाबद्दल योग्य शब्द ओळखा:<br><strong>'ज्याचा तळ लागत नाही असा'</strong>",
+        options: ["अनंत", "अमर्याद", "अथांग", "असीम"],
+        ans: 2,
+        topic: "शब्दसंपत्ती",
+        subtopic: "शब्दसमूहाबद्दल एक शब्द",
+        explain: "'अथांग' म्हणजे ज्याचा तळ लागत नाही असा (उदा. अथांग सागर)."
+    },
+    {
+        q: "खालील शब्दसमूहाबद्दल योग्य शब्द ओळखा:<br><strong>'दर पंधरवड्याने प्रसिद्ध होणारे'</strong>",
+        options: ["पाक्षिक", "साप्ताहिक", "मासिक", "दैनिक"],
+        ans: 0,
+        topic: "शब्दसंपत्ती",
+        subtopic: "शब्दसमूहाबद्दल एक शब्द",
+        explain: "'पाक्षिक' म्हणजे दर पंधरवड्याने (पंधरा दिवसांनी) प्रसिद्ध होणारे. 'साप्ताहिक' म्हणजे दर आठवड्याने प्रसिद्ध होणारे."
+    },
+    {
+        q: "खालील शब्दसमूहाबद्दल योग्य शब्द ओळखा:<br><strong>'देव आहे असा मानणारा'</strong>",
+        options: ["दैववादी", "नास्तिक", "दैवाधिन", "आस्तिक"],
+        ans: 3,
+        topic: "शब्दसंपत्ती",
+        subtopic: "शब्दसमूहाबद्दल एक शब्द",
+        explain: "'आस्तिक' म्हणजे देव आहे असे मानणारा. 'नास्तिक' म्हणजे देव नाही असे मानणारा."
+    },
+    {
+        q: "खालील शब्दसमूहाबद्दल योग्य शब्द ओळखा:<br><strong>'ज्याचे घरदार नष्ट झाले आहे असा'</strong>",
+        options: ["भूकंपग्रस्त", "निर्वासित", "पूरग्रस्त", "निराधार"],
+        ans: 1,
+        topic: "शब्दसंपत्ती",
+        subtopic: "शब्दसमूहाबद्दल एक शब्द",
+        explain: "'निर्वासित' म्हणजे ज्याचे घरदार नष्ट झाले आहे असा."
+    },
+    {
+        q: "खालील शब्दसमूहाबद्दल योग्य शब्द ओळखा:<br><strong>'स्वत: श्रम न करता खाणारा'</strong>",
+        options: ["आळशी", "कृतघ्न", "ऐतखाऊ", "स्वार्थी"],
+        ans: 2,
+        topic: "शब्दसंपत्ती",
+        subtopic: "शब्दसमूहाबद्दल एक शब्द",
+        explain: "'ऐतखाऊ' म्हणजे स्वतः श्रम न करता (आयते) खाणारा."
+    },
+    {
+        q: "खालील शब्दसमूहाबद्दल योग्य शब्द ओळखा:<br><strong>'पूर्वी कधी घडले नाही असे'</strong>",
+        options: ["अपूर्व", "अभूतपूर्व", "अभूतरम्य", "अमर्याद"],
+        ans: 1,
+        topic: "शब्दसंपत्ती",
+        subtopic: "शब्दसमूहाबद्दल एक शब्द",
+        explain: "'अभूतपूर्व' म्हणजे पूर्वी कधीही घडले नाही असे."
+    },
+    {
+        q: "खालील शब्दसमूहाबद्दल योग्य शब्द ओळखा:<br><strong>'फुकट अन्न मिळण्याचे ठिकाण'</strong>",
+        options: ["खाणावळ", "पाणपोई", "यात्रा", "सदावर्त"],
+        ans: 3,
+        topic: "शब्दसंपत्ती",
+        subtopic: "शब्दसमूहाबद्दल एक शब्द",
+        explain: "'सदावर्त' म्हणजे फुकट अन्न मिळण्याचे ठिकाण. 'पाणपोई' म्हणजे फुकट पाणी मिळण्याचे ठिकाण."
+    },
+    {
+        q: "खालील शब्दसमूहाबद्दल योग्य शब्द ओळखा:<br><strong>'मोजता येणार नाही असे'</strong>",
+        options: ["अगणित", "अनंत", "अथांग", "अमर्याद"],
+        ans: 0,
+        topic: "शब्दसंपत्ती",
+        subtopic: "शब्दसमूहाबद्दल एक शब्द",
+        explain: "'अगणित' म्हणजे मोजता येणार नाही असे. 'अथांग' म्हणजे तळ नसलेला, 'अमर्याद' म्हणजे मर्यादा नसलेला."
+    },
+    {
+        q: "खालील शब्दसमूहाबद्दल योग्य शब्द ओळखा:<br><strong>'मूर्तीची पूजा करणारा'</strong>",
+        options: ["मूर्तिपूजक", "मूर्तिकार", "पुजारी", "मूर्तिभंजक"],
+        ans: 0,
+        topic: "शब्दसंपत्ती",
+        subtopic: "शब्दसमूहाबद्दल एक शब्द",
+        explain: "'मूर्तिपूजक' म्हणजे मूर्तीची पूजा करणारा. 'मूर्तिकार' म्हणजे मूर्ती घडवणारा, तर 'मूर्तिभंजक' म्हणजे मूर्ती फोडणारा."
+    },
+    {
+        q: "खालील शब्दसमूहाबद्दल योग्य शब्द ओळखा:<br><strong>'हरणासारखे डोळे असणारी'</strong>",
+        options: ["मृगवती", "मीनाक्षी", "मृगाक्षी", "नयनमृगा"],
+        ans: 2,
+        topic: "शब्दसंपत्ती",
+        subtopic: "शब्दसमूहाबद्दल एक शब्द",
+        explain: "'मृगाक्षी' म्हणजे हरणासारखे (मृगासारखे) डोळे असणारी. 'मीनाक्षी' म्हणजे माशासारखे डोळे असणारी."
+    },
+    {
+        q: "खालील जोड्यांपैकी <strong>अयोग्य जोडी</strong> ओळखा:",
+        options: ["सतत करावयाची गोष्ट – सराव", "एका विचाराने एकत्र आलेला समूह – संघटना", "दगडातून मूर्ती घडविणारा – शिल्पकार", "लोकांची आवडती व्यक्ती – लोकमान्य"],
+        ans: 3,
+        topic: "शब्दसंपत्ती",
+        subtopic: "शब्दसमूहाबद्दल एक शब्द",
+        explain: "'लोकांची आवडती व्यक्ती' साठी योग्य शब्द 'लोकप्रिय'. 'लोकमान्य' म्हणजे लोकांनी मान्यता दिलेला."
+    },
+    {
+        q: "खालील जोड्यांपैकी <strong>अयोग्य जोडी</strong> ओळखा:",
+        options: ["हिंडून करावयाचा पहारा – पहारेकरी", "टिकून राहण्याचा गुणधर्म – चिकाटी", "जाणून घेण्याची इच्छा – जिज्ञासा", "कमी वेळ टिकणारा – अल्पजीवी"],
+        ans: 0,
+        topic: "शब्दसंपत्ती",
+        subtopic: "शब्दसमूहाबद्दल एक शब्द",
+        explain: "'हिंडून करावयाचा पहारा' म्हणजे 'गस्त'. 'पहारेकरी' म्हणजे पहारा देणारा माणूस."
+    },
+    {
+        q: "खालील जोड्यांपैकी <strong>अयोग्य जोडी</strong> ओळखा:",
+        options: ["भूकंपामुळे नुकसान झालेले लोक – भूकंपग्रस्त", "पूरामुळे नुकसान झालेले लोक – पूरग्रस्त", "दंगलीत नुकसान झालेले लोक – दंगलखोर", "धरणामुळे नुकसान झालेले लोक – धरणग्रस्त"],
+        ans: 2,
+        topic: "शब्दसंपत्ती",
+        subtopic: "शब्दसमूहाबद्दल एक शब्द",
+        explain: "'दंगलीत नुकसान झालेले लोक' म्हणजे 'दंगलग्रस्त'. 'दंगलखोर' म्हणजे दंगल करणारा."
+    },
+    {
+        q: "खालील जोड्यांपैकी <strong>अयोग्य जोडी</strong> ओळखा:",
+        options: ["ज्याला आई-वडील नाहीत असा – अनाथ", "अपेक्षा नसताना घडलेली गोष्ट – अनपेक्षित", "कधीही जिंकता न येणारा – अजिंक्य", "ज्याचे वर्णन करता येत नाही असे – अभूतपूर्व"],
+        ans: 3,
+        topic: "शब्दसंपत्ती",
+        subtopic: "शब्दसमूहाबद्दल एक शब्द",
+        explain: "'ज्याचे वर्णन करता येत नाही असे' म्हणजे 'अवर्णनीय'. 'अभूतपूर्व' म्हणजे पूर्वी कधी न घडलेले."
+    },
+    {
+        q: "खालील जोड्यांपैकी <strong>अयोग्य जोडी</strong> ओळखा:",
+        options: ["सर्व इच्छा पूर्ण करणारा वृक्ष – कल्पवृक्ष", "सर्व इच्छा पूर्ण करणारी गाय – कामधेनू", "इच्छिलेले फळ देणारा मणी – चिंतामणी", "इच्छिलेले सोने देणारा – परिस"],
+        ans: 3,
+        topic: "शब्दसंपत्ती",
+        subtopic: "शब्दसमूहाबद्दल एक शब्द",
+        explain: "'परिस' म्हणजे स्पर्शाने लोखंडाचे सोने करणारा दगड; 'इच्छिलेले सोने देणारा' हा अर्थ चुकीचा आहे."
+    },
+    {
+        q: "खालील जोड्यांपैकी <strong>अयोग्य जोडी</strong> ओळखा:",
+        options: ["फुकट पाणी मिळण्याचे ठिकाण – पाणपोई", "वर-खाली नेणारा विजेचा पाळणा – उद्वाहक", "खाण्याचे पदार्थ मिळण्याचे ठिकाण – अन्नछत्र", "वस्तूंचा साठा करण्याचे ठिकाण – गुदाम"],
+        ans: 2,
+        topic: "शब्दसंपत्ती",
+        subtopic: "शब्दसमूहाबद्दल एक शब्द",
+        explain: "'खाण्याचे पदार्थ मिळण्याचे ठिकाण' म्हणजे 'खाणावळ / उपाहारगृह'. 'अन्नछत्र' म्हणजे फुकट अन्न मिळण्याचे ठिकाण."
+    },
+    {
+        q: "खालील जोड्यांपैकी <strong>अयोग्य जोडी</strong> ओळखा:",
+        options: ["दररोज प्रसिद्ध होणारे – दैनिक", "दर पंधरा दिवसांनी प्रसिद्ध होणारे – साप्ताहिक", "दर महिन्याने प्रसिद्ध होणारे – मासिक", "दर सहा महिन्यांनी प्रसिद्ध होणारे – षण्मासिक"],
+        ans: 1,
+        topic: "शब्दसंपत्ती",
+        subtopic: "शब्दसमूहाबद्दल एक शब्द",
+        explain: "'दर पंधरा दिवसांनी प्रसिद्ध होणारे' म्हणजे 'पाक्षिक'. 'साप्ताहिक' म्हणजे दर आठवड्याने प्रसिद्ध होणारे."
+    },
+    {
+        q: "खालील जोड्यांपैकी <strong>अयोग्य जोडी</strong> ओळखा:",
+        options: ["भाषण करणारा – वक्ता", "भाषण ऐकणारा – श्रोता", "व्याख्यान देणारा – व्याख्याता", "बातमी आणून देणारा – संपादक"],
+        ans: 3,
+        topic: "शब्दसंपत्ती",
+        subtopic: "शब्दसमूहाबद्दल एक शब्द",
+        explain: "'बातमी आणून देणारा' म्हणजे 'वार्ताहर / बातमीदार'. 'संपादक' म्हणजे मजकुराची निवड व मांडणी करणारा."
+    },
+    {
+        q: "खालील जोड्यांपैकी <strong>अयोग्य जोडी</strong> ओळखा:",
+        options: ["राजाची स्तुती गाणारा – शाहीर", "नाटकात काम करणारा – नट", "दगडातून मूर्ती घडविणारा – शिल्पकार", "कथा लिहिणारा – कथाकार"],
+        ans: 0,
+        topic: "शब्दसंपत्ती",
+        subtopic: "शब्दसमूहाबद्दल एक शब्द",
+        explain: "'राजाची स्तुती गाणारा' म्हणजे 'भाट'. 'शाहीर' म्हणजे पोवाडे रचून गाणारा."
+    },
+    {
+        q: "खालील जोड्यांपैकी <strong>अयोग्य जोडी</strong> ओळखा:",
+        options: ["माकडाचा खेळ करणारा – डोंबारी", "अस्वलाचा खेळ करणारा – दरवेशी", "जादूचे खेळ करून दाखवणारा – जादूगार", "सापाचा खेळ करून दाखवणारा – गारूडी"],
+        ans: 0,
+        topic: "शब्दसंपत्ती",
+        subtopic: "शब्दसमूहाबद्दल एक शब्द",
+        explain: "'माकडाचा खेळ करणारा' म्हणजे 'मदारी'. 'डोंबारी' म्हणजे दोरीवरील कसरतीचे खेळ करणारा."
+    }
+];
+
+/* ════════════════════════════════════════
+   STATE  — do not edit below this line
+════════════════════════════════════════ */
+let curQ        = 0;
+let answers     = new Array(questions.length).fill(null);
+let sName       = "";
+let timerInt;
+let timeLeft    = TIME_LIMIT;
+
+/* ════════════════════════════════════════
+   TIMER
+════════════════════════════════════════ */
+function startTimer() {
+    timerInt = setInterval(() => {
+        timeLeft--;
+        sessionStorage.setItem('tl_' + EXAM_KEY, timeLeft);
+        renderTimer();
+        if (timeLeft <= 0) { clearInterval(timerInt); submit(true); }
+    }, 1000);
+}
+function renderTimer() {
+    const m = Math.floor(timeLeft / 60), s = timeLeft % 60;
+    const el = document.getElementById('timer');
+    el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    if (timeLeft <= 180) el.classList.add('warn'); else el.classList.remove('warn');
+}
+
+/* ════════════════════════════════════════
+   FLOW
+════════════════════════════════════════ */
+function startExam() {
+    sName = document.getElementById('sname').value.trim();
+    if (!sName) { alert("Please enter your name to begin."); return; }
+    sessionStorage.setItem('sn_' + EXAM_KEY, sName);
+    sessionStorage.setItem('ip_' + EXAM_KEY, '1');
+    show('pg-exam');
+    startTimer();
+    renderGrid();
+    renderQ();
+}
+
+function renderQ() {
+    const q = questions[curQ];
+    document.getElementById('qnum').textContent     = curQ + 1;
+    document.getElementById('q-circle').textContent = curQ + 1;
+    document.getElementById('q-tag').textContent    = q.topic + ' · ' + q.subtopic;
+    document.getElementById('q-text').innerHTML     = q.q;
+    document.getElementById('next-btn').textContent =
+        curQ === questions.length - 1 ? 'Finish ✓' : 'Next →';
+    document.getElementById('prog').style.width =
+        `${Math.max(4, ((curQ + 1) / questions.length) * 100)}%`;
+
+    const optsEl = document.getElementById('opts');
+    optsEl.innerHTML = '';
+    ['A','B','C','D'].forEach((L, i) => {
+        const lbl = document.createElement('label');
+        lbl.className = 'opt' + (answers[curQ] === i ? ' selected' : '');
+        lbl.innerHTML = `<input type="radio" name="opt"><span class="ocircle">${L}</span><span>${q.options[i]}</span>`;
+        lbl.onclick = () => pick(i);
+        optsEl.appendChild(lbl);
+    });
+
+    sessionStorage.setItem('cq_' + EXAM_KEY, curQ);
+    renderGrid();
+    if (window.MathJax) MathJax.typesetPromise();
+}
+
+function pick(i) {
+    answers[curQ] = i;
+    sessionStorage.setItem('ans_' + EXAM_KEY, JSON.stringify(answers));
+    document.querySelectorAll('.opt').forEach((el, idx) => el.classList.toggle('selected', idx === i));
+    renderGrid();
+}
+
+function go(d) {
+    if (d === 1 && curQ === questions.length - 1) { submit(false); return; }
+    curQ = Math.max(0, Math.min(questions.length - 1, curQ + d));
+    renderQ();
+}
+
+function jumpTo(i) { curQ = i; renderQ(); }
+
+function renderGrid() {
+    const g = document.getElementById('navgrid');
+    g.innerHTML = '';
+    questions.forEach((_, i) => {
+        const d = document.createElement('div');
+        let c = 'nb';
+        if (i === curQ) c += ' current';
+        if (answers[i] !== null) c += ' answered';
+        d.className = c;
+        d.textContent = i + 1;
+        d.onclick = () => jumpTo(i);
+        g.appendChild(d);
+    });
+}
+
+/* ════════════════════════════════════════
+   SUBMIT
+════════════════════════════════════════ */
+async function submit(auto = false) {
+    if (!auto) {
+        const unanswered = answers.filter(a => a === null).length;
+        if (unanswered > 0 && !confirm(`${unanswered} question(s) unanswered. Submit anyway?`)) return;
+    }
+    clearInterval(timerInt);
+
+    let raw = 0;
+    const topicMap = {};
+    const missedQs = [];
+    let revHTML = '';
+
+    questions.forEach((q, i) => {
+        const ok = answers[i] === q.ans;
+        if (ok) raw++;
+        else missedQs.push('Q' + (i + 1));
+
+        const skillKey = q.topic + ' > ' + q.subtopic;
+        if (!topicMap[skillKey]) topicMap[skillKey] = { total:0, correct:0, failedQ:[] };
+        topicMap[skillKey].total++;
+        if (ok) topicMap[skillKey].correct++;
+        else topicMap[skillKey].failedQ.push(i + 1);
+
+        const uAns = answers[i] !== null ? q.options[answers[i]] : 'Skipped';
+        revHTML += `<div class="rcard ${ok ? 'ok' : ''}">
+            <div class="rq">Q${i+1}: ${q.q}</div>
+            <div class="al">Your Answer: <span class="${ok ? 'ac' : 'aw'}">${uAns}</span></div>
+            <div class="al">Correct Answer: <span class="ac">${q.options[q.ans]}</span></div>
+            <div class="exp">💡 ${q.explain}</div>
+        </div>`;
+    });
+
+    const marks    = raw * MARKS_PER_Q;
+    const scoreStr = `${marks}/${TOTAL_MARKS}`;
+    const wrongStr = missedQs.length ? missedQs.join(', ') : 'None';
+
+    show('pg-res');
+    document.getElementById('res-name').textContent  = sName;
+    document.getElementById('res-score').textContent = marks;
+
+    const pct = (marks / TOTAL_MARKS) * 100;
+    const gEl = document.getElementById('res-grade');
+    if (pct >= 90)      { gEl.style.cssText='background:#4caf82;color:#fff'; gEl.textContent='⭐ Excellent!'; }
+    else if (pct >= 70) { gEl.style.cssText='background:#f0c040;color:#000'; gEl.textContent='👍 Good'; }
+    else if (pct >= 50) { gEl.style.cssText='background:#e87a30;color:#fff'; gEl.textContent='📚 Average'; }
+    else                { gEl.style.cssText='background:#f05c5c;color:#fff'; gEl.textContent='❗ Needs Improvement'; }
+
+    // AI feedback
+    let fbHTML = '';
+    for (const t in topicMap) {
+        const d = topicMap[t];
+        const p = (d.correct / d.total) * 100;
+        let icon, cls, msg;
+        if (p === 100)    { icon='✓'; cls='fi-m'; msg=`<strong>${t}</strong> — Mastery! All ${d.total} question(s) correct.`; }
+        else if (p >= 60) { icon='~'; cls='fi-s'; msg=`<strong>${t}</strong> — Good, but review Question(s) <strong>${d.failedQ.join(', ')}</strong>.`; }
+        else              { icon='✗'; cls='fi-w'; msg=`<strong>${t}</strong> — Needs practice. Focus on Question(s) <strong>${d.failedQ.join(', ')}</strong>.`; }
+        fbHTML += `<div class="fb-row"><div class="fb-icon ${cls}">${icon}</div><div style="font-size:0.88rem;color:var(--text);line-height:1.6;">${msg}</div></div>`;
+    }
+    document.getElementById('ai-content').innerHTML = fbHTML;
+    document.getElementById('rev-cards').innerHTML  = revHTML;
+    if (window.MathJax) MathJax.typesetPromise();
+
+    localStorage.setItem('done_' + EXAM_KEY, JSON.stringify({ sName, answers, marks, topicMap }));
+    sessionStorage.clear();
+    window.scrollTo(0, 0);
+
+    // Build topic breakdown string for SkillLedger
+    const parts = [], weak = [];
+    for (const t in topicMap) {
+        const d = topicMap[t];
+        const p = Math.round((d.correct / d.total) * 100);
+        const fail = d.failedQ.length ? ` [failed Q: ${d.failedQ.join(',')}]` : '';
+        parts.push(`${t}: ${d.correct}/${d.total}${fail}`);
+        if (p < 60) weak.push(t);
+    }
+
+    try {
+        fetch(WEB_APP_URL, {
+            method: 'POST', mode: 'no-cors',
+            body: JSON.stringify({
+                studentName:    sName,
+                standard:       STD,
+                examName:       EXAM_NAME,
+                examFile:       window.location.pathname.split('/').pop(),   // ← DO NOT CHANGE
+                subject:        SUBJ,
+                score:          scoreStr,
+                marksScored:    marks,
+                totalMarks:     TOTAL_MARKS,
+                wrongAnswers:   wrongStr,
+                topicBreakdown: parts.join(' | '),
+                weakTopics:     weak.length ? weak.join(', ') : 'None'
+            })
+        });
+    } catch(e) { /* silent */ }
+}
+
+/* ════════════════════════════════════════
+   HELPERS
+════════════════════════════════════════ */
+function show(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+
+window.onload = () => {
+    const done = localStorage.getItem('done_' + EXAM_KEY);
+    if (done) { restoreResult(JSON.parse(done)); return; }
+    if (sessionStorage.getItem('ip_' + EXAM_KEY)) {
+        sName    = sessionStorage.getItem('sn_' + EXAM_KEY) || '';
+        const sa = sessionStorage.getItem('ans_' + EXAM_KEY);
+        if (sa) answers = JSON.parse(sa);
+        curQ     = parseInt(sessionStorage.getItem('cq_' + EXAM_KEY)) || 0;
+        timeLeft = parseInt(sessionStorage.getItem('tl_' + EXAM_KEY)) || TIME_LIMIT;
+        show('pg-exam');
+        startTimer(); renderTimer(); renderGrid(); renderQ();
+    }
+};
+
+function restoreResult(d) {
+    sName   = d.sName;
+    answers = d.answers;
+    show('pg-res');
+    document.getElementById('res-name').textContent  = d.sName;
+    document.getElementById('res-score').textContent = d.marks;
+
+    const pct = (d.marks / TOTAL_MARKS) * 100;
+    const gEl = document.getElementById('res-grade');
+    if (pct >= 90)      { gEl.style.cssText='background:#4caf82;color:#fff'; gEl.textContent='⭐ Excellent!'; }
+    else if (pct >= 70) { gEl.style.cssText='background:#f0c040;color:#000'; gEl.textContent='👍 Good'; }
+    else if (pct >= 50) { gEl.style.cssText='background:#e87a30;color:#fff'; gEl.textContent='📚 Average'; }
+    else                { gEl.style.cssText='background:#f05c5c;color:#fff'; gEl.textContent='❗ Needs Improvement'; }
+
+    let revHTML = '';
+    questions.forEach((q, i) => {
+        const ok   = answers[i] === q.ans;
+        const uAns = answers[i] !== null ? q.options[answers[i]] : 'Skipped';
+        revHTML += `<div class="rcard ${ok?'ok':''}">
+            <div class="rq">Q${i+1}: ${q.q}</div>
+            <div class="al">Your Answer: <span class="${ok?'ac':'aw'}">${uAns}</span></div>
+            <div class="al">Correct Answer: <span class="ac">${q.options[q.ans]}</span></div>
+            <div class="exp">💡 ${q.explain}</div>
+        </div>`;
+    });
+    document.getElementById('rev-cards').innerHTML = revHTML;
+
+    let fbHTML = '';
+    for (const t in d.topicMap) {
+        const td = d.topicMap[t];
+        const p  = (td.correct / td.total) * 100;
+        let icon, cls, msg;
+        if (p === 100)  { icon='✓'; cls='fi-m'; msg=`<strong>${t}</strong> — Mastery achieved!`; }
+        else if (p>=60) { icon='~'; cls='fi-s'; msg=`<strong>${t}</strong> — Good, review Q ${td.failedQ.join(', ')}.`; }
+        else            { icon='✗'; cls='fi-w'; msg=`<strong>${t}</strong> — Needs practice. Focus on Q ${td.failedQ.join(', ')}.`; }
+        fbHTML += `<div class="fb-row"><div class="fb-icon ${cls}">${icon}</div><div style="font-size:0.88rem;color:var(--text);line-height:1.6;">${msg}</div></div>`;
+    }
+    document.getElementById('ai-content').innerHTML = fbHTML;
+    if (window.MathJax) MathJax.typesetPromise();
+}
+</script>
+</body>
+</html>
