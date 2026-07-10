@@ -1,0 +1,456 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>8th Std Maths Olympiad - Exam Master Template</title>
+<script>MathJax={tex:{inlineMath:[['\\(','\\)']]},startup:{typeset:false}};</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+:root{--bg:#1e293b;--pan:#334155;--acc:#3b82f6;--txt:#f8fafc;--mut:#94a3b8;--suc:#10b981;--dan:#ef4444;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:sans-serif;line-height:1.6;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow-x:hidden;}
+.container{width:100%;max-width:900px;padding:15px;margin-top:10px;}
+.screen{display:none;width:100%;}.screen.active{display:block;}
+h1,h2,h3{margin-bottom:15px;}.subtitle{color:var(--mut);margin-bottom:25px;}
+.panel{background:var(--pan);padding:25px;border-radius:12px;margin-bottom:20px;max-width:100%;overflow-x:auto;}
+input[type="text"]{width:100%;padding:12px;border-radius:8px;border:2px solid #475569;background:#0f172a;color:#fff;font-size:16px;margin-bottom:10px;}
+input[type="text"]:focus{outline:none;border-color:var(--acc);}
+.error-msg{color:var(--dan);font-size:14px;height:20px;margin-bottom:15px;opacity:0;}
+button{cursor:pointer;border-radius:8px;font-size:16px;font-weight:600;transition:0.2s;}
+.btn-primary{background:var(--acc);color:#fff;border:none;padding:12px 24px;}.btn-primary:hover{background:#2563eb;}
+.btn-secondary{background:transparent;border:2px solid var(--acc);color:var(--acc);padding:10px 20px;}
+.exam-header{display:flex;justify-content:space-between;align-items:center;background:var(--pan);padding:15px;border-radius:12px;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
+.timer{font-size:1.25rem;font-weight:bold;color:var(--acc);}
+.exam-layout{display:grid;grid-template-columns:1fr 280px;gap:20px;}
+@media(max-width:768px){.exam-layout{grid-template-columns:1fr;}}
+.question-card{background:var(--pan);padding:20px;border-radius:12px;min-height:350px;max-width:100%;overflow-x:auto;}
+.section-badge{display:inline-block;background:rgba(59,130,246,0.2);color:var(--acc);padding:4px 10px;border-radius:6px;font-size:12px;font-weight:bold;text-transform:uppercase;margin-bottom:15px;}
+.marks-badge{float:right;color:var(--mut);font-size:14px;}
+.question-text{font-size:1.1rem;margin-bottom:25px;word-break:break-word;}
+.options-grid{display:flex;flex-direction:column;gap:12px;}
+.option-label{display:flex;align-items:center;padding:12px;border:2px solid #475569;border-radius:8px;cursor:pointer;max-width:100%;}
+.option-label input{margin-right:12px;transform:scale(1.2);accent-color:var(--acc);flex-shrink:0;}
+.option-label span{flex:1;min-width:0;word-wrap:break-word;overflow-wrap:break-word;overflow-x:auto;}
+.option-label.selected{border-color:var(--acc);background:rgba(59,130,246,0.1);}
+.nav-controls{display:flex;justify-content:space-between;margin-top:25px;padding-top:20px;border-top:1px solid #475569;}
+.sidebar{background:var(--pan);padding:20px;border-radius:12px;}
+.nav-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;place-items:center;}
+.nav-btn{width:42px;height:42px;border-radius:50%;border:2px solid #475569;background:transparent;color:var(--txt);font-weight:bold;display:flex;align-items:center;justify-content:center;}
+.nav-btn.active{background:var(--acc);border-color:var(--acc);color:#fff;}
+.nav-btn.answered{background:rgba(59,130,246,0.2);border-color:var(--acc);}
+.nav-btn.answered.active{background:var(--acc);}
+.submit-btn-container{text-align:center;border-top:1px solid #475569;padding-top:20px;}
+.score-card{text-align:center;margin-bottom:30px;padding:20px;}
+.score-circle{width:120px;height:120px;border-radius:50%;border:8px solid var(--acc);display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 20px auto;font-size:2rem;font-weight:bold;}
+.feedback-text{font-size:1.1rem;color:var(--mut);max-width:600px;margin:0 auto;}
+.review-item{padding:15px;border-bottom:1px solid #475569;margin-bottom:15px;max-width:100%;overflow-x:auto;}
+.review-item:last-child{border-bottom:none;}
+.review-q{font-weight:bold;margin-bottom:10px;font-size:1.1rem;word-break:break-word;}
+.correct-ans{color:var(--suc);margin-bottom:5px;}.wrong-ans{color:var(--dan);margin-bottom:5px;}
+.explanation{background:#0f172a;padding:15px;border-radius:8px;border-left:4px solid var(--acc);margin-top:10px;font-size:0.95rem;word-break:break-word;overflow-x:auto;}
+
+/* Fix for MathJax Scrollbars in Options */
+.option-label { height: auto !important; min-height: 50px; }
+.option-label, .option-label span, mjx-container { overflow: visible !important; }
+</style></head><body>
+<div class="container">
+    <div id="intro-screen" class="screen active panel">
+        <h1>8th Std Maths Olympiad Prep</h1>
+        <p class="subtitle" id="intro-subtitle">Exam: [Exam Name]</p>
+        <div style="background:#0f172a;padding:20px;border-radius:8px;margin-bottom:25px;"><h3>Instructions:</h3><ul style="margin-left:20px;margin-top:10px;color:var(--mut);font-size:0.9rem;"><li>Total Questions: 16 (20 Marks total)</li><li><strong>Mathematical Reasoning:</strong> 8 Questions (1 Mark each)</li><li><strong>Everyday Mathematics:</strong> 6 Questions (1 Mark each)</li><li><strong>Achievers Section:</strong> 2 Questions (3 Marks each)</li><li>Time Limit: 30 Minutes. Timer starts upon clicking 'Start Exam'.</li></ul></div>
+        <label style="display:block;margin-bottom:8px;font-weight:600;">Enter your Full Name:</label>
+        <input type="text" id="student-name" placeholder="E.g. Aryan Sharma" autocomplete="off">
+        <div id="name-error" class="error-msg">Please enter a valid name.</div>
+        <button type="button" class="btn-primary" onclick="startExam()" style="width:100%;">Start Exam</button>
+    </div>
+    <div id="exam-screen" class="screen">
+        <div class="exam-header">
+            <div><span style="font-weight:bold;">Candidate: </span><span id="display-name" style="color:var(--mut);"></span></div>
+            <div class="timer" id="timer-display">30:00</div>
+        </div>
+        <div class="exam-layout">
+            <div class="question-card">
+                <div id="section-badge" class="section-badge">Section</div><span id="marks-badge" class="marks-badge">1 Mark</span>
+                <div id="question-text" class="question-text">Loading...</div>
+                <div class="options-grid" id="options-container"></div>
+                <div class="nav-controls">
+                    <button type="button" class="btn-secondary" id="btn-prev" onclick="changeQuestion(-1)">← Prev</button>
+                    <button type="button" class="btn-primary" id="btn-next" onclick="changeQuestion(1)">Next →</button>
+                </div>
+            </div>
+            <div class="sidebar">
+                <h3 style="text-align:center;margin-bottom:15px;">Navigator</h3>
+                <div class="nav-grid" id="nav-grid"></div>
+                <div class="submit-btn-container"><button type="button" class="btn-primary" onclick="confirmSubmit()" style="width:100%;background:var(--dan);">Submit</button></div>
+            </div>
+        </div>
+    </div>
+    <div id="result-screen" class="screen panel">
+        <div class="score-card">
+            <h2 id="result-title">Exam Submitted!</h2><p class="subtitle" id="result-subtitle">Here is your performance report.</p>
+            <h3 id="final-student-name" style="margin-bottom:20px;color:var(--acc);"></h3>
+            <div class="score-circle"><span id="final-score">0/20</span></div>
+            <p id="ai-feedback" class="feedback-text"></p>
+        </div>
+        <h3>Detailed Review</h3><div id="review-container" style="margin-top:20px;"></div>
+        <div style="text-align:center;margin-top:30px;color:var(--mut);"><p><strong>Note:</strong> Results permanently saved on device.</p></div>
+    </div>
+</div>
+<script>
+// =========================================================================
+// ⬇️ EDIT THESE VARIABLES FOR EACH NEW EXAM ⬇️
+// =========================================================================
+
+const EXAM_KEY = "8th_Math_olympiad_rational_numbers_test_v2"; 
+const EXAM_NAME = "Rational Numbers Test 2"; 
+const HARDCODED_STD = "8th";
+const HARDCODED_SUBJECT = "Maths";
+
+const QUESTIONS = [
+  {
+    "id": 1,
+    "section": "Mathematical Reasoning",
+    "marks": 1,
+    "text": "Simplify: \\(\\frac{4}{9} \\times \\left(\\frac{-3}{7}\\right) + \\frac{3}{14} + \\frac{4}{9} \\times \\left(\\frac{-4}{7}\\right)\\)",
+    "options": [
+      "\\(\\frac{-29}{126}\\)",
+      "\\(\\frac{29}{126}\\)",
+      "\\(\\frac{-5}{14}\\)",
+      "\\(\\frac{5}{14}\\)"
+    ],
+    "correct": 0,
+    "exp": "Using the distributive property: \\(\\frac{4}{9} \\times \\left(\\frac{-3}{7} - \\frac{4}{7}\\right) + \\frac{3}{14} = \\frac{4}{9} \\times \\left(\\frac{-7}{7}\\right) + \\frac{3}{14} = \\frac{-4}{9} + \\frac{3}{14}\\). Taking the LCM of 9 and 14 (which is 126), we get \\(\\frac{-56 + 27}{126} = \\frac{-29}{126}\\)."
+  },
+  {
+    "id": 2,
+    "section": "Mathematical Reasoning",
+    "marks": 1,
+    "text": "What is the additive inverse of the multiplicative inverse of \\(\\frac{-7}{15}\\)?",
+    "options": [
+      "\\(\\frac{-7}{15}\\)",
+      "\\(\\frac{7}{15}\\)",
+      "\\(\\frac{-15}{7}\\)",
+      "\\(\\frac{15}{7}\\)"
+    ],
+    "correct": 3,
+    "exp": "First, the multiplicative inverse (reciprocal) of \\(\\frac{-7}{15}\\) is \\(\\frac{-15}{7}\\). Next, the additive inverse of \\(\\frac{-15}{7}\\) is \\(\\frac{15}{7}\\)."
+  },
+  {
+    "id": 3,
+    "section": "Mathematical Reasoning",
+    "marks": 1,
+    "text": "By what rational number should \\(\\frac{-15}{56}\\) be divided to get \\(\\frac{-5}{7}\\)?",
+    "options": [
+      "\\(\\frac{3}{8}\\)",
+      "\\(\\frac{-3}{8}\\)",
+      "\\(\\frac{8}{3}\\)",
+      "\\(\\frac{-8}{3}\\)"
+    ],
+    "correct": 0,
+    "exp": "Let the required number be \\(x\\). So, \\(\\frac{-15}{56} \\div x = \\frac{-5}{7}\\). This implies \\(x = \\frac{-15}{56} \\div \\frac{-5}{7} = \\frac{-15}{56} \\times \\frac{7}{-5} = \\frac{3}{8}\\)."
+  },
+  {
+    "id": 4,
+    "section": "Mathematical Reasoning",
+    "marks": 1,
+    "text": "Which of the following rational numbers lies exactly between \\(\\frac{1}{4}\\) and \\(\\frac{1}{3}\\)?",
+    "options": [
+      "\\(\\frac{7}{24}\\)",
+      "\\(\\frac{5}{24}\\)",
+      "\\(\\frac{1}{12}\\)",
+      "\\(\\frac{7}{12}\\)"
+    ],
+    "correct": 0,
+    "exp": "Make the denominators the same (LCM = 12): \\(\\frac{3}{12}\\) and \\(\\frac{4}{12}\\). To find a number exactly between them, double the numerator and denominator: \\(\\frac{6}{24}\\) and \\(\\frac{8}{24}\\). The rational number between them is \\(\\frac{7}{24}\\)."
+  },
+  {
+    "id": 5,
+    "section": "Mathematical Reasoning",
+    "marks": 1,
+    "text": "Which of the following rational numbers is the greatest?",
+    "options": [
+      "\\(\\frac{-2}{3}\\)",
+      "\\(\\frac{-5}{6}\\)",
+      "\\(\\frac{-3}{4}\\)",
+      "\\(\\frac{-4}{5}\\)"
+    ],
+    "correct": 0,
+    "exp": "Convert all to a common denominator (LCM of 3, 6, 4, 5 is 60). The numbers become: \\(\\frac{-40}{60}\\), \\(\\frac{-50}{60}\\), \\(\\frac{-45}{60}\\), and \\(\\frac{-48}{60}\\). Among these, \\(\\frac{-40}{60}\\) (which is \\(\\frac{-2}{3}\\)) is the greatest because it is closest to zero on the negative side."
+  },
+  {
+    "id": 6,
+    "section": "Mathematical Reasoning",
+    "marks": 1,
+    "text": "The product of two rational numbers is \\(\\frac{-16}{35}\\). If one of them is \\(\\frac{-15}{14}\\), find the other.",
+    "options": [
+      "\\(\\frac{-32}{75}\\)",
+      "\\(\\frac{32}{75}\\)",
+      "\\(\\frac{8}{25}\\)",
+      "\\(\\frac{-8}{25}\\)"
+    ],
+    "correct": 1,
+    "exp": "Let the other number be \\(y\\). Then \\(y \\times \\frac{-15}{14} = \\frac{-16}{35}\\). Solving for \\(y\\): \\(y = \\frac{-16}{35} \\div \\frac{-15}{14} = \\frac{-16}{35} \\times \\frac{14}{-15} = \\frac{-16 \\times 2}{5 \\times -15} = \\frac{-32}{-75} = \\frac{32}{75}\\)."
+  },
+  {
+    "id": 7,
+    "section": "Mathematical Reasoning",
+    "marks": 1,
+    "text": "Subtract the sum of \\(\\frac{-3}{4}\\) and \\(\\frac{5}{6}\\) from the product of \\(\\frac{-1}{4}\\) and \\(\\frac{2}{3}\\).",
+    "options": [
+      "\\(\\frac{-1}{4}\\)",
+      "\\(\\frac{1}{4}\\)",
+      "\\(\\frac{-1}{12}\\)",
+      "\\(\\frac{1}{12}\\)"
+    ],
+    "correct": 0,
+    "exp": "Sum = \\(\\frac{-3}{4} + \\frac{5}{6} = \\frac{-9+10}{12} = \\frac{1}{12}\\). Product = \\(\\frac{-1}{4} \\times \\frac{2}{3} = \\frac{-2}{12} = \\frac{-1}{6}\\). Subtracting the sum FROM the product: \\(\\frac{-1}{6} - \\frac{1}{12} = \\frac{-2-1}{12} = \\frac{-3}{12} = \\frac{-1}{4}\\)."
+  },
+  {
+    "id": 8,
+    "section": "Mathematical Reasoning",
+    "marks": 1,
+    "text": "Which of the following statements is true?",
+    "options": [
+      "Rational numbers are not closed under addition.",
+      "0 is not a rational number.",
+      "All whole numbers are rational numbers.",
+      "Division of rational numbers is always commutative."
+    ],
+    "correct": 2,
+    "exp": "All whole numbers can be expressed in the form \\(\\frac{p}{q}\\) where \\(q=1\\) (e.g., \\(5 = \\frac{5}{1}\\)), making them rational numbers. The other statements are mathematically incorrect."
+  },
+  {
+    "id": 9,
+    "section": "Everyday Mathematics",
+    "marks": 1,
+    "text": "The average of 5 rational numbers is \\(\\frac{3}{5}\\). If one of the numbers, \\(\\frac{1}{5}\\), is replaced by \\(\\frac{4}{5}\\), the new average will:",
+    "options": [
+      "Increase by \\(\\frac{3}{25}\\)",
+      "Decrease by \\(\\frac{3}{25}\\)",
+      "Increase by \\(\\frac{2}{25}\\)",
+      "Decrease by \\(\\frac{2}{25}\\)"
+    ],
+    "correct": 0,
+    "exp": "Original sum of the 5 numbers = \\(5 \\times \\frac{3}{5} = 3\\). If \\(\\frac{1}{5}\\) is replaced by \\(\\frac{4}{5}\\), the sum increases by \\(\\left(\\frac{4}{5} - \\frac{1}{5}\\right) = \\frac{3}{5}\\). The new sum is \\(3 + \\frac{3}{5} = \\frac{18}{5}\\). The new average is \\(\\frac{18}{5} \\div 5 = \\frac{18}{25}\\). The change in average is \\(\\frac{18}{25} - \\frac{3}{5} = \\frac{18 - 15}{25} = \\frac{3}{25}\\). It increases by \\(\\frac{3}{25}\\)."
+  },
+  {
+    "id": 10,
+    "section": "Everyday Mathematics",
+    "marks": 1,
+    "text": "Ravi reads \\(\\frac{1}{4}\\) part of a novel in 1 hour. How much part of the novel will he read in \\(3\\frac{1}{2}\\) hours?",
+    "options": [
+      "\\(\\frac{5}{8}\\)",
+      "\\(\\frac{7}{8}\\)",
+      "\\(\\frac{3}{4}\\)",
+      "\\(\\frac{1}{2}\\)"
+    ],
+    "correct": 1,
+    "exp": "Part read in 1 hour = \\(\\frac{1}{4}\\). Total time = \\(3\\frac{1}{2} = \\frac{7}{2}\\) hours. Part read in total time = \\(\\frac{1}{4} \\times \\frac{7}{2} = \\frac{7}{8}\\)."
+  },
+  {
+    "id": 11,
+    "section": "Everyday Mathematics",
+    "marks": 1,
+    "text": "A rectangular piece of land has a length of \\(22\\frac{1}{2}\\) m and a breadth of \\(10\\frac{2}{3}\\) m. What is its perimeter?",
+    "options": [
+      "\\(64\\frac{1}{3}\\) m",
+      "\\(66\\frac{1}{3}\\) m",
+      "\\(65\\frac{2}{3}\\) m",
+      "\\(68\\frac{1}{2}\\) m"
+    ],
+    "correct": 1,
+    "exp": "Length = \\(22\\frac{1}{2} = \\frac{45}{2}\\) m. Breadth = \\(10\\frac{2}{3} = \\frac{32}{3}\\) m. Perimeter = \\(2 \\times (Length + Breadth) = 2 \\times \\left(\\frac{45}{2} + \\frac{32}{3}\\right) = 2 \\times \\left(\\frac{135 + 64}{6}\\right) = 2 \\times \\frac{199}{6} = \\frac{199}{3} = 66\\frac{1}{3}\\) m."
+  },
+  {
+    "id": 12,
+    "section": "Everyday Mathematics",
+    "marks": 1,
+    "text": "A ribbon of length \\(35\\frac{3}{4}\\) m is cut into equal pieces of length \\(2\\frac{3}{4}\\) m each. How many pieces are formed?",
+    "options": [
+      "12",
+      "13",
+      "14",
+      "15"
+    ],
+    "correct": 1,
+    "exp": "Total length = \\(35\\frac{3}{4} = \\frac{143}{4}\\) m. Length of one piece = \\(2\\frac{3}{4} = \\frac{11}{4}\\) m. Number of pieces = \\(\\frac{143}{4} \\div \\frac{11}{4} = \\frac{143}{4} \\times \\frac{4}{11} = \\frac{143}{11} = 13\\)."
+  },
+  {
+    "id": 13,
+    "section": "Everyday Mathematics",
+    "marks": 1,
+    "text": "Ankita had ₹400. She spent \\(\\frac{2}{5}\\) of it on books and \\(\\frac{1}{4}\\) of the <b>remainder</b> on stationary. How much money is left with her?",
+    "options": [
+      "₹160",
+      "₹180",
+      "₹200",
+      "₹240"
+    ],
+    "correct": 1,
+    "exp": "Money spent on books = \\(\\frac{2}{5} \\times 400 = 160\\). Remainder = \\(400 - 160 = 240\\). Money spent on stationary = \\(\\frac{1}{4} \\times 240 = 60\\). Money left = \\(240 - 60 = 180\\)."
+  },
+  {
+    "id": 14,
+    "section": "Everyday Mathematics",
+    "marks": 1,
+    "text": "The cost of \\(3\\frac{1}{4}\\) kg of rice is ₹104. What is the cost of \\(2\\frac{1}{2}\\) kg of rice?",
+    "options": [
+      "₹75",
+      "₹80",
+      "₹85",
+      "₹90"
+    ],
+    "correct": 1,
+    "exp": "Cost of \\(\\frac{13}{4}\\) kg = ₹104. Cost of 1 kg = \\(104 \\div \\frac{13}{4} = 104 \\times \\frac{4}{13} = 8 \\times 4 = ₹32\\). Therefore, cost of \\(2\\frac{1}{2}\\) kg (or \\(\\frac{5}{2}\\) kg) = \\(32 \\times \\frac{5}{2} = 16 \\times 5 = ₹80\\)."
+  },
+  {
+    "id": 15,
+    "section": "Achievers Section",
+    "marks": 3,
+    "text": "State 'T' for True and 'F' for False.<br>(i) The rational number \\(\\frac{5}{-9}\\) lies to the right of zero on the number line.<br>(ii) There are infinitely many rational numbers between \\(\\frac{1}{2}\\) and \\(\\frac{1}{3}\\).<br>(iii) Subtraction is associative for rational numbers.",
+    "options": [
+      "(i)-F, (ii)-T, (iii)-F",
+      "(i)-T, (ii)-F, (iii)-T",
+      "(i)-F, (ii)-F, (iii)-T",
+      "(i)-F, (ii)-T, (iii)-T"
+    ],
+    "correct": 0,
+    "exp": "(i) \\(\\frac{5}{-9}\\) is a negative rational number, so it lies to the left of zero (False).<br>(ii) Between any two distinct rational numbers, there exist infinitely many rational numbers (True).<br>(iii) Subtraction is not associative: \\(a - (b - c) \\neq (a - b) - c\\) (False)."
+  },
+  {
+    "id": 16,
+    "section": "Achievers Section",
+    "marks": 3,
+    "text": "Fill in the blanks.<br>(i) The multiplicative identity for rational numbers is <b>P</b>.<br>(ii) The rational number which is equal to its negative is <b>Q</b>.<br>(iii) The reciprocal of \\(\\frac{-5}{8} \\times \\frac{16}{15}\\) is <b>R</b>.",
+    "options": [
+      "P=0, Q=1, R=\\(\\frac{-2}{3}\\)",
+      "P=1, Q=0, R=\\(\\frac{-3}{2}\\)",
+      "P=1, Q=-1, R=\\(\\frac{-2}{3}\\)",
+      "P=0, Q=0, R=\\(\\frac{-3}{2}\\)"
+    ],
+    "correct": 1,
+    "exp": "<b>P</b>: When any rational number is multiplied by 1, it remains unchanged, so the multiplicative identity is 1.<br><b>Q</b>: 0 is the only rational number where \\(0 = -0\\).<br><b>R</b>: The product is \\(\\frac{-5}{8} \\times \\frac{16}{15} = \\frac{-1}{1} \\times \\frac{2}{3} = \\frac{-2}{3}\\). The reciprocal of \\(\\frac{-2}{3}\\) is \\(\\frac{-3}{2}\\)."
+  }
+];
+
+// =========================================================================
+// ⬆️ DO NOT EDIT BELOW THIS LINE ⬆️
+// =========================================================================
+
+document.getElementById("intro-subtitle").innerText = `Exam: ${EXAM_NAME}`;
+const WEB_APP_URL="https://script.google.com/macros/s/AKfycbwEutZaKIAodDqKVocXPmgGlsfyO6ma8vuQK4sFgEobmvD73QQwztuH4qbT_R3g1Figtw/exec",EXAM_DURATION=1800;
+let currentQuestionIndex=0,userAnswers=new Array(QUESTIONS.length).fill(null),timerInterval,timeRemaining=EXAM_DURATION,studentName="";
+
+window.onload=function(){
+    const sd=localStorage.getItem(`submitted_data_${EXAM_KEY}`);
+    if(sd){
+        try{
+            const d=JSON.parse(sd);
+            studentName=d.studentName;
+            userAnswers=d.answers||new Array(QUESTIONS.length).fill(null);
+            const sp=d.score.split('/');
+            document.getElementById("intro-screen").classList.remove("active");
+            document.getElementById("result-title").innerText=`Welcome Back!`;
+            document.getElementById("result-subtitle").innerText="Performance report from previous submission.";
+            showReviewScreen(parseInt(sp[0]),parseInt(sp[1]));
+        }catch(e){
+            localStorage.removeItem(`submitted_data_${EXAM_KEY}`);
+            sessionStorage.clear();
+        }
+    } else if (sessionStorage.getItem(`examActive_${EXAM_KEY}`) === "true") {
+        // Resume active exam state on refresh
+        studentName = sessionStorage.getItem(`studentName_${EXAM_KEY}`);
+        document.getElementById("display-name").innerText=studentName;
+        const st=sessionStorage.getItem("examTime");if(st)timeRemaining=parseInt(st);
+        const sa=sessionStorage.getItem("examAnswers");if(sa)try{userAnswers=JSON.parse(sa);}catch(e){userAnswers=new Array(QUESTIONS.length).fill(null);}
+        
+        document.getElementById("intro-screen").classList.remove("active");
+        document.getElementById("exam-screen").classList.add("active");
+        
+        buildNavGrid();
+        const savedQ = parseInt(sessionStorage.getItem("currentQuestionIndex")) || 0;
+        loadQuestion(savedQ);
+        startTimer();
+    } else {
+        sessionStorage.clear();
+    }
+};
+
+function startExam(){
+    if(QUESTIONS.length === 0) return alert("Error: No questions found in the array!");
+    const name=document.getElementById("student-name").value.trim(),err=document.getElementById("name-error");
+    if(name.length<3){alert("Enter your full name (min 3 chars).");err.style.opacity=1;return;}
+    err.style.opacity=0;studentName=name;document.getElementById("display-name").innerText=studentName;
+    
+    // Save active exam state
+    sessionStorage.setItem(`examActive_${EXAM_KEY}`, "true");
+    sessionStorage.setItem(`studentName_${EXAM_KEY}`, studentName);
+    
+    const st=sessionStorage.getItem("examTime");if(st)timeRemaining=parseInt(st);
+    const sa=sessionStorage.getItem("examAnswers");if(sa)try{userAnswers=JSON.parse(sa);}catch(e){userAnswers=new Array(QUESTIONS.length).fill(null);}
+    document.getElementById("intro-screen").classList.remove("active");document.getElementById("exam-screen").classList.add("active");
+    buildNavGrid();loadQuestion(0);startTimer();
+}
+function buildNavGrid(){
+    const grid=document.getElementById("nav-grid");grid.innerHTML="";
+    QUESTIONS.forEach((q,i)=>{
+        const btn=document.createElement("button");btn.className="nav-btn";btn.innerText=i+1;
+        btn.onclick=()=>loadQuestion(i);btn.id=`nav-btn-${i}`;
+        if(userAnswers[i]!==null)btn.classList.add("answered");grid.appendChild(btn);
+    });
+}
+function loadQuestion(i){
+    if(i<0||i>=QUESTIONS.length)return;
+    currentQuestionIndex=i;
+    sessionStorage.setItem("currentQuestionIndex", i); // Save current page number
+    const q=QUESTIONS[i];
+    document.getElementById("section-badge").innerText=q.section;
+    document.getElementById("marks-badge").innerText=`${q.marks} Mark${q.marks>1?'s':''}`;
+    document.getElementById("question-text").innerHTML=`<strong style="margin-right:10px;">Q${i+1}.</strong> ${q.text}`;
+    const optContainer=document.getElementById("options-container");optContainer.innerHTML="";
+    q.options.forEach((optText,optIndex)=>{
+        optContainer.innerHTML+=`<label class="option-label ${userAnswers[i]===optIndex?'selected':''}" onclick="selectOption(${i},${optIndex})">
+        <input type="radio" name="q${i}" ${userAnswers[i]===optIndex?'checked':''}><span>${String.fromCharCode(65+optIndex)}) ${optText}</span></label>`;
+    });
+    if(window.MathJax&&window.MathJax.typesetPromise)MathJax.typesetPromise([document.getElementById("question-text"),optContainer]).catch(e=>console.error(e));
+    document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));
+    document.getElementById(`nav-btn-${i}`).classList.add("active");
+    document.getElementById("btn-prev").style.visibility=i===0?"hidden":"visible";
+    document.getElementById("btn-next").style.visibility=i===QUESTIONS.length-1?"hidden":"visible";
+}
+function selectOption(qI,oI){userAnswers[qI]=oI;sessionStorage.setItem("examAnswers",JSON.stringify(userAnswers));document.getElementById(`nav-btn-${qI}`).classList.add("answered");loadQuestion(qI);}
+function changeQuestion(step){loadQuestion(currentQuestionIndex+step);}
+function startTimer(){
+    const td=document.getElementById("timer-display");
+    timerInterval=setInterval(()=>{
+        if(timeRemaining<=0){clearInterval(timerInterval);submitExam();}
+        else{timeRemaining--;sessionStorage.setItem("examTime",timeRemaining);
+        td.innerText=`${Math.floor(timeRemaining/60).toString().padStart(2,'0')}:${(timeRemaining%60).toString().padStart(2,'0')}`;
+        if(timeRemaining<=300)td.style.color="var(--dan)";}
+    },1000);
+}
+function confirmSubmit(){
+    const unans=userAnswers.filter(a=>a===null).length;
+    if(window.confirm(unans>0?`You have ${unans} unanswered questions. Submit?`:"Ready to submit?"))submitExam();
+}
+function submitExam(){
+    clearInterval(timerInterval);let score=0,max=0,miss=[];
+    QUESTIONS.forEach((q,i)=>{max+=q.marks;if(userAnswers[i]===q.correct)score+=q.marks;else miss.push("Q"+(i+1));});
+    const payload={studentName:studentName,standard:HARDCODED_STD,examName:EXAM_NAME,subject:HARDCODED_SUBJECT,score:`${score}/${max}`,wrongAnswers:miss.length>0?miss.join(", "):"None",answers:userAnswers};
+    fetch(WEB_APP_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(payload)}).catch(e=>console.error(e));
+    localStorage.setItem(`submitted_data_${EXAM_KEY}`,JSON.stringify(payload));sessionStorage.clear();
+    showReviewScreen(score,max);
+}
+function showReviewScreen(s,m){
+    document.getElementById("exam-screen").classList.remove("active");document.getElementById("result-screen").classList.add("active");
+    document.getElementById("final-student-name").innerText=`Candidate: ${studentName}`;document.getElementById("final-score").innerText=`${s}/${m}`;
+    const pct=(s/m)*100;
+    document.getElementById("ai-feedback").innerText=pct>=90?"Absolutely stellar! You are well prepared to ace the Olympiad.":pct>=60?"Great job! Your fundamentals are strong. Keep practicing complex simplifications.":"We recommend going back to the foundational concepts and trying again.";
+    const rc=document.getElementById("review-container");rc.innerHTML="";
+    QUESTIONS.forEach((q,i)=>{
+        const isC=userAnswers[i]===q.correct;
+        rc.innerHTML+=`<div class="review-item"><div class="review-q">Q${i+1}. ${q.text} <span style="float:right;color:var(--${isC?'suc':'dan'});font-size:0.9rem;">${isC?'✓ Correct':'✗ Incorrect'} (${isC?q.marks:0}/${q.marks})</span></div>
+        <div class="${isC?'correct-ans':'wrong-ans'}"><strong>Your Answer:</strong> ${userAnswers[i]!==null?q.options[userAnswers[i]]:"Not Attempted"}</div>
+        ${!isC?`<div class="correct-ans"><strong>Correct Answer:</strong> ${q.options[q.correct]}</div>`:''}
+        <div class="explanation"><strong>Explanation:</strong><br> ${q.exp}</div></div>`;
+    });
+    if(window.MathJax&&window.MathJax.typesetPromise)MathJax.typesetPromise([rc]).catch(e=>console.error(e));
+}
+</script></body></html>

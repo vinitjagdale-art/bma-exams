@@ -1,0 +1,456 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>8th Std Maths Olympiad - Exam Master Template</title>
+<script>MathJax={tex:{inlineMath:[['\\(','\\)']]},startup:{typeset:false}};</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+:root{--bg:#1e293b;--pan:#334155;--acc:#3b82f6;--txt:#f8fafc;--mut:#94a3b8;--suc:#10b981;--dan:#ef4444;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:sans-serif;line-height:1.6;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow-x:hidden;}
+.container{width:100%;max-width:900px;padding:15px;margin-top:10px;}
+.screen{display:none;width:100%;}.screen.active{display:block;}
+h1,h2,h3{margin-bottom:15px;}.subtitle{color:var(--mut);margin-bottom:25px;}
+.panel{background:var(--pan);padding:25px;border-radius:12px;margin-bottom:20px;max-width:100%;overflow-x:auto;}
+input[type="text"]{width:100%;padding:12px;border-radius:8px;border:2px solid #475569;background:#0f172a;color:#fff;font-size:16px;margin-bottom:10px;}
+input[type="text"]:focus{outline:none;border-color:var(--acc);}
+.error-msg{color:var(--dan);font-size:14px;height:20px;margin-bottom:15px;opacity:0;}
+button{cursor:pointer;border-radius:8px;font-size:16px;font-weight:600;transition:0.2s;}
+.btn-primary{background:var(--acc);color:#fff;border:none;padding:12px 24px;}.btn-primary:hover{background:#2563eb;}
+.btn-secondary{background:transparent;border:2px solid var(--acc);color:var(--acc);padding:10px 20px;}
+.exam-header{display:flex;justify-content:space-between;align-items:center;background:var(--pan);padding:15px;border-radius:12px;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
+.timer{font-size:1.25rem;font-weight:bold;color:var(--acc);}
+.exam-layout{display:grid;grid-template-columns:1fr 280px;gap:20px;}
+@media(max-width:768px){.exam-layout{grid-template-columns:1fr;}}
+.question-card{background:var(--pan);padding:20px;border-radius:12px;min-height:350px;max-width:100%;overflow-x:auto;}
+.section-badge{display:inline-block;background:rgba(59,130,246,0.2);color:var(--acc);padding:4px 10px;border-radius:6px;font-size:12px;font-weight:bold;text-transform:uppercase;margin-bottom:15px;}
+.marks-badge{float:right;color:var(--mut);font-size:14px;}
+.question-text{font-size:1.1rem;margin-bottom:25px;word-break:break-word;}
+.options-grid{display:flex;flex-direction:column;gap:12px;}
+.option-label{display:flex;align-items:center;padding:12px;border:2px solid #475569;border-radius:8px;cursor:pointer;max-width:100%;}
+.option-label input{margin-right:12px;transform:scale(1.2);accent-color:var(--acc);flex-shrink:0;}
+.option-label span{flex:1;min-width:0;word-wrap:break-word;overflow-wrap:break-word;overflow-x:auto;}
+.option-label.selected{border-color:var(--acc);background:rgba(59,130,246,0.1);}
+.nav-controls{display:flex;justify-content:space-between;margin-top:25px;padding-top:20px;border-top:1px solid #475569;}
+.sidebar{background:var(--pan);padding:20px;border-radius:12px;}
+.nav-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;place-items:center;}
+.nav-btn{width:42px;height:42px;border-radius:50%;border:2px solid #475569;background:transparent;color:var(--txt);font-weight:bold;display:flex;align-items:center;justify-content:center;}
+.nav-btn.active{background:var(--acc);border-color:var(--acc);color:#fff;}
+.nav-btn.answered{background:rgba(59,130,246,0.2);border-color:var(--acc);}
+.nav-btn.answered.active{background:var(--acc);}
+.submit-btn-container{text-align:center;border-top:1px solid #475569;padding-top:20px;}
+.score-card{text-align:center;margin-bottom:30px;padding:20px;}
+.score-circle{width:120px;height:120px;border-radius:50%;border:8px solid var(--acc);display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 20px auto;font-size:2rem;font-weight:bold;}
+.feedback-text{font-size:1.1rem;color:var(--mut);max-width:600px;margin:0 auto;}
+.review-item{padding:15px;border-bottom:1px solid #475569;margin-bottom:15px;max-width:100%;overflow-x:auto;}
+.review-item:last-child{border-bottom:none;}
+.review-q{font-weight:bold;margin-bottom:10px;font-size:1.1rem;word-break:break-word;}
+.correct-ans{color:var(--suc);margin-bottom:5px;}.wrong-ans{color:var(--dan);margin-bottom:5px;}
+.explanation{background:#0f172a;padding:15px;border-radius:8px;border-left:4px solid var(--acc);margin-top:10px;font-size:0.95rem;word-break:break-word;overflow-x:auto;}
+
+/* Fix for MathJax Scrollbars in Options */
+.option-label { height: auto !important; min-height: 50px; }
+.option-label, .option-label span, mjx-container { overflow: visible !important; }
+</style></head><body>
+<div class="container">
+    <div id="intro-screen" class="screen active panel">
+        <h1>8th Std Maths Olympiad Prep</h1>
+        <p class="subtitle" id="intro-subtitle">Exam: [Exam Name]</p>
+        <div style="background:#0f172a;padding:20px;border-radius:8px;margin-bottom:25px;"><h3>Instructions:</h3><ul style="margin-left:20px;margin-top:10px;color:var(--mut);font-size:0.9rem;"><li>Total Questions: 16 (20 Marks total)</li><li><strong>Mathematical Reasoning:</strong> 8 Questions (1 Mark each)</li><li><strong>Everyday Mathematics:</strong> 6 Questions (1 Mark each)</li><li><strong>Achievers Section:</strong> 2 Questions (3 Marks each)</li><li>Time Limit: 30 Minutes. Timer starts upon clicking 'Start Exam'.</li></ul></div>
+        <label style="display:block;margin-bottom:8px;font-weight:600;">Enter your Full Name:</label>
+        <input type="text" id="student-name" placeholder="E.g. Aryan Sharma" autocomplete="off">
+        <div id="name-error" class="error-msg">Please enter a valid name.</div>
+        <button type="button" class="btn-primary" onclick="startExam()" style="width:100%;">Start Exam</button>
+    </div>
+    <div id="exam-screen" class="screen">
+        <div class="exam-header">
+            <div><span style="font-weight:bold;">Candidate: </span><span id="display-name" style="color:var(--mut);"></span></div>
+            <div class="timer" id="timer-display">30:00</div>
+        </div>
+        <div class="exam-layout">
+            <div class="question-card">
+                <div id="section-badge" class="section-badge">Section</div><span id="marks-badge" class="marks-badge">1 Mark</span>
+                <div id="question-text" class="question-text">Loading...</div>
+                <div class="options-grid" id="options-container"></div>
+                <div class="nav-controls">
+                    <button type="button" class="btn-secondary" id="btn-prev" onclick="changeQuestion(-1)">← Prev</button>
+                    <button type="button" class="btn-primary" id="btn-next" onclick="changeQuestion(1)">Next →</button>
+                </div>
+            </div>
+            <div class="sidebar">
+                <h3 style="text-align:center;margin-bottom:15px;">Navigator</h3>
+                <div class="nav-grid" id="nav-grid"></div>
+                <div class="submit-btn-container"><button type="button" class="btn-primary" onclick="confirmSubmit()" style="width:100%;background:var(--dan);">Submit</button></div>
+            </div>
+        </div>
+    </div>
+    <div id="result-screen" class="screen panel">
+        <div class="score-card">
+            <h2 id="result-title">Exam Submitted!</h2><p class="subtitle" id="result-subtitle">Here is your performance report.</p>
+            <h3 id="final-student-name" style="margin-bottom:20px;color:var(--acc);"></h3>
+            <div class="score-circle"><span id="final-score">0/20</span></div>
+            <p id="ai-feedback" class="feedback-text"></p>
+        </div>
+        <h3>Detailed Review</h3><div id="review-container" style="margin-top:20px;"></div>
+        <div style="text-align:center;margin-top:30px;color:var(--mut);"><p><strong>Note:</strong> Results permanently saved on device.</p></div>
+    </div>
+</div>
+<script>
+// =========================================================================
+// ⬇️ EDIT THESE VARIABLES FOR EACH NEW EXAM ⬇️
+// =========================================================================
+
+const EXAM_KEY = "8th_Math_Rational_Numbers_test_1"; 
+const EXAM_NAME = "Rational Numbers Test 1"; 
+const HARDCODED_STD = "8th";
+const HARDCODED_SUBJECT = "Maths";
+
+const QUESTIONS = [
+  {
+    "id": 1,
+    "section": "Mathematical Reasoning",
+    "marks": 1,
+    "text": "What is the additive inverse of \\(\\frac{-(-3)}{4}\\)?",
+    "options": [
+      "\\(\\frac{3}{4}\\)",
+      "\\(\\frac{-3}{4}\\)",
+      "\\(\\frac{4}{3}\\)",
+      "\\(\\frac{-4}{3}\\)"
+    ],
+    "correct": 1,
+    "exp": "First, simplify the given expression: \\(\\frac{-(-3)}{4} = \\frac{3}{4}\\). The additive inverse of a number \\(x\\) is \\(-x\\). So, the additive inverse of \\(\\frac{3}{4}\\) is \\(\\frac{-3}{4}\\)."
+  },
+  {
+    "id": 2,
+    "section": "Mathematical Reasoning",
+    "marks": 1,
+    "text": "The product of a non-zero rational number and its reciprocal is always:",
+    "options": [
+      "0",
+      "1",
+      "-1",
+      "Not defined"
+    ],
+    "correct": 1,
+    "exp": "The reciprocal of a rational number \\(\\frac{a}{b}\\) is \\(\\frac{b}{a}\\). Their product is \\(\\frac{a}{b} \\times \\frac{b}{a} = 1\\)."
+  },
+  {
+    "id": 3,
+    "section": "Mathematical Reasoning",
+    "marks": 1,
+    "text": "Find the value of \\(\\frac{3}{7} \\times \\frac{-2}{5} - \\frac{1}{14} - \\frac{3}{7} \\times \\frac{3}{5}\\).",
+    "options": [
+      "\\(\\frac{-1}{2}\\)",
+      "\\(\\frac{1}{2}\\)",
+      "1",
+      "0"
+    ],
+    "correct": 0,
+    "exp": "Using the commutative and distributive properties: \\(\\frac{3}{7} \\times \\left(\\frac{-2}{5} - \\frac{3}{5}\\right) - \\frac{1}{14} = \\frac{3}{7} \\times \\left(\\frac{-5}{5}\\right) - \\frac{1}{14} = \\frac{3}{7} \\times (-1) - \\frac{1}{14} = \\frac{-3}{7} - \\frac{1}{14} = \\frac{-6 - 1}{14} = \\frac{-7}{14} = \\frac{-1}{2}\\)."
+  },
+  {
+    "id": 4,
+    "section": "Mathematical Reasoning",
+    "marks": 1,
+    "text": "How many rational numbers are there between \\(\\frac{-1}{3}\\) and \\(\\frac{1}{2}\\)?",
+    "options": [
+      "1",
+      "2",
+      "10",
+      "Infinitely many"
+    ],
+    "correct": 3,
+    "exp": "There are infinitely many rational numbers between any two distinct rational numbers."
+  },
+  {
+    "id": 5,
+    "section": "Mathematical Reasoning",
+    "marks": 1,
+    "text": "Which of the following rational numbers is in its standard form?",
+    "options": [
+      "\\(\\frac{-12}{26}\\)",
+      "\\(\\frac{-49}{71}\\)",
+      "\\(\\frac{14}{-21}\\)",
+      "\\(\\frac{28}{105}\\)"
+    ],
+    "correct": 1,
+    "exp": "A rational number is in standard form if its denominator is positive and the numerator and denominator have no common factor other than 1. Only \\(\\frac{-49}{71}\\) satisfies this condition (49 and 71 are co-prime)."
+  },
+  {
+    "id": 6,
+    "section": "Mathematical Reasoning",
+    "marks": 1,
+    "text": "If \\(x = \\frac{2}{3}\\) and \\(y = \\frac{4}{5}\\), what is the value of \\((x+y) \\div (x-y)\\)?",
+    "options": [
+      "-11",
+      "11",
+      "\\(\\frac{-11}{15}\\)",
+      "\\(\\frac{11}{15}\\)"
+    ],
+    "correct": 0,
+    "exp": "\\(x+y = \\frac{2}{3} + \\frac{4}{5} = \\frac{10+12}{15} = \\frac{22}{15}\\). \\(x-y = \\frac{2}{3} - \\frac{4}{5} = \\frac{10-12}{15} = \\frac{-2}{15}\\). \\((x+y) \\div (x-y) = \\frac{22}{15} \\times \\frac{15}{-2} = \\frac{22}{-2} = -11\\)."
+  },
+  {
+    "id": 7,
+    "section": "Mathematical Reasoning",
+    "marks": 1,
+    "text": "By what number should \\(\\frac{-33}{16}\\) be divided to get \\(\\frac{-11}{4}\\)?",
+    "options": [
+      "\\(\\frac{3}{4}\\)",
+      "\\(\\frac{-3}{4}\\)",
+      "\\(\\frac{4}{3}\\)",
+      "\\(\\frac{-4}{3}\\)"
+    ],
+    "correct": 0,
+    "exp": "Let the number be \\(z\\). Then \\(\\frac{-33}{16} \\div z = \\frac{-11}{4}\\). This implies \\(z = \\frac{-33}{16} \\div \\frac{-11}{4} = \\frac{-33}{16} \\times \\frac{4}{-11} = \\frac{3}{4}\\)."
+  },
+  {
+    "id": 8,
+    "section": "Mathematical Reasoning",
+    "marks": 1,
+    "text": "Which of the following statements about rational numbers is INCORRECT?",
+    "options": [
+      "Rational numbers are closed under addition.",
+      "Rational numbers are closed under subtraction.",
+      "Rational numbers are closed under multiplication.",
+      "Rational numbers are closed under division."
+    ],
+    "correct": 3,
+    "exp": "Rational numbers are not closed under division because division by zero is not defined (e.g., \\(\\frac{5}{0}\\) is not a rational number)."
+  },
+  {
+    "id": 9,
+    "section": "Everyday Mathematics",
+    "marks": 1,
+    "text": "A tailor needs \\(\\frac{5}{4}\\) meters of cloth to stitch one shirt. How many identical shirts can he stitch from a \\(20\\) meter roll of cloth?",
+    "options": [
+      "12",
+      "16",
+      "20",
+      "25"
+    ],
+    "correct": 1,
+    "exp": "Total shirts = Total cloth \\(\\div\\) Cloth per shirt = \\(20 \\div \\frac{5}{4} = 20 \\times \\frac{4}{5} = 4 \\times 4 = 16\\) shirts."
+  },
+  {
+    "id": 10,
+    "section": "Everyday Mathematics",
+    "marks": 1,
+    "text": "Ria reads \\(\\frac{1}{4}\\) of a book in 1 hour. How much fraction of the book will she read in \\(3\\frac{1}{2}\\) hours?",
+    "options": [
+      "\\(\\frac{5}{8}\\)",
+      "\\(\\frac{7}{8}\\)",
+      "\\(\\frac{3}{4}\\)",
+      "\\(\\frac{1}{2}\\)"
+    ],
+    "correct": 1,
+    "exp": "Fraction of book read in 1 hour = \\(\\frac{1}{4}\\). In \\(3\\frac{1}{2} = \\frac{7}{2}\\) hours, she will read = \\(\\frac{1}{4} \\times \\frac{7}{2} = \\frac{7}{8}\\) of the book."
+  },
+  {
+    "id": 11,
+    "section": "Everyday Mathematics",
+    "marks": 1,
+    "text": "The area of a rectangular garden is \\(45\\frac{1}{2}\\) sq. m. If its breadth is \\(2\\frac{4}{5}\\) m, find its length.",
+    "options": [
+      "\\(15\\frac{1}{4}\\) m",
+      "\\(16\\frac{1}{4}\\) m",
+      "\\(17\\frac{1}{2}\\) m",
+      "\\(16\\frac{3}{4}\\) m"
+    ],
+    "correct": 1,
+    "exp": "Area = \\(45\\frac{1}{2} = \\frac{91}{2}\\) sq. m. Breadth = \\(2\\frac{4}{5} = \\frac{14}{5}\\) m. Length = Area \\(\\div\\) Breadth = \\(\\frac{91}{2} \\div \\frac{14}{5} = \\frac{91}{2} \\times \\frac{5}{14} = \\frac{13}{2} \\times \\frac{5}{2} = \\frac{65}{4} = 16\\frac{1}{4}\\) m."
+  },
+  {
+    "id": 12,
+    "section": "Everyday Mathematics",
+    "marks": 1,
+    "text": "From a rope \\(11\\) m long, two pieces of lengths \\(2\\frac{3}{5}\\) m and \\(3\\frac{3}{10}\\) m are cut off. What is the length of the remaining rope?",
+    "options": [
+      "\\(5\\frac{1}{10}\\) m",
+      "\\(4\\frac{9}{10}\\) m",
+      "\\(6\\frac{1}{10}\\) m",
+      "\\(5\\frac{3}{10}\\) m"
+    ],
+    "correct": 0,
+    "exp": "Total length cut = \\(2\\frac{3}{5} + 3\\frac{3}{10} = \\frac{13}{5} + \\frac{33}{10} = \\frac{26+33}{10} = \\frac{59}{10}\\) m. Remaining length = \\(11 - \\frac{59}{10} = \\frac{110 - 59}{10} = \\frac{51}{10} = 5\\frac{1}{10}\\) m."
+  },
+  {
+    "id": 13,
+    "section": "Everyday Mathematics",
+    "marks": 1,
+    "text": "A cake recipe requires \\(2\\frac{1}{2}\\) cups of flour. If Rohan wants to make exactly \\(\\frac{3}{4}\\) of the recipe size, how many cups of flour will he need?",
+    "options": [
+      "\\(1\\frac{3}{8}\\) cups",
+      "\\(2\\frac{1}{8}\\) cups",
+      "\\(1\\frac{7}{8}\\) cups",
+      "\\(1\\frac{5}{8}\\) cups"
+    ],
+    "correct": 2,
+    "exp": "Flour required = \\(2\\frac{1}{2} \\times \\frac{3}{4} = \\frac{5}{2} \\times \\frac{3}{4} = \\frac{15}{8} = 1\\frac{7}{8}\\) cups."
+  },
+  {
+    "id": 14,
+    "section": "Everyday Mathematics",
+    "marks": 1,
+    "text": "Sunita earns ₹36000 per month. She spends \\(\\frac{1}{3}\\) of it on rent, \\(\\frac{1}{4}\\) of the remainder on food, and saves the rest. How much does she save?",
+    "options": [
+      "₹18000",
+      "₹12000",
+      "₹24000",
+      "₹15000"
+    ],
+    "correct": 0,
+    "exp": "Rent = \\(\\frac{1}{3} \\times 36000 = 12000\\). Remainder = \\(36000 - 12000 = 24000\\). Food = \\(\\frac{1}{4} \\times 24000 = 6000\\). Total spent = \\(12000 + 6000 = 18000\\). Savings = \\(36000 - 18000 = 18000\\)."
+  },
+  {
+    "id": 15,
+    "section": "Achievers Section",
+    "marks": 3,
+    "text": "Match the following expressions with their results:<br>(P) \\(\\frac{-5}{9} \\div \\frac{2}{3}\\)<br>(Q) \\(\\frac{4}{7} \\times \\frac{-14}{3}\\)<br>(R) \\(\\frac{-3}{8} + \\frac{5}{12}\\)<br><br>(1) \\(\\frac{1}{24}\\)<br>(2) \\(\\frac{-5}{6}\\)<br>(3) \\(\\frac{-8}{3}\\)",
+    "options": [
+      "P-2, Q-3, R-1",
+      "P-3, Q-2, R-1",
+      "P-1, Q-3, R-2",
+      "P-2, Q-1, R-3"
+    ],
+    "correct": 0,
+    "exp": "(P) \\(\\frac{-5}{9} \\div \\frac{2}{3} = \\frac{-5}{9} \\times \\frac{3}{2} = \\frac{-5}{6}\\). <br>(Q) \\(\\frac{4}{7} \\times \\frac{-14}{3} = \\frac{-8}{3}\\). <br>(R) \\(\\frac{-3}{8} + \\frac{5}{12} = \\frac{-9+10}{24} = \\frac{1}{24}\\). So, P matches 2, Q matches 3, R matches 1."
+  },
+  {
+    "id": 16,
+    "section": "Achievers Section",
+    "marks": 3,
+    "text": "Read the statements carefully and select the correct option.<br><b>Statement 1:</b> The rational number \\(\\frac{-7}{4}\\) lies between \\(-2\\) and \\(-1\\) on the number line.<br><b>Statement 2:</b> There is no rational number between \\(\\frac{1}{3}\\) and \\(\\frac{1}{2}\\).",
+    "options": [
+      "Both Statement 1 and Statement 2 are true.",
+      "Both Statement 1 and Statement 2 are false.",
+      "Statement 1 is true but Statement 2 is false.",
+      "Statement 1 is false but Statement 2 is true."
+    ],
+    "correct": 2,
+    "exp": "\\(\\frac{-7}{4}\\) is equivalent to \\(-1\\frac{3}{4}\\), which is strictly between \\(-1\\) and \\(-2\\). Hence, Statement 1 is true. There are infinitely many rational numbers between any two rational numbers (like \\(\\frac{5}{12}\\) between \\(\\frac{1}{3}\\) and \\(\\frac{1}{2}\\)), so Statement 2 is false."
+  }
+];
+
+// =========================================================================
+// ⬆️ DO NOT EDIT BELOW THIS LINE ⬆️
+// =========================================================================
+
+document.getElementById("intro-subtitle").innerText = `Exam: ${EXAM_NAME}`;
+const WEB_APP_URL="https://script.google.com/macros/s/AKfycbwEutZaKIAodDqKVocXPmgGlsfyO6ma8vuQK4sFgEobmvD73QQwztuH4qbT_R3g1Figtw/exec",EXAM_DURATION=1800;
+let currentQuestionIndex=0,userAnswers=new Array(QUESTIONS.length).fill(null),timerInterval,timeRemaining=EXAM_DURATION,studentName="";
+
+window.onload=function(){
+    const sd=localStorage.getItem(`submitted_data_${EXAM_KEY}`);
+    if(sd){
+        try{
+            const d=JSON.parse(sd);
+            studentName=d.studentName;
+            userAnswers=d.answers||new Array(QUESTIONS.length).fill(null);
+            const sp=d.score.split('/');
+            document.getElementById("intro-screen").classList.remove("active");
+            document.getElementById("result-title").innerText=`Welcome Back!`;
+            document.getElementById("result-subtitle").innerText="Performance report from previous submission.";
+            showReviewScreen(parseInt(sp[0]),parseInt(sp[1]));
+        }catch(e){
+            localStorage.removeItem(`submitted_data_${EXAM_KEY}`);
+            sessionStorage.clear();
+        }
+    } else if (sessionStorage.getItem(`examActive_${EXAM_KEY}`) === "true") {
+        // Resume active exam state on refresh
+        studentName = sessionStorage.getItem(`studentName_${EXAM_KEY}`);
+        document.getElementById("display-name").innerText=studentName;
+        const st=sessionStorage.getItem("examTime");if(st)timeRemaining=parseInt(st);
+        const sa=sessionStorage.getItem("examAnswers");if(sa)try{userAnswers=JSON.parse(sa);}catch(e){userAnswers=new Array(QUESTIONS.length).fill(null);}
+        
+        document.getElementById("intro-screen").classList.remove("active");
+        document.getElementById("exam-screen").classList.add("active");
+        
+        buildNavGrid();
+        const savedQ = parseInt(sessionStorage.getItem("currentQuestionIndex")) || 0;
+        loadQuestion(savedQ);
+        startTimer();
+    } else {
+        sessionStorage.clear();
+    }
+};
+
+function startExam(){
+    if(QUESTIONS.length === 0) return alert("Error: No questions found in the array!");
+    const name=document.getElementById("student-name").value.trim(),err=document.getElementById("name-error");
+    if(name.length<3){alert("Enter your full name (min 3 chars).");err.style.opacity=1;return;}
+    err.style.opacity=0;studentName=name;document.getElementById("display-name").innerText=studentName;
+    
+    // Save active exam state
+    sessionStorage.setItem(`examActive_${EXAM_KEY}`, "true");
+    sessionStorage.setItem(`studentName_${EXAM_KEY}`, studentName);
+    
+    const st=sessionStorage.getItem("examTime");if(st)timeRemaining=parseInt(st);
+    const sa=sessionStorage.getItem("examAnswers");if(sa)try{userAnswers=JSON.parse(sa);}catch(e){userAnswers=new Array(QUESTIONS.length).fill(null);}
+    document.getElementById("intro-screen").classList.remove("active");document.getElementById("exam-screen").classList.add("active");
+    buildNavGrid();loadQuestion(0);startTimer();
+}
+function buildNavGrid(){
+    const grid=document.getElementById("nav-grid");grid.innerHTML="";
+    QUESTIONS.forEach((q,i)=>{
+        const btn=document.createElement("button");btn.className="nav-btn";btn.innerText=i+1;
+        btn.onclick=()=>loadQuestion(i);btn.id=`nav-btn-${i}`;
+        if(userAnswers[i]!==null)btn.classList.add("answered");grid.appendChild(btn);
+    });
+}
+function loadQuestion(i){
+    if(i<0||i>=QUESTIONS.length)return;
+    currentQuestionIndex=i;
+    sessionStorage.setItem("currentQuestionIndex", i); // Save current page number
+    const q=QUESTIONS[i];
+    document.getElementById("section-badge").innerText=q.section;
+    document.getElementById("marks-badge").innerText=`${q.marks} Mark${q.marks>1?'s':''}`;
+    document.getElementById("question-text").innerHTML=`<strong style="margin-right:10px;">Q${i+1}.</strong> ${q.text}`;
+    const optContainer=document.getElementById("options-container");optContainer.innerHTML="";
+    q.options.forEach((optText,optIndex)=>{
+        optContainer.innerHTML+=`<label class="option-label ${userAnswers[i]===optIndex?'selected':''}" onclick="selectOption(${i},${optIndex})">
+        <input type="radio" name="q${i}" ${userAnswers[i]===optIndex?'checked':''}><span>${String.fromCharCode(65+optIndex)}) ${optText}</span></label>`;
+    });
+    if(window.MathJax&&window.MathJax.typesetPromise)MathJax.typesetPromise([document.getElementById("question-text"),optContainer]).catch(e=>console.error(e));
+    document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));
+    document.getElementById(`nav-btn-${i}`).classList.add("active");
+    document.getElementById("btn-prev").style.visibility=i===0?"hidden":"visible";
+    document.getElementById("btn-next").style.visibility=i===QUESTIONS.length-1?"hidden":"visible";
+}
+function selectOption(qI,oI){userAnswers[qI]=oI;sessionStorage.setItem("examAnswers",JSON.stringify(userAnswers));document.getElementById(`nav-btn-${qI}`).classList.add("answered");loadQuestion(qI);}
+function changeQuestion(step){loadQuestion(currentQuestionIndex+step);}
+function startTimer(){
+    const td=document.getElementById("timer-display");
+    timerInterval=setInterval(()=>{
+        if(timeRemaining<=0){clearInterval(timerInterval);submitExam();}
+        else{timeRemaining--;sessionStorage.setItem("examTime",timeRemaining);
+        td.innerText=`${Math.floor(timeRemaining/60).toString().padStart(2,'0')}:${(timeRemaining%60).toString().padStart(2,'0')}`;
+        if(timeRemaining<=300)td.style.color="var(--dan)";}
+    },1000);
+}
+function confirmSubmit(){
+    const unans=userAnswers.filter(a=>a===null).length;
+    if(window.confirm(unans>0?`You have ${unans} unanswered questions. Submit?`:"Ready to submit?"))submitExam();
+}
+function submitExam(){
+    clearInterval(timerInterval);let score=0,max=0,miss=[];
+    QUESTIONS.forEach((q,i)=>{max+=q.marks;if(userAnswers[i]===q.correct)score+=q.marks;else miss.push("Q"+(i+1));});
+    const payload={studentName:studentName,standard:HARDCODED_STD,examName:EXAM_NAME,subject:HARDCODED_SUBJECT,score:`${score}/${max}`,wrongAnswers:miss.length>0?miss.join(", "):"None",answers:userAnswers};
+    fetch(WEB_APP_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(payload)}).catch(e=>console.error(e));
+    localStorage.setItem(`submitted_data_${EXAM_KEY}`,JSON.stringify(payload));sessionStorage.clear();
+    showReviewScreen(score,max);
+}
+function showReviewScreen(s,m){
+    document.getElementById("exam-screen").classList.remove("active");document.getElementById("result-screen").classList.add("active");
+    document.getElementById("final-student-name").innerText=`Candidate: ${studentName}`;document.getElementById("final-score").innerText=`${s}/${m}`;
+    const pct=(s/m)*100;
+    document.getElementById("ai-feedback").innerText=pct>=90?"Absolutely stellar! You are well prepared to ace the Olympiad.":pct>=60?"Great job! Your fundamentals are strong. Keep practicing complex simplifications.":"We recommend going back to the foundational concepts and trying again.";
+    const rc=document.getElementById("review-container");rc.innerHTML="";
+    QUESTIONS.forEach((q,i)=>{
+        const isC=userAnswers[i]===q.correct;
+        rc.innerHTML+=`<div class="review-item"><div class="review-q">Q${i+1}. ${q.text} <span style="float:right;color:var(--${isC?'suc':'dan'});font-size:0.9rem;">${isC?'✓ Correct':'✗ Incorrect'} (${isC?q.marks:0}/${q.marks})</span></div>
+        <div class="${isC?'correct-ans':'wrong-ans'}"><strong>Your Answer:</strong> ${userAnswers[i]!==null?q.options[userAnswers[i]]:"Not Attempted"}</div>
+        ${!isC?`<div class="correct-ans"><strong>Correct Answer:</strong> ${q.options[q.correct]}</div>`:''}
+        <div class="explanation"><strong>Explanation:</strong><br> ${q.exp}</div></div>`;
+    });
+    if(window.MathJax&&window.MathJax.typesetPromise)MathJax.typesetPromise([rc]).catch(e=>console.error(e));
+}
+</script></body></html>

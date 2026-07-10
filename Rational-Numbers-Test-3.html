@@ -1,0 +1,456 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>8th Std Maths Olympiad - Exam Master Template</title>
+<script>MathJax={tex:{inlineMath:[['\\(','\\)']]},startup:{typeset:false}};</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+:root{--bg:#1e293b;--pan:#334155;--acc:#3b82f6;--txt:#f8fafc;--mut:#94a3b8;--suc:#10b981;--dan:#ef4444;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:sans-serif;line-height:1.6;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow-x:hidden;}
+.container{width:100%;max-width:900px;padding:15px;margin-top:10px;}
+.screen{display:none;width:100%;}.screen.active{display:block;}
+h1,h2,h3{margin-bottom:15px;}.subtitle{color:var(--mut);margin-bottom:25px;}
+.panel{background:var(--pan);padding:25px;border-radius:12px;margin-bottom:20px;max-width:100%;overflow-x:auto;}
+input[type="text"]{width:100%;padding:12px;border-radius:8px;border:2px solid #475569;background:#0f172a;color:#fff;font-size:16px;margin-bottom:10px;}
+input[type="text"]:focus{outline:none;border-color:var(--acc);}
+.error-msg{color:var(--dan);font-size:14px;height:20px;margin-bottom:15px;opacity:0;}
+button{cursor:pointer;border-radius:8px;font-size:16px;font-weight:600;transition:0.2s;}
+.btn-primary{background:var(--acc);color:#fff;border:none;padding:12px 24px;}.btn-primary:hover{background:#2563eb;}
+.btn-secondary{background:transparent;border:2px solid var(--acc);color:var(--acc);padding:10px 20px;}
+.exam-header{display:flex;justify-content:space-between;align-items:center;background:var(--pan);padding:15px;border-radius:12px;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
+.timer{font-size:1.25rem;font-weight:bold;color:var(--acc);}
+.exam-layout{display:grid;grid-template-columns:1fr 280px;gap:20px;}
+@media(max-width:768px){.exam-layout{grid-template-columns:1fr;}}
+.question-card{background:var(--pan);padding:20px;border-radius:12px;min-height:350px;max-width:100%;overflow-x:auto;}
+.section-badge{display:inline-block;background:rgba(59,130,246,0.2);color:var(--acc);padding:4px 10px;border-radius:6px;font-size:12px;font-weight:bold;text-transform:uppercase;margin-bottom:15px;}
+.marks-badge{float:right;color:var(--mut);font-size:14px;}
+.question-text{font-size:1.1rem;margin-bottom:25px;word-break:break-word;}
+.options-grid{display:flex;flex-direction:column;gap:12px;}
+.option-label{display:flex;align-items:center;padding:12px;border:2px solid #475569;border-radius:8px;cursor:pointer;max-width:100%;}
+.option-label input{margin-right:12px;transform:scale(1.2);accent-color:var(--acc);flex-shrink:0;}
+.option-label span{flex:1;min-width:0;word-wrap:break-word;overflow-wrap:break-word;overflow-x:auto;}
+.option-label.selected{border-color:var(--acc);background:rgba(59,130,246,0.1);}
+.nav-controls{display:flex;justify-content:space-between;margin-top:25px;padding-top:20px;border-top:1px solid #475569;}
+.sidebar{background:var(--pan);padding:20px;border-radius:12px;}
+.nav-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;place-items:center;}
+.nav-btn{width:42px;height:42px;border-radius:50%;border:2px solid #475569;background:transparent;color:var(--txt);font-weight:bold;display:flex;align-items:center;justify-content:center;}
+.nav-btn.active{background:var(--acc);border-color:var(--acc);color:#fff;}
+.nav-btn.answered{background:rgba(59,130,246,0.2);border-color:var(--acc);}
+.nav-btn.answered.active{background:var(--acc);}
+.submit-btn-container{text-align:center;border-top:1px solid #475569;padding-top:20px;}
+.score-card{text-align:center;margin-bottom:30px;padding:20px;}
+.score-circle{width:120px;height:120px;border-radius:50%;border:8px solid var(--acc);display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 20px auto;font-size:2rem;font-weight:bold;}
+.feedback-text{font-size:1.1rem;color:var(--mut);max-width:600px;margin:0 auto;}
+.review-item{padding:15px;border-bottom:1px solid #475569;margin-bottom:15px;max-width:100%;overflow-x:auto;}
+.review-item:last-child{border-bottom:none;}
+.review-q{font-weight:bold;margin-bottom:10px;font-size:1.1rem;word-break:break-word;}
+.correct-ans{color:var(--suc);margin-bottom:5px;}.wrong-ans{color:var(--dan);margin-bottom:5px;}
+.explanation{background:#0f172a;padding:15px;border-radius:8px;border-left:4px solid var(--acc);margin-top:10px;font-size:0.95rem;word-break:break-word;overflow-x:auto;}
+
+/* Fix for MathJax Scrollbars in Options */
+.option-label { height: auto !important; min-height: 50px; }
+.option-label, .option-label span, mjx-container { overflow: visible !important; }
+</style></head><body>
+<div class="container">
+    <div id="intro-screen" class="screen active panel">
+        <h1>8th Std Maths Olympiad Prep</h1>
+        <p class="subtitle" id="intro-subtitle">Exam: [Exam Name]</p>
+        <div style="background:#0f172a;padding:20px;border-radius:8px;margin-bottom:25px;"><h3>Instructions:</h3><ul style="margin-left:20px;margin-top:10px;color:var(--mut);font-size:0.9rem;"><li>Total Questions: 16 (20 Marks total)</li><li><strong>Mathematical Reasoning:</strong> 8 Questions (1 Mark each)</li><li><strong>Everyday Mathematics:</strong> 6 Questions (1 Mark each)</li><li><strong>Achievers Section:</strong> 2 Questions (3 Marks each)</li><li>Time Limit: 30 Minutes. Timer starts upon clicking 'Start Exam'.</li></ul></div>
+        <label style="display:block;margin-bottom:8px;font-weight:600;">Enter your Full Name:</label>
+        <input type="text" id="student-name" placeholder="E.g. Aryan Sharma" autocomplete="off">
+        <div id="name-error" class="error-msg">Please enter a valid name.</div>
+        <button type="button" class="btn-primary" onclick="startExam()" style="width:100%;">Start Exam</button>
+    </div>
+    <div id="exam-screen" class="screen">
+        <div class="exam-header">
+            <div><span style="font-weight:bold;">Candidate: </span><span id="display-name" style="color:var(--mut);"></span></div>
+            <div class="timer" id="timer-display">30:00</div>
+        </div>
+        <div class="exam-layout">
+            <div class="question-card">
+                <div id="section-badge" class="section-badge">Section</div><span id="marks-badge" class="marks-badge">1 Mark</span>
+                <div id="question-text" class="question-text">Loading...</div>
+                <div class="options-grid" id="options-container"></div>
+                <div class="nav-controls">
+                    <button type="button" class="btn-secondary" id="btn-prev" onclick="changeQuestion(-1)">← Prev</button>
+                    <button type="button" class="btn-primary" id="btn-next" onclick="changeQuestion(1)">Next →</button>
+                </div>
+            </div>
+            <div class="sidebar">
+                <h3 style="text-align:center;margin-bottom:15px;">Navigator</h3>
+                <div class="nav-grid" id="nav-grid"></div>
+                <div class="submit-btn-container"><button type="button" class="btn-primary" onclick="confirmSubmit()" style="width:100%;background:var(--dan);">Submit</button></div>
+            </div>
+        </div>
+    </div>
+    <div id="result-screen" class="screen panel">
+        <div class="score-card">
+            <h2 id="result-title">Exam Submitted!</h2><p class="subtitle" id="result-subtitle">Here is your performance report.</p>
+            <h3 id="final-student-name" style="margin-bottom:20px;color:var(--acc);"></h3>
+            <div class="score-circle"><span id="final-score">0/20</span></div>
+            <p id="ai-feedback" class="feedback-text"></p>
+        </div>
+        <h3>Detailed Review</h3><div id="review-container" style="margin-top:20px;"></div>
+        <div style="text-align:center;margin-top:30px;color:var(--mut);"><p><strong>Note:</strong> Results permanently saved on device.</p></div>
+    </div>
+</div>
+<script>
+// =========================================================================
+// ⬇️ EDIT THESE VARIABLES FOR EACH NEW EXAM ⬇️
+// =========================================================================
+
+const EXAM_KEY = "8th_Math_rational_numbers_test_3"; 
+const EXAM_NAME = "Rational Numbers Test 3"; 
+const HARDCODED_STD = "8th";
+const HARDCODED_SUBJECT = "Maths";
+
+const QUESTIONS = [
+  {
+    "id": 1,
+    "section": "Mathematical Reasoning",
+    "marks": 1,
+    "text": "Which of the following statements is INCORRECT?",
+    "options": [
+      "Every integer is a rational number.",
+      "The rational number \\(\\frac{-15}{-23}\\) lies to the right of zero on the number line.",
+      "Rational numbers are closed under division.",
+      "Zero is the additive identity for rational numbers."
+    ],
+    "correct": 2,
+    "exp": "Rational numbers are NOT closed under division because division by zero (e.g., \\(\\frac{a}{0}\\)) is not defined. Therefore, this statement is incorrect. (Reference: PYQ Q1 style)"
+  },
+  {
+    "id": 2,
+    "section": "Mathematical Reasoning",
+    "marks": 1,
+    "text": "Evaluate: \\(\\frac{3}{5} \\times \\left(\\frac{-4}{9}\\right) - \\frac{1}{15} - \\frac{2}{5} \\times \\left(\\frac{-4}{9}\\right)\\)",
+    "options": [
+      "\\(\\frac{-13}{45}\\)",
+      "\\(\\frac{-7}{45}\\)",
+      "\\(\\frac{13}{45}\\)",
+      "\\(\\frac{7}{45}\\)"
+    ],
+    "correct": 0,
+    "exp": "Using the distributive property: \\(\\left(\\frac{-4}{9}\\right) \\times \\left(\\frac{3}{5} - \\frac{2}{5}\\right) - \\frac{1}{15} = \\left(\\frac{-4}{9}\\right) \\times \\left(\\frac{1}{5}\\right) - \\frac{1}{15} = \\frac{-4}{45} - \\frac{3}{45} = \\frac{-7}{45}\\). (Reference: PYQ Q5 style)"
+  },
+  {
+    "id": 3,
+    "section": "Mathematical Reasoning",
+    "marks": 1,
+    "text": "What should be subtracted from \\(\\frac{-3}{4}\\) to get \\(\\frac{5}{6}\\)?",
+    "options": [
+      "\\(\\frac{-19}{12}\\)",
+      "\\(\\frac{19}{12}\\)",
+      "\\(\\frac{-1}{12}\\)",
+      "\\(\\frac{1}{12}\\)"
+    ],
+    "correct": 0,
+    "exp": "Let the number be \\(x\\). \\(\\frac{-3}{4} - x = \\frac{5}{6} \\implies x = \\frac{-3}{4} - \\frac{5}{6}\\). The LCM of 4 and 6 is 12. \\(x = \\frac{-9 - 10}{12} = \\frac{-19}{12}\\). (Reference: PYQ Q6 style)"
+  },
+  {
+    "id": 4,
+    "section": "Mathematical Reasoning",
+    "marks": 1,
+    "text": "Find a rational number exactly halfway between \\(\\frac{-1}{3}\\) and \\(\\frac{1}{4}\\).",
+    "options": [
+      "\\(\\frac{-1}{24}\\)",
+      "\\(\\frac{1}{24}\\)",
+      "\\(\\frac{-1}{12}\\)",
+      "\\(\\frac{1}{12}\\)"
+    ],
+    "correct": 0,
+    "exp": "The rational number exactly halfway between \\(a\\) and \\(b\\) is \\(\\frac{a+b}{2}\\). Sum = \\(\\frac{-1}{3} + \\frac{1}{4} = \\frac{-4 + 3}{12} = \\frac{-1}{12}\\). Halfway = \\(\\frac{1}{2} \\times \\left(\\frac{-1}{12}\\right) = \\frac{-1}{24}\\). (Reference: PYQ Q9 style)"
+  },
+  {
+    "id": 5,
+    "section": "Mathematical Reasoning",
+    "marks": 1,
+    "text": "The sum of two rational numbers is \\(-4\\). If one of them is \\(\\frac{-11}{5}\\), find the other.",
+    "options": [
+      "\\(\\frac{-9}{5}\\)",
+      "\\(\\frac{9}{5}\\)",
+      "\\(\\frac{-31}{5}\\)",
+      "\\(\\frac{31}{5}\\)"
+    ],
+    "correct": 0,
+    "exp": "Let the other number be \\(y\\). \\(y + \\left(\\frac{-11}{5}\\right) = -4 \\implies y = -4 + \\frac{11}{5} = \\frac{-20 + 11}{5} = \\frac{-9}{5}\\)."
+  },
+  {
+    "id": 6,
+    "section": "Mathematical Reasoning",
+    "marks": 1,
+    "text": "Divide the sum of \\(\\frac{13}{5}\\) and \\(\\frac{-12}{7}\\) by the product of \\(\\frac{-31}{7}\\) and \\(\\frac{1}{-2}\\).",
+    "options": [
+      "\\(\\frac{62}{155}\\)",
+      "\\(\\frac{31}{155}\\)",
+      "\\(\\frac{2}{5}\\)",
+      "\\(\\frac{-2}{5}\\)"
+    ],
+    "correct": 2,
+    "exp": "Sum = \\(\\frac{13}{5} + \\left(\\frac{-12}{7}\\right) = \\frac{91 - 60}{35} = \\frac{31}{35}\\). Product = \\(\\frac{-31}{7} \\times \\frac{1}{-2} = \\frac{31}{14}\\). Division = \\(\\frac{31}{35} \\div \\frac{31}{14} = \\frac{31}{35} \\times \\frac{14}{31} = \\frac{14}{35} = \\frac{2}{5}\\)."
+  },
+  {
+    "id": 7,
+    "section": "Mathematical Reasoning",
+    "marks": 1,
+    "text": "Which property is illustrated by the equation: \\(\\frac{-5}{6} \\times \\left(\\frac{3}{4} \\times \\frac{-7}{8}\\right) = \\left(\\frac{-5}{6} \\times \\frac{3}{4}\\right) \\times \\frac{-7}{8}\\)?",
+    "options": [
+      "Commutative property of multiplication",
+      "Associative property of multiplication",
+      "Distributive property",
+      "Multiplicative identity"
+    ],
+    "correct": 1,
+    "exp": "This represents \\(a \\times (b \\times c) = (a \\times b) \\times c\\), which is the associative property of multiplication."
+  },
+  {
+    "id": 8,
+    "section": "Mathematical Reasoning",
+    "marks": 1,
+    "text": "Simplify: \\(\\left| \\frac{-3}{4} - \\frac{1}{2} \\right| - \\left| \\frac{1}{2} - \\frac{3}{4} \\right|\\)",
+    "options": [
+      "1",
+      "\\(\\frac{1}{2}\\)",
+      "0",
+      "\\(\\frac{-1}{4}\\)"
+    ],
+    "correct": 0,
+    "exp": "First part: \\(\\left| \\frac{-3 - 2}{4} \\right| = \\left| \\frac{-5}{4} \\right| = \\frac{5}{4}\\). Second part: \\(\\left| \\frac{2 - 3}{4} \\right| = \\left| \\frac{-1}{4} \\right| = \\frac{1}{4}\\). Difference = \\(\\frac{5}{4} - \\frac{1}{4} = \\frac{4}{4} = 1\\)."
+  },
+  {
+    "id": 9,
+    "section": "Everyday Mathematics",
+    "marks": 1,
+    "text": "A rectangular park has a length of \\(17\\frac{1}{2}\\) m and a breadth of \\(9\\frac{1}{5}\\) m. What is the area of the park?",
+    "options": [
+      "159 sq. m",
+      "161 sq. m",
+      "165 sq. m",
+      "155 sq. m"
+    ],
+    "correct": 1,
+    "exp": "Length = \\(17\\frac{1}{2} = \\frac{35}{2}\\) m. Breadth = \\(9\\frac{1}{5} = \\frac{46}{5}\\) m. Area = \\(\\frac{35}{2} \\times \\frac{46}{5} = 7 \\times 23 = 161\\) sq. m. (Reference: PYQ Q7 style)"
+  },
+  {
+    "id": 10,
+    "section": "Everyday Mathematics",
+    "marks": 1,
+    "text": "From a rope \\(68\\) m long, pieces of equal size are cut. If the length of one piece is \\(4\\frac{1}{4}\\) m, find the number of such pieces.",
+    "options": [
+      "15",
+      "16",
+      "17",
+      "18"
+    ],
+    "correct": 1,
+    "exp": "Total length = 68 m. Length of one piece = \\(4\\frac{1}{4} = \\frac{17}{4}\\) m. Number of pieces = \\(68 \\div \\frac{17}{4} = 68 \\times \\frac{4}{17} = 4 \\times 4 = 16\\). (Reference: PYQ Q11 style)"
+  },
+  {
+    "id": 11,
+    "section": "Everyday Mathematics",
+    "marks": 1,
+    "text": "Raman reads \\(\\frac{1}{5}\\) of a book in 1 hour. How much part of the book will he read in \\(2\\frac{1}{3}\\) hours?",
+    "options": [
+      "\\(\\frac{7}{15}\\)",
+      "\\(\\frac{8}{15}\\)",
+      "\\(\\frac{1}{3}\\)",
+      "\\(\\frac{2}{5}\\)"
+    ],
+    "correct": 0,
+    "exp": "Part read in 1 hour = \\(\\frac{1}{5}\\). Time = \\(2\\frac{1}{3} = \\frac{7}{3}\\) hours. Part read in total time = \\(\\frac{1}{5} \\times \\frac{7}{3} = \\frac{7}{15}\\)."
+  },
+  {
+    "id": 12,
+    "section": "Everyday Mathematics",
+    "marks": 1,
+    "text": "The cost of \\(2\\frac{1}{2}\\) kg of apples is ₹\\(135\\frac{1}{4}\\). What is the cost of 1 kg of apples?",
+    "options": [
+      "₹\\(54\\frac{1}{10}\\)",
+      "₹\\(52\\frac{1}{5}\\)",
+      "₹\\(54\\frac{1}{5}\\)",
+      "₹\\(55\\frac{1}{10}\\)"
+    ],
+    "correct": 0,
+    "exp": "Cost = ₹\\(135\\frac{1}{4} = \\frac{541}{4}\\). Quantity = \\(2\\frac{1}{2} = \\frac{5}{2}\\) kg. Cost of 1 kg = \\(\\frac{541}{4} \\div \\frac{5}{2} = \\frac{541}{4} \\times \\frac{2}{5} = \\frac{541}{10} = 54\\frac{1}{10}\\)."
+  },
+  {
+    "id": 13,
+    "section": "Everyday Mathematics",
+    "marks": 1,
+    "text": "A car covers a certain distance at a uniform speed of \\(66\\frac{2}{3}\\) km/h. How much distance will it cover in \\(1\\frac{4}{5}\\) hours?",
+    "options": [
+      "120 km",
+      "115 km",
+      "110 km",
+      "100 km"
+    ],
+    "correct": 0,
+    "exp": "Speed = \\(66\\frac{2}{3} = \\frac{200}{3}\\) km/h. Time = \\(1\\frac{4}{5} = \\frac{9}{5}\\) hours. Distance = Speed \\(\\times\\) Time = \\(\\frac{200}{3} \\times \\frac{9}{5} = 40 \\times 3 = 120\\) km."
+  },
+  {
+    "id": 14,
+    "section": "Everyday Mathematics",
+    "marks": 1,
+    "text": "Out of 500 students in a school, \\(\\frac{3}{5}\\) are boys. If \\(\\frac{1}{3}\\) of the boys and \\(\\frac{1}{2}\\) of the girls participate in sports, what is the total number of participants?",
+    "options": [
+      "180",
+      "200",
+      "220",
+      "240"
+    ],
+    "correct": 1,
+    "exp": "Number of boys = \\(\\frac{3}{5} \\times 500 = 300\\). Number of girls = \\(500 - 300 = 200\\). Boys in sports = \\(\\frac{1}{3} \\times 300 = 100\\). Girls in sports = \\(\\frac{1}{2} \\times 200 = 100\\). Total participants = \\(100 + 100 = 200\\)."
+  },
+  {
+    "id": 15,
+    "section": "Achievers Section",
+    "marks": 3,
+    "text": "State 'T' for True and 'F' for False.<br>(i) The rational number \\(\\frac{-3}{-4}\\) is smaller than \\(\\frac{-1}{4}\\).<br>(ii) \\(\\frac{-5}{8}\\) lies to the left of \\(\\frac{-3}{4}\\) on the number line.<br>(iii) The product of a rational number and its reciprocal is always 1 (if reciprocal exists).",
+    "options": [
+      "(i)-F, (ii)-F, (iii)-T",
+      "(i)-T, (ii)-F, (iii)-T",
+      "(i)-F, (ii)-T, (iii)-F",
+      "(i)-T, (ii)-T, (iii)-F"
+    ],
+    "correct": 0,
+    "exp": "(i) \\(\\frac{-3}{-4} = \\frac{3}{4}\\) which is positive, so it is larger than \\(\\frac{-1}{4}\\). False.<br>(ii) To compare \\(\\frac{-5}{8}\\) and \\(\\frac{-3}{4}\\), make denominators equal: \\(\\frac{-3}{4} = \\frac{-6}{8}\\). Since \\(-6 < -5\\), \\(\\frac{-6}{8}\\) is to the left of \\(\\frac{-5}{8}\\). False.<br>(iii) A rational number \\(a/b \\times b/a = 1\\). True. (Reference: PYQ Q17 style)"
+  },
+  {
+    "id": 16,
+    "section": "Achievers Section",
+    "marks": 3,
+    "text": "Fill in the blanks.<br>(i) The additive inverse of \\(\\frac{-p}{q}\\) is <b>P</b>.<br>(ii) The rational number <b>Q</b> has no reciprocal.<br>(iii) If \\(x = \\frac{2}{3}\\) and \\(y = \\frac{-3}{4}\\), then \\((x \\div y)\\) is <b>R</b>.",
+    "options": [
+      "P = \\(\\frac{p}{q}\\), Q = 1, R = \\(\\frac{-8}{9}\\)",
+      "P = \\(\\frac{p}{q}\\), Q = 0, R = \\(\\frac{-8}{9}\\)",
+      "P = \\(\\frac{-q}{p}\\), Q = 0, R = \\(\\frac{-1}{2}\\)",
+      "P = \\(\\frac{-p}{q}\\), Q = -1, R = \\(\\frac{-8}{9}\\)"
+    ],
+    "correct": 1,
+    "exp": "<b>P</b>: The additive inverse of \\(\\frac{-p}{q}\\) is \\(\\frac{p}{q}\\).<br><b>Q</b>: 0 has no reciprocal because division by zero is undefined.<br><b>R</b>: \\(x \\div y = \\frac{2}{3} \\div \\frac{-3}{4} = \\frac{2}{3} \\times \\frac{4}{-3} = \\frac{-8}{9}\\). (Reference: PYQ Q18 style)"
+  }
+];
+
+// =========================================================================
+// ⬆️ DO NOT EDIT BELOW THIS LINE ⬆️
+// =========================================================================
+
+document.getElementById("intro-subtitle").innerText = `Exam: ${EXAM_NAME}`;
+const WEB_APP_URL="https://script.google.com/macros/s/AKfycbwEutZaKIAodDqKVocXPmgGlsfyO6ma8vuQK4sFgEobmvD73QQwztuH4qbT_R3g1Figtw/exec",EXAM_DURATION=1800;
+let currentQuestionIndex=0,userAnswers=new Array(QUESTIONS.length).fill(null),timerInterval,timeRemaining=EXAM_DURATION,studentName="";
+
+window.onload=function(){
+    const sd=localStorage.getItem(`submitted_data_${EXAM_KEY}`);
+    if(sd){
+        try{
+            const d=JSON.parse(sd);
+            studentName=d.studentName;
+            userAnswers=d.answers||new Array(QUESTIONS.length).fill(null);
+            const sp=d.score.split('/');
+            document.getElementById("intro-screen").classList.remove("active");
+            document.getElementById("result-title").innerText=`Welcome Back!`;
+            document.getElementById("result-subtitle").innerText="Performance report from previous submission.";
+            showReviewScreen(parseInt(sp[0]),parseInt(sp[1]));
+        }catch(e){
+            localStorage.removeItem(`submitted_data_${EXAM_KEY}`);
+            sessionStorage.clear();
+        }
+    } else if (sessionStorage.getItem(`examActive_${EXAM_KEY}`) === "true") {
+        // Resume active exam state on refresh
+        studentName = sessionStorage.getItem(`studentName_${EXAM_KEY}`);
+        document.getElementById("display-name").innerText=studentName;
+        const st=sessionStorage.getItem("examTime");if(st)timeRemaining=parseInt(st);
+        const sa=sessionStorage.getItem("examAnswers");if(sa)try{userAnswers=JSON.parse(sa);}catch(e){userAnswers=new Array(QUESTIONS.length).fill(null);}
+        
+        document.getElementById("intro-screen").classList.remove("active");
+        document.getElementById("exam-screen").classList.add("active");
+        
+        buildNavGrid();
+        const savedQ = parseInt(sessionStorage.getItem("currentQuestionIndex")) || 0;
+        loadQuestion(savedQ);
+        startTimer();
+    } else {
+        sessionStorage.clear();
+    }
+};
+
+function startExam(){
+    if(QUESTIONS.length === 0) return alert("Error: No questions found in the array!");
+    const name=document.getElementById("student-name").value.trim(),err=document.getElementById("name-error");
+    if(name.length<3){alert("Enter your full name (min 3 chars).");err.style.opacity=1;return;}
+    err.style.opacity=0;studentName=name;document.getElementById("display-name").innerText=studentName;
+    
+    // Save active exam state
+    sessionStorage.setItem(`examActive_${EXAM_KEY}`, "true");
+    sessionStorage.setItem(`studentName_${EXAM_KEY}`, studentName);
+    
+    const st=sessionStorage.getItem("examTime");if(st)timeRemaining=parseInt(st);
+    const sa=sessionStorage.getItem("examAnswers");if(sa)try{userAnswers=JSON.parse(sa);}catch(e){userAnswers=new Array(QUESTIONS.length).fill(null);}
+    document.getElementById("intro-screen").classList.remove("active");document.getElementById("exam-screen").classList.add("active");
+    buildNavGrid();loadQuestion(0);startTimer();
+}
+function buildNavGrid(){
+    const grid=document.getElementById("nav-grid");grid.innerHTML="";
+    QUESTIONS.forEach((q,i)=>{
+        const btn=document.createElement("button");btn.className="nav-btn";btn.innerText=i+1;
+        btn.onclick=()=>loadQuestion(i);btn.id=`nav-btn-${i}`;
+        if(userAnswers[i]!==null)btn.classList.add("answered");grid.appendChild(btn);
+    });
+}
+function loadQuestion(i){
+    if(i<0||i>=QUESTIONS.length)return;
+    currentQuestionIndex=i;
+    sessionStorage.setItem("currentQuestionIndex", i); // Save current page number
+    const q=QUESTIONS[i];
+    document.getElementById("section-badge").innerText=q.section;
+    document.getElementById("marks-badge").innerText=`${q.marks} Mark${q.marks>1?'s':''}`;
+    document.getElementById("question-text").innerHTML=`<strong style="margin-right:10px;">Q${i+1}.</strong> ${q.text}`;
+    const optContainer=document.getElementById("options-container");optContainer.innerHTML="";
+    q.options.forEach((optText,optIndex)=>{
+        optContainer.innerHTML+=`<label class="option-label ${userAnswers[i]===optIndex?'selected':''}" onclick="selectOption(${i},${optIndex})">
+        <input type="radio" name="q${i}" ${userAnswers[i]===optIndex?'checked':''}><span>${String.fromCharCode(65+optIndex)}) ${optText}</span></label>`;
+    });
+    if(window.MathJax&&window.MathJax.typesetPromise)MathJax.typesetPromise([document.getElementById("question-text"),optContainer]).catch(e=>console.error(e));
+    document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));
+    document.getElementById(`nav-btn-${i}`).classList.add("active");
+    document.getElementById("btn-prev").style.visibility=i===0?"hidden":"visible";
+    document.getElementById("btn-next").style.visibility=i===QUESTIONS.length-1?"hidden":"visible";
+}
+function selectOption(qI,oI){userAnswers[qI]=oI;sessionStorage.setItem("examAnswers",JSON.stringify(userAnswers));document.getElementById(`nav-btn-${qI}`).classList.add("answered");loadQuestion(qI);}
+function changeQuestion(step){loadQuestion(currentQuestionIndex+step);}
+function startTimer(){
+    const td=document.getElementById("timer-display");
+    timerInterval=setInterval(()=>{
+        if(timeRemaining<=0){clearInterval(timerInterval);submitExam();}
+        else{timeRemaining--;sessionStorage.setItem("examTime",timeRemaining);
+        td.innerText=`${Math.floor(timeRemaining/60).toString().padStart(2,'0')}:${(timeRemaining%60).toString().padStart(2,'0')}`;
+        if(timeRemaining<=300)td.style.color="var(--dan)";}
+    },1000);
+}
+function confirmSubmit(){
+    const unans=userAnswers.filter(a=>a===null).length;
+    if(window.confirm(unans>0?`You have ${unans} unanswered questions. Submit?`:"Ready to submit?"))submitExam();
+}
+function submitExam(){
+    clearInterval(timerInterval);let score=0,max=0,miss=[];
+    QUESTIONS.forEach((q,i)=>{max+=q.marks;if(userAnswers[i]===q.correct)score+=q.marks;else miss.push("Q"+(i+1));});
+    const payload={studentName:studentName,standard:HARDCODED_STD,examName:EXAM_NAME,subject:HARDCODED_SUBJECT,score:`${score}/${max}`,wrongAnswers:miss.length>0?miss.join(", "):"None",answers:userAnswers};
+    fetch(WEB_APP_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(payload)}).catch(e=>console.error(e));
+    localStorage.setItem(`submitted_data_${EXAM_KEY}`,JSON.stringify(payload));sessionStorage.clear();
+    showReviewScreen(score,max);
+}
+function showReviewScreen(s,m){
+    document.getElementById("exam-screen").classList.remove("active");document.getElementById("result-screen").classList.add("active");
+    document.getElementById("final-student-name").innerText=`Candidate: ${studentName}`;document.getElementById("final-score").innerText=`${s}/${m}`;
+    const pct=(s/m)*100;
+    document.getElementById("ai-feedback").innerText=pct>=90?"Absolutely stellar! You are well prepared to ace the Olympiad.":pct>=60?"Great job! Your fundamentals are strong. Keep practicing complex simplifications.":"We recommend going back to the foundational concepts and trying again.";
+    const rc=document.getElementById("review-container");rc.innerHTML="";
+    QUESTIONS.forEach((q,i)=>{
+        const isC=userAnswers[i]===q.correct;
+        rc.innerHTML+=`<div class="review-item"><div class="review-q">Q${i+1}. ${q.text} <span style="float:right;color:var(--${isC?'suc':'dan'});font-size:0.9rem;">${isC?'✓ Correct':'✗ Incorrect'} (${isC?q.marks:0}/${q.marks})</span></div>
+        <div class="${isC?'correct-ans':'wrong-ans'}"><strong>Your Answer:</strong> ${userAnswers[i]!==null?q.options[userAnswers[i]]:"Not Attempted"}</div>
+        ${!isC?`<div class="correct-ans"><strong>Correct Answer:</strong> ${q.options[q.correct]}</div>`:''}
+        <div class="explanation"><strong>Explanation:</strong><br> ${q.exp}</div></div>`;
+    });
+    if(window.MathJax&&window.MathJax.typesetPromise)MathJax.typesetPromise([rc]).catch(e=>console.error(e));
+}
+</script></body></html>
