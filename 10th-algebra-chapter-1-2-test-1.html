@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="doc-title">Exam Title</title>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+:root {
+    /* ── THEME: Slate + Teal (calm, low-glare) ── */
+    --bg:       #171d24;
+    --card:     rgba(255,255,255,0.05);
+    --accent:   #3fb6a0;
+    --adark:    #2f8f7d;
+    --aglow:    rgba(63,182,160,0.28);
+    --gold:     #e0b64a;
+    --text:     #f2f5f7;
+    --muted:    #94a3ad;
+    --border:   rgba(63,182,160,0.20);
+    --correct:  #3fb6a0;
+    --error:    #e2685f;
+}
+* { box-sizing: border-box; margin:0; padding:0; }
+body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    background-image:
+        radial-gradient(ellipse at 20% 10%, rgba(47,143,125,0.16) 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 90%, rgba(63,182,160,0.09) 0%, transparent 55%);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 16px;
+}
+#wrap { width:100%; max-width:780px; }
+
+/* ── pages ── */
+.page { display:none; }
+.page.active { display:block; }
+
+/* ── landing ── */
+.lhdr { text-align:center; padding:28px 16px 20px; border-bottom:2px solid var(--accent); margin-bottom:22px; }
+.badge {
+    display:inline-block;
+    background:linear-gradient(135deg,var(--adark),var(--accent));
+    color:#fff; font-size:0.7rem; font-weight:700; letter-spacing:2px;
+    text-transform:uppercase; padding:4px 14px; border-radius:20px; margin-bottom:12px;
+}
+.lhdr h1 { font-size:1.85rem; font-weight:800; color:#fff; }
+.lhdr h1 span { color:var(--accent); }
+.lhdr p { color:var(--muted); font-size:0.9rem; margin-top:6px; }
+
+.meta-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:20px; }
+.mc { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:13px; text-align:center; }
+.mc .ml { font-size:0.68rem; text-transform:uppercase; letter-spacing:1.2px; color:var(--muted); margin-bottom:4px; }
+.mc .mv { font-size:1.1rem; font-weight:700; color:var(--accent); }
+
+.topics-panel { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:16px 18px; margin-bottom:20px; }
+.topics-panel h3 { font-size:0.72rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--accent); margin-bottom:10px; }
+.chips { display:flex; flex-wrap:wrap; gap:8px; }
+.chip { background:rgba(63,182,160,0.12); border:1px solid rgba(63,182,160,0.3); border-radius:20px; padding:5px 13px; font-size:0.8rem; }
+.chip .dot { display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--accent); margin-right:6px; vertical-align:middle; }
+
+.instr { background:rgba(224,182,74,0.07); border:1px solid rgba(224,182,74,0.25); border-radius:10px; padding:13px 16px; margin-bottom:20px; font-size:0.84rem; color:var(--muted); line-height:1.7; }
+.instr strong { color:var(--gold); }
+
+.name-sec { margin-bottom:20px; }
+.name-sec label { display:block; font-size:0.78rem; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-bottom:7px; }
+.name-sec input { width:100%; padding:13px 15px; background:var(--card); border:1.5px solid var(--border); border-radius:8px; color:#fff; font-size:1rem; outline:none; transition:border-color 0.2s; }
+.name-sec input:focus { border-color:var(--accent); }
+.name-sec input::placeholder { color:var(--muted); }
+
+.btn-start { width:100%; padding:15px; background:linear-gradient(135deg,var(--adark),var(--accent)); border:none; border-radius:8px; color:#fff; font-size:1.05rem; font-weight:700; cursor:pointer; letter-spacing:0.5px; transition:opacity 0.2s,transform 0.15s; }
+.btn-start:hover { opacity:0.9; transform:translateY(-1px); }
+
+/* ── exam ── */
+.topbar { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; background:var(--card); border:1px solid var(--border); border-radius:10px; padding:11px 16px; margin-bottom:14px; }
+.topbar-title { font-size:0.78rem; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:1px; }
+.timer { background:rgba(63,182,160,0.15); border:1.5px solid var(--accent); border-radius:20px; padding:6px 16px; font-size:1rem; font-weight:800; color:#fff; font-variant-numeric:tabular-nums; letter-spacing:1px; }
+.timer.warn { border-color:var(--error); color:var(--error); background:rgba(226,104,95,0.12); }
+.topbar-info { text-align:right; font-size:0.78rem; color:var(--muted); }
+.topbar-info span { color:var(--accent); font-weight:700; }
+
+.prog-outer { background:rgba(255,255,255,0.08); border-radius:4px; height:4px; margin-bottom:14px; overflow:hidden; }
+.prog-inner { height:100%; background:linear-gradient(90deg,var(--adark),var(--accent)); border-radius:4px; transition:width 0.4s ease; }
+
+.qcard { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:20px 22px; margin-bottom:14px; }
+.qbadge { display:inline-flex; align-items:center; gap:6px; font-size:0.73rem; text-transform:uppercase; letter-spacing:1.2px; color:var(--accent); margin-bottom:10px; }
+.qbadge .num { background:var(--accent); color:var(--bg); font-weight:900; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.73rem; }
+#q-tag { float:right; background:rgba(63,182,160,0.12); border:1px solid rgba(63,182,160,0.25); border-radius:12px; padding:3px 10px; font-size:0.68rem; color:var(--muted); }
+#q-text { font-size:1.12rem; line-height:1.75; clear:both; }
+
+#opts { margin-top:16px; }
+.opt {
+    display:flex; align-items:center; gap:12px;
+    background:rgba(255,255,255,0.04); border:1.5px solid rgba(255,255,255,0.1);
+    border-radius:8px; padding:12px 15px; margin-bottom:10px;
+    cursor:pointer; transition:all 0.2s; font-size:0.97rem;
+}
+.opt:hover { background:rgba(63,182,160,0.1); border-color:var(--accent); }
+.opt.selected { background:rgba(63,182,160,0.15); border-color:var(--accent); }
+.opt input { display:none; }
+.ocircle {
+    width:30px; height:30px; flex-shrink:0; border-radius:50%;
+    border:2px solid rgba(255,255,255,0.2);
+    display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:0.78rem; color:var(--muted); transition:all 0.2s;
+}
+.opt.selected .ocircle { background:var(--accent); border-color:var(--accent); color:var(--bg); }
+
+.btn-row { display:flex; gap:10px; margin-bottom:14px; }
+.btn-nav { flex:1; padding:12px; border:1.5px solid var(--border); border-radius:8px; background:var(--card); color:var(--text); font-size:0.95rem; font-weight:600; cursor:pointer; transition:all 0.2s; }
+.btn-nav:hover { background:rgba(63,182,160,0.15); border-color:var(--accent); }
+.btn-nav.primary { background:linear-gradient(135deg,var(--adark),var(--accent)); border-color:transparent; color:#fff; }
+.btn-nav.primary:hover { opacity:0.88; }
+
+/* nav circles */
+#navgrid { display:grid; grid-template-columns:repeat(10,1fr); gap:7px; background:var(--card); border:1px solid var(--border); border-radius:10px; padding:12px; }
+.nb { aspect-ratio:1; display:flex; align-items:center; justify-content:center; border-radius:50%; border:1.5px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.03); color:var(--muted); font-weight:700; font-size:0.78rem; cursor:pointer; transition:all 0.2s; }
+.nb:hover { border-color:var(--accent); color:#fff; background:rgba(63,182,160,0.1); }
+.nb.current { background:var(--accent); border-color:var(--accent); color:var(--bg); box-shadow:0 0 12px var(--aglow); }
+.nb.answered { background:rgba(63,182,160,0.22); border-color:var(--accent); color:#fff; }
+.nb.current.answered { background:var(--accent); color:var(--bg); }
+
+/* ── result ── */
+.res-hdr { text-align:center; padding:26px 16px; border-bottom:1px solid var(--border); margin-bottom:22px; }
+.res-hdr h2 { font-size:1rem; color:var(--muted); font-weight:400; margin-bottom:6px; }
+.score-big { font-size:3.5rem; font-weight:900; color:#fff; line-height:1; }
+.score-big .denom { font-size:1.4rem; color:var(--muted); }
+.grade-badge { display:inline-block; margin-top:10px; padding:5px 18px; border-radius:20px; font-size:0.84rem; font-weight:700; }
+
+#ai-box { background:rgba(63,182,160,0.07); border:1px solid var(--border); border-left:4px solid var(--accent); border-radius:10px; padding:18px 20px; margin-bottom:22px; }
+#ai-box h3 { font-size:0.75rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--accent); margin-bottom:12px; }
+.fb-row { display:flex; align-items:flex-start; gap:10px; margin-bottom:10px; font-size:0.88rem; }
+.fb-icon { flex-shrink:0; width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.68rem; margin-top:1px; }
+.fi-m { background:var(--correct); color:#fff; }
+.fi-s { background:var(--gold); color:#000; }
+.fi-w { background:var(--error); color:#fff; }
+
+#rev-list h3 { font-size:0.75rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--muted); margin-bottom:12px; }
+.rcard { background:var(--card); border:1px solid rgba(255,255,255,0.08); border-left:4px solid var(--error); border-radius:10px; padding:14px 16px; margin-bottom:10px; font-size:0.87rem; line-height:1.7; }
+.rcard.ok { border-left-color:var(--correct); }
+.rq { font-weight:700; color:#fff; margin-bottom:7px; }
+.al { margin-bottom:3px; }
+.exp { color:var(--muted); font-style:italic; margin-top:6px; }
+.ac { color:var(--correct); font-weight:600; }
+.aw { color:var(--error); font-weight:600; }
+
+.scroll-area { max-height:58vh; overflow-y:auto; padding-right:4px; }
+.scroll-area::-webkit-scrollbar { width:4px; }
+.scroll-area::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+/* ── security toast ── */
+#sec-toast {
+    position:fixed; top:14px; left:50%; transform:translateX(-50%) translateY(-80px);
+    background:rgba(226,104,95,0.95); color:#fff; font-size:0.85rem; font-weight:700;
+    padding:10px 18px; border-radius:24px; box-shadow:0 4px 18px rgba(0,0,0,0.45);
+    z-index:999; transition:transform 0.35s ease; pointer-events:none;
+}
+#sec-toast.show { transform:translateX(-50%) translateY(0); }
+
+@media(max-width:500px){
+    .meta-grid { grid-template-columns:1fr 1fr; }
+    #navgrid { grid-template-columns:repeat(5,1fr); }
+    .score-big { font-size:2.5rem; }
+    .topbar { grid-template-columns:1fr; gap:6px; text-align:center; }
+    .topbar-info { text-align:center; }
+}
+</style>
+</head>
+<body>
+<div id="wrap">
+
+<!-- ══════════════ LANDING ══════════════ -->
+<!-- NOTE: every visible value below is filled automatically from the CONFIG
+     block in the script. You do NOT edit anything in this HTML. -->
+<div id="pg-land" class="page active">
+    <div class="lhdr">
+        <div class="badge" id="ui-badge"></div>
+        <h1><span id="ui-title-main"></span> <span id="ui-title-hl"></span></h1>
+        <p id="ui-subtitle"></p>
+    </div>
+
+    <div class="meta-grid">
+        <div class="mc"><div class="ml">Total Marks</div><div class="mv" id="ui-marks"></div></div>
+        <div class="mc"><div class="ml">Questions</div><div class="mv" id="ui-qcount"></div></div>
+        <div class="mc"><div class="ml">Time Limit</div><div class="mv" id="ui-time"></div></div>
+        <div class="mc"><div class="ml">Marks / Q</div><div class="mv" id="ui-mpq"></div></div>
+        <div class="mc"><div class="ml">Negative Marking</div><div class="mv" id="ui-neg"></div></div>
+        <div class="mc"><div class="ml">Type</div><div class="mv" id="ui-type"></div></div>
+    </div>
+
+    <div class="topics-panel">
+        <h3>&#128218; Topics Covered</h3>
+        <div class="chips" id="ui-chips"></div>
+    </div>
+
+    <div class="instr" id="ui-instr"></div>
+
+    <div class="name-sec">
+        <label>Student Full Name</label>
+        <input type="text" id="sname" placeholder="Enter your full name here…">
+    </div>
+    <button class="btn-start" onclick="startExam()">▶ Start Test</button>
+</div>
+
+<!-- ══════════════ EXAM ══════════════ -->
+<div id="pg-exam" class="page">
+    <div class="topbar">
+        <div class="topbar-title" id="ui-exam-label"></div>
+        <div class="timer" id="timer">--:--</div>
+        <div class="topbar-info">Q <span id="qnum">1</span>/<span id="ui-qcount2"></span> &nbsp;|&nbsp; <span id="ui-marks2"></span> Marks</div>
+    </div>
+
+    <div class="prog-outer"><div class="prog-inner" id="prog" style="width:5%"></div></div>
+
+    <div class="qcard">
+        <div style="overflow:hidden;margin-bottom:8px;">
+            <span id="q-tag">Topic</span>
+            <div class="qbadge">
+                <span class="num" id="q-circle">1</span>
+                <span>Question</span>
+            </div>
+        </div>
+        <div class="scroll-area">
+            <p id="q-text"></p>
+            <div id="opts"></div>
+        </div>
+    </div>
+
+    <div class="btn-row">
+        <button class="btn-nav" onclick="go(-1)">← Back</button>
+        <button class="btn-nav primary" id="next-btn" onclick="go(1)">Next →</button>
+    </div>
+
+    <div id="navgrid"></div>
+</div>
+
+<!-- ══════════════ RESULT ══════════════ -->
+<div id="pg-res" class="page">
+    <div class="res-hdr">
+        <h2 id="res-name"></h2>
+        <div class="score-big">
+            <span id="res-score">0</span>
+            <span class="denom"> / <span id="ui-marks3"></span></span>
+        </div>
+        <div id="res-grade" class="grade-badge"></div>
+    </div>
+    <div id="ai-box">
+        <h3>&#129302; AI Feedback — Topic-wise Analysis</h3>
+        <div id="ai-content"></div>
+    </div>
+    <div id="rev-list">
+        <h3>&#128203; Question Review</h3>
+        <div id="rev-cards"></div>
+    </div>
+</div>
+
+<div id="sec-toast"></div>
+
+</div><!-- end wrap -->
+
+<script>
+/* ╔══════════════════════════════════════════════════════════════════╗
+   ║                                                                    ║
+   ║        ✏️  EDIT HERE  —  everything you change per paper           ║
+   ║        lives in THIS ONE BLOCK. Nothing to hunt for in the HTML.   ║
+   ║                                                                    ║
+   ╚══════════════════════════════════════════════════════════════════╝ */
+const CONFIG = {
+
+    /* ── 1. TITLES & LABELS (landing page) ─────────────────────────── */
+    paperBadge:    "Paper 1",                    // pill at the very top
+    titleMain:     "Algebra",                    // big title — white part
+    titleHighlight:"Paper 1",                    // big title — teal part
+    subtitle:      "Linear · Quadratic Equations", // one line under the title
+    examLabel:     "Algebra · Paper 1",          // small label shown during the exam
+
+    /* ── 2. EXAM PARAMETERS ────────────────────────────────────────── */
+    timeLimitMin:  30,        // minutes. Drives timer + "Time Limit" card
+    marksPerQ:     1,         // marks per correct question
+    negMarking:    "None",    // text shown in the "Negative Marking" card
+    examType:      "MCQ",     // text shown in the "Type" card
+    /* Total marks + Question count are computed automatically from the
+       questions array below — you do NOT set them by hand. */
+
+    /* ── 3. TOPICS COVERED (chips) ─────────────────────────────────── */
+    /* One string per chip. Use canonical UNIT names for the student-facing
+       list (short + readable). These are DISPLAY ONLY — the skill matrix
+       still uses each question's own topic/subtopic below. */
+    topics: [
+        "Linear Equations in Two Variables",
+        "Quadratic Equations"
+    ],
+
+    /* ── 4. SAVE KEYS (must be UNIQUE per paper) ───────────────────── */
+    /* If two papers share the same examKey, a student's result from one
+       will overwrite the other on the same device. Change this per paper. */
+    examKey:  "Algebra_LE_QE_Paper1",          // internal storage key
+    examName: "Algebra Chapter 1 & 2 Test 1"          // readable name sent to Google Sheets
+};
+
+/* ── 5. QUESTIONS ──────────────────────────────────────────────────
+   Paste your JSON array between the brackets below.
+   RULES (do not break these):
+   • Each question needs 7 fields — subj is MANDATORY:
+       q, options (4 items), ans (0-based index),
+       subj ("Algebra" | "Geometry"), topic, subtopic, explain
+   • Ledger key format: subj :: topic > subtopic
+   • topic/subtopic must match the canonical map EXACTLY
+     (spaces, ampersands &, em dashes – are all significant).
+   • LaTeX backslashes must be doubled inside JS strings: \\( \\dfrac
+   • Keep the closing "];" alone on its own line (parser depends on it).
+────────────────────────────────────────────────────────────────────── */
+const questions = [
+  {
+    "q": "Identify the linear equation in two variables from the following:",
+    "options": [
+      "\\(\\sqrt{3}x + \\sqrt{5}y = 10\\)",
+      "5x - 0y - 14 = 0",
+      "4/x + 5/y = 4",
+      "3x^2 - 7y = 13"
+    ],
+    "ans": 0,
+    "subj": "Algebra",
+    "topic": "Linear Equations in Two Variables",
+    "subtopic": "Simultaneous Linear Equations",
+    "explain": "A linear equation in two variables must have a degree of 1 for both variables."
+  },
+  {
+    "q": "Solve for \\(y\\) if \\(x + y = 14\\) and \\(x - y = 2\\).",
+    "options": [
+      "8",
+      "6",
+      "12",
+      "16"
+    ],
+    "ans": 1,
+    "subj": "Algebra",
+    "topic": "Linear Equations in Two Variables",
+    "subtopic": "Simultaneous Linear Equations",
+    "explain": "Subtracting equations: \\(2y = 12 \\Rightarrow y = 6\\)."
+  },
+  {
+    "q": "To draw the graph of \\(x + 2y = 4\\), find \\(x\\) when \\(y = 1\\).",
+    "options": [
+      "1",
+      "2",
+      "-2",
+      "6"
+    ],
+    "ans": 1,
+    "subj": "Algebra",
+    "topic": "Linear Equations in Two Variables",
+    "subtopic": "Graphical Method",
+    "explain": "Substitute y=1: \\(x + 2(1) = 4 \\Rightarrow x + 2 = 4 \\Rightarrow x = 2\\)."
+  },
+  {
+    "q": "To solve \\(2x + y = 10\\) graphically, if \\(x = 0\\), then \\(y\\) is:",
+    "options": [
+      "0",
+      "2",
+      "5",
+      "10"
+    ],
+    "ans": 3,
+    "subj": "Algebra",
+    "topic": "Linear Equations in Two Variables",
+    "subtopic": "Graphical Method",
+    "explain": "\\(2(0) + y = 10 \\Rightarrow y = 10\\)."
+  },
+  {
+    "q": "Find the value of \\(\\begin{vmatrix} 3 & 2 \\\\ 4 & 5 \\end{vmatrix}\\)",
+    "options": [
+      "2",
+      "7",
+      "-7",
+      "23"
+    ],
+    "ans": 1,
+    "subj": "Algebra",
+    "topic": "Linear Equations in Two Variables",
+    "subtopic": "Determinants and Cramers Method",
+    "explain": "\\((3 \\times 5) - (2 \\times 4) = 15 - 8 = 7\\)."
+  },
+  {
+    "q": "For simultaneous equations in \\(x\\) and \\(y\\), if \\(D_x = 49, D = 7\\), then what is the value of \\(x\\)?",
+    "options": [
+      "7",
+      "-7",
+      "1/7",
+      "-1/7"
+    ],
+    "ans": 0,
+    "subj": "Algebra",
+    "topic": "Linear Equations in Two Variables",
+    "subtopic": "Determinants and Cramers Method",
+    "explain": "By Cramer's Rule, \\(x = D_x / D = 49 / 7 = 7\\)."
+  },
+  {
+    "q": "To solve \\(x + y = 3\\) ; \\(3x - 2y - 4 = 0\\) by determinant method, find D.",
+    "options": [
+      "5",
+      "1",
+      "-5",
+      "-1"
+    ],
+    "ans": 2,
+    "subj": "Algebra",
+    "topic": "Linear Equations in Two Variables",
+    "subtopic": "Determinants and Cramers Method",
+    "explain": "\\(D = \\begin{vmatrix} 1 & 1 \\\\ 3 & -2 \\end{vmatrix} = (1 \\times -2) - (1 \\times 3) = -2 - 3 = -5\\)."
+  },
+  {
+    "q": "To solve \\(\\dfrac{4}{x} + \\dfrac{5}{y} = 7\\) by reducing it to linear form, we substitute \\(\\dfrac{1}{x} = m\\) and \\(\\dfrac{1}{y} = n\\). The equation becomes:",
+    "options": [
+      "\\(4m + 5n = 7\\)",
+      "\\(4x + 5y = 7\\)",
+      "\\(\\dfrac{m}{4} + \\dfrac{n}{5} = 7\\)",
+      "\\(5m + 4n = 7\\)"
+    ],
+    "ans": 0,
+    "subj": "Algebra",
+    "topic": "Linear Equations in Two Variables",
+    "subtopic": "Equations Reducible to Linear Form",
+    "explain": "Replacing \\(\\dfrac{1}{x}\\) by \\(m\\) and \\(\\dfrac{1}{y}\\) by \\(n\\) directly gives the linear equation \\(4m + 5n = 7\\)."
+  },
+  {
+    "q": "If the sum of two numbers is 35 and their difference is 13, then the numbers are:",
+    "options": [
+      "23 and 12",
+      "24 and 11",
+      "25 and 12",
+      "21 and 14"
+    ],
+    "ans": 1,
+    "subj": "Algebra",
+    "topic": "Linear Equations in Two Variables",
+    "subtopic": "Applications of Simultaneous Equations",
+    "explain": "\\(x+y=35, x-y=13 \\Rightarrow 2x=48 \\Rightarrow x=24, y=11\\)."
+  },
+  {
+    "q": "The cost of 5 pens (x) and 3 pencils (y) is Rs. 35. Select the correct algebraic form.",
+    "options": [
+      "5x + 3y = 35",
+      "3x + 5y = 35",
+      "5x - 3y = 35",
+      "8x + 8y = 35"
+    ],
+    "ans": 0,
+    "subj": "Algebra",
+    "topic": "Linear Equations in Two Variables",
+    "subtopic": "Applications of Simultaneous Equations",
+    "explain": "5 times cost of pen plus 3 times cost of pencil is 35."
+  },
+  {
+    "q": "Which of the following is a quadratic equation?",
+    "options": [
+      "\\(\\frac{5}{x} - 3 = x^2\\)",
+      "\\(x(x + 5) = 2\\)",
+      "\\(n - 1 = 2n\\)",
+      "\\(\\frac{1}{x^2}(x + 2) = x\\)"
+    ],
+    "ans": 1,
+    "subj": "Algebra",
+    "topic": "Quadratic Equations",
+    "subtopic": "Introduction to Quadratic Equations",
+    "explain": "Expanding \\(x(x + 5) = 2\\) gives \\(x^2 + 5x - 2 = 0\\), which is in form \\(ax^2 + bx + c = 0\\)."
+  },
+  {
+    "q": "For the quadratic equation \\(x^2 + 10x - 7 = 0\\), the values of a, b, c are:",
+    "options": [
+      "a = -1, b = 10, c = 7",
+      "a = 1, b = -10, c = -7",
+      "a = 1, b = 10, c = -7",
+      "a = 1, b = 10, c = 7"
+    ],
+    "ans": 2,
+    "subj": "Algebra",
+    "topic": "Quadratic Equations",
+    "subtopic": "Introduction to Quadratic Equations",
+    "explain": "Comparing with \\(ax^2 + bx + c = 0\\), we get a=1, b=10, c=-7."
+  },
+  {
+    "q": "Solve by factorization: \\(x^2 - 15x + 54 = 0\\).",
+    "options": [
+      "\\(6, 9\\)",
+      "\\(-6, -9\\)",
+      "\\(18, 3\\)",
+      "\\(54, 1\\)"
+    ],
+    "ans": 0,
+    "subj": "Algebra",
+    "topic": "Quadratic Equations",
+    "subtopic": "Solution by Factorisation",
+    "explain": "Factors of 54 that sum to -15 are -6 and -9. So roots are 6 and 9."
+  },
+  {
+    "q": "Find the third term for completing the square in \\(x^2 + 10x = 0\\).",
+    "options": [
+      "10",
+      "100",
+      "25",
+      "5"
+    ],
+    "ans": 2,
+    "subj": "Algebra",
+    "topic": "Quadratic Equations",
+    "subtopic": "Completing the Square Method",
+    "explain": "Term = \\((\\frac{10}{2})^2 = 5^2 = 25\\)."
+  },
+  {
+    "q": "Solve using the quadratic formula: \\(m^2 - 14m + 13 = 0\\).",
+    "options": [
+      "\\(13, 1\\)",
+      "\\(-13, -1\\)",
+      "\\(14, 1\\)",
+      "\\(13, -1\\)"
+    ],
+    "ans": 0,
+    "subj": "Algebra",
+    "topic": "Quadratic Equations",
+    "subtopic": "Formula Method",
+    "explain": "\\(x = \\frac{14 \\pm \\sqrt{196 - 52}}{2} = \\frac{14 \\pm 12}{2}\\). Roots are 13 and 1."
+  },
+  {
+    "q": "If roots of a quadratic equation are real and unequal, then \\(\\Delta\\) is:",
+    "options": [
+      "\\(\\Delta > 0\\)",
+      "\\(\\Delta = 0\\)",
+      "\\(\\Delta < 0\\)",
+      "\\(\\Delta \\leq 0\\)"
+    ],
+    "ans": 0,
+    "subj": "Algebra",
+    "topic": "Quadratic Equations",
+    "subtopic": "Nature of Roots",
+    "explain": "For real and unequal roots, the discriminant must be positive (greater than zero)."
+  },
+  {
+    "q": "For the equation \\(3x^2 + 2x - 1 = 0\\), find the value of \\(b^2 - 4ac\\).",
+    "options": [
+      "4",
+      "16",
+      "8",
+      "12"
+    ],
+    "ans": 1,
+    "subj": "Algebra",
+    "topic": "Quadratic Equations",
+    "subtopic": "Nature of Roots",
+    "explain": "\\(\\Delta = (2)^2 - 4(3)(-1) = 4 + 12 = 16\\)."
+  },
+  {
+    "q": "If \\(\\alpha\\) and \\(\\beta\\) are roots of \\(x^2 - 5x + 6 = 0\\), find \\(\\alpha + \\beta\\).",
+    "options": [
+      "6",
+      "-5",
+      "5",
+      "-6"
+    ],
+    "ans": 2,
+    "subj": "Algebra",
+    "topic": "Quadratic Equations",
+    "subtopic": "Relation between Roots and Coefficients",
+    "explain": "Sum of roots \\(\\alpha + \\beta = -b/a = -(-5)/1 = 5\\)."
+  },
+  {
+    "q": "Find the product of roots (\\(\\alpha\\beta\\)) for \\(2x^2 + 7x + 5 = 0\\).",
+    "options": [
+      "\\(\\frac{7}{2}\\)",
+      "\\(-\\frac{7}{2}\\)",
+      "\\(\\frac{5}{2}\\)",
+      "\\(-\\frac{5}{2}\\)"
+    ],
+    "ans": 2,
+    "subj": "Algebra",
+    "topic": "Quadratic Equations",
+    "subtopic": "Relation between Roots and Coefficients",
+    "explain": "Product of roots \\(\\alpha\\beta = c/a = 5/2\\)."
+  },
+  {
+    "q": "The product of two consecutive natural numbers is 156. Find the correct quadratic equation.",
+    "options": [
+      "\\(x^2 + x + 156 = 0\\)",
+      "\\(x^2 - x - 156 = 0\\)",
+      "\\(x^2 + x - 156 = 0\\)",
+      "\\(x^2 + 2x - 156 = 0\\)"
+    ],
+    "ans": 2,
+    "subj": "Algebra",
+    "topic": "Quadratic Equations",
+    "subtopic": "Applications of Quadratic Equations",
+    "explain": "Let the numbers be \\(x\\) and \\(x+1\\). Then \\(x(x+1) = 156 \\Rightarrow x^2 + x - 156 = 0\\)."
+  }
+];
+
+/* ╔══════════════════════════════════════════════════════════════════╗
+   ║   ⛔  DO NOT EDIT BELOW THIS LINE  (engine — same for every paper) ║
+   ╚══════════════════════════════════════════════════════════════════╝ */
+
+/* Google Apps Script endpoint — DO NOT CHANGE */
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwEutZaKIAodDqKVocXPmgGlsfyO6ma8vuQK4sFgEobmvD73QQwztuH4qbT_R3g1Figtw/exec";
+
+/* Standard — used in the Google Sheet row */
+const STD  = "10th";
+/* Subject fallback ONLY. Mixed papers: every question carries its own subj. */
+const SUBJ = "Maths";
+
+/* Derived constants (computed from CONFIG — never set by hand) */
+const EXAM_KEY    = CONFIG.examKey;
+const EXAM_NAME   = CONFIG.examName;
+const TIME_LIMIT  = CONFIG.timeLimitMin * 60;
+const MARKS_PER_Q = CONFIG.marksPerQ;
+const TOTAL_MARKS = questions.length * MARKS_PER_Q;
+
+/* Proctoring thresholds (seconds) — engine constants */
+const SEC_QUICK_MAX = 5;
+const SEC_SHORT_MAX = 45;
+
+/* Masterfile guard — subj is mandatory on every question */
+questions.forEach((q, i) => {
+    if (!q.subj) console.warn("MASTERFILE WARNING: Q" + (i + 1) + " is missing the mandatory subj field (\"Algebra\" | \"Geometry\")");
+});
+
+/* ── Apply CONFIG to the landing / exam / result chrome ── */
+function applyConfig() {
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+    const mm = String(CONFIG.timeLimitMin);
+
+    document.getElementById('doc-title').textContent = CONFIG.examName;
+    set('ui-badge',      CONFIG.paperBadge);
+    set('ui-title-main', CONFIG.titleMain);
+    set('ui-title-hl',   CONFIG.titleHighlight);
+    set('ui-subtitle',   CONFIG.subtitle);
+    set('ui-marks',      TOTAL_MARKS);
+    set('ui-qcount',     questions.length);
+    set('ui-time',       mm + ' Min');
+    set('ui-mpq',        CONFIG.marksPerQ);
+    set('ui-type',       CONFIG.examType);
+    set('ui-exam-label', CONFIG.examLabel);
+    set('ui-qcount2',    questions.length);
+    set('ui-marks2',     TOTAL_MARKS);
+    set('ui-marks3',     TOTAL_MARKS);
+
+    const neg = document.getElementById('ui-neg');
+    if (neg) {
+        neg.textContent = CONFIG.negMarking;
+        if (/^(none|no)$/i.test(String(CONFIG.negMarking).trim())) neg.style.color = 'var(--error)';
+    }
+
+    const chips = document.getElementById('ui-chips');
+    if (chips) {
+        chips.innerHTML = '';
+        CONFIG.topics.forEach(t => {
+            const c = document.createElement('span');
+            c.className = 'chip';
+            c.innerHTML = '<span class="dot"></span>' + t;
+            chips.appendChild(c);
+        });
+    }
+
+    const instr = document.getElementById('ui-instr');
+    if (instr) {
+        const negTxt = /^(none|no)$/i.test(String(CONFIG.negMarking).trim())
+            ? 'There is <strong>no negative marking</strong>.'
+            : 'Negative marking: <strong>' + CONFIG.negMarking + '</strong>.';
+        instr.innerHTML =
+            '<strong>Instructions:</strong><br>' +
+            '• Each question carries <strong>' + CONFIG.marksPerQ + ' mark</strong>. ' + negTxt + '<br>' +
+            '• Use the number grid to jump between questions.<br>' +
+            '• The exam auto-submits when the timer reaches zero.';
+    }
+}
+
+/* ════════════════════════════════════════
+   STATE
+════════════════════════════════════════ */
+let curQ        = 0;
+let answers     = new Array(questions.length).fill(null);
+let sName       = "";
+let timerInt;
+let timeLeft    = TIME_LIMIT;
+
+/* proctoring state */
+let switchLog   = [];
+let copyCount   = 0;
+let startTs     = 0;
+let awayStart   = 0;
+let toastTO     = null;
+
+/* ════════════════════════════════════════
+   TIMER
+════════════════════════════════════════ */
+function startTimer() {
+    timerInt = setInterval(() => {
+        timeLeft--;
+        sessionStorage.setItem('tl_' + EXAM_KEY, timeLeft);
+        renderTimer();
+        if (timeLeft <= 0) { clearInterval(timerInt); submit(true); }
+    }, 1000);
+}
+function renderTimer() {
+    const m = Math.floor(timeLeft / 60), s = timeLeft % 60;
+    const el = document.getElementById('timer');
+    el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    if (timeLeft <= 180) el.classList.add('warn'); else el.classList.remove('warn');
+}
+
+/* ════════════════════════════════════════
+   PROCTORING  (log-only: never blocks the student)
+════════════════════════════════════════ */
+function examLive() {
+    return document.getElementById('pg-exam').classList.contains('active');
+}
+function saveSec() {
+    sessionStorage.setItem('sec_' + EXAM_KEY,
+        JSON.stringify({ switchLog, copyCount, startTs }));
+}
+function loadSec() {
+    try {
+        const s = JSON.parse(sessionStorage.getItem('sec_' + EXAM_KEY));
+        if (s) { switchLog = s.switchLog || []; copyCount = s.copyCount || 0; startTs = s.startTs || 0; }
+    } catch(e) { /* ignore */ }
+}
+function showToast(msg) {
+    const t = document.getElementById('sec-toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTO);
+    toastTO = setTimeout(() => t.classList.remove('show'), 3000);
+}
+function classifyAway(sec) {
+    if (sec < SEC_QUICK_MAX)  return 'quick';
+    if (sec <= SEC_SHORT_MAX) return 'short';
+    return 'long';
+}
+function resyncTimer() {
+    if (!startTs) return;
+    const elapsed = Math.floor((Date.now() - startTs) / 1000);
+    timeLeft = Math.max(0, TIME_LIMIT - elapsed);
+    sessionStorage.setItem('tl_' + EXAM_KEY, timeLeft);
+    renderTimer();
+    if (timeLeft <= 0) { clearInterval(timerInt); submit(true); }
+}
+
+document.addEventListener('visibilitychange', () => {
+    if (!examLive()) return;
+    if (document.hidden) {
+        awayStart = Date.now();
+    } else if (awayStart) {
+        const away = Math.round((Date.now() - awayStart) / 1000);
+        awayStart = 0;
+        switchLog.push({ q: curQ + 1, away, cls: classifyAway(away) });
+        saveSec();
+        resyncTimer();
+        showToast('\u26a0 Tab switch recorded (' + switchLog.length + ')');
+    }
+});
+
+['copy', 'cut'].forEach(ev => document.addEventListener(ev, () => {
+    if (!examLive()) return;
+    copyCount++;
+    saveSec();
+}));
+
+function buildVerdict() {
+    const shorts = switchLog.filter(s => s.cls === 'short').length;
+    const longs  = switchLog.filter(s => s.cls === 'long').length;
+    const quicks = switchLog.filter(s => s.cls === 'quick').length;
+
+    let psCorrect = 0;
+    switchLog.forEach(s => {
+        if (s.cls !== 'quick' && answers[s.q - 1] === questions[s.q - 1].ans) psCorrect++;
+    });
+
+    let verdict;
+    if (!switchLog.length && !copyCount)               verdict = 'CLEAN';
+    else if (copyCount > 0 || shorts >= 2 ||
+             (shorts >= 1 && psCorrect >= 1))          verdict = 'SUSPICIOUS';
+    else if (longs >= 1 && shorts === 0)               verdict = 'LIKELY GENUINE (interruption pattern)';
+    else if (!shorts && !longs)                        verdict = 'MINOR (brief glances only)';
+    else                                               verdict = 'REVIEW';
+
+    const bits = [];
+    if (shorts)    bits.push(shorts + ' short');
+    if (longs)     bits.push(longs + ' long');
+    if (quicks)    bits.push(quicks + ' quick');
+    if (psCorrect) bits.push(psCorrect + ' answered-correct-after-absence');
+    if (copyCount) bits.push(copyCount + ' copy event(s)');
+    return verdict + (bits.length ? ' \u2014 ' + bits.join(', ') : '');
+}
+function fmtDur(sec) {
+    const m = Math.floor(sec / 60), s = sec % 60;
+    return m + 'm ' + s + 's';
+}
+
+/* ════════════════════════════════════════
+   FLOW
+════════════════════════════════════════ */
+function startExam() {
+    sName = document.getElementById('sname').value.trim();
+    if (!sName) { alert("Please enter your name to begin."); return; }
+    sessionStorage.setItem('sn_' + EXAM_KEY, sName);
+    sessionStorage.setItem('ip_' + EXAM_KEY, '1');
+    startTs = Date.now();
+    saveSec();
+    show('pg-exam');
+    startTimer();
+    renderGrid();
+    renderQ();
+}
+
+function renderQ() {
+    const q = questions[curQ];
+    document.getElementById('qnum').textContent     = curQ + 1;
+    document.getElementById('q-circle').textContent = curQ + 1;
+    document.getElementById('q-tag').textContent    = q.topic + ' \u00b7 ' + q.subtopic;
+    document.getElementById('q-text').innerHTML     = q.q;
+    document.getElementById('next-btn').textContent =
+        curQ === questions.length - 1 ? 'Finish ✓' : 'Next →';
+    document.getElementById('prog').style.width =
+        `${Math.max(4, ((curQ + 1) / questions.length) * 100)}%`;
+
+    const optsEl = document.getElementById('opts');
+    optsEl.innerHTML = '';
+    ['A','B','C','D'].forEach((L, i) => {
+        const lbl = document.createElement('label');
+        lbl.className = 'opt' + (answers[curQ] === i ? ' selected' : '');
+        lbl.innerHTML = `<input type="radio" name="opt"><span class="ocircle">${L}</span><span>${q.options[i]}</span>`;
+        lbl.onclick = () => pick(i);
+        optsEl.appendChild(lbl);
+    });
+
+    sessionStorage.setItem('cq_' + EXAM_KEY, curQ);
+    renderGrid();
+    if (window.MathJax) MathJax.typesetPromise();
+}
+
+function pick(i) {
+    answers[curQ] = i;
+    sessionStorage.setItem('ans_' + EXAM_KEY, JSON.stringify(answers));
+    document.querySelectorAll('.opt').forEach((el, idx) => el.classList.toggle('selected', idx === i));
+    renderGrid();
+}
+
+function go(d) {
+    if (d === 1 && curQ === questions.length - 1) { submit(false); return; }
+    curQ = Math.max(0, Math.min(questions.length - 1, curQ + d));
+    renderQ();
+}
+
+function jumpTo(i) { curQ = i; renderQ(); }
+
+function renderGrid() {
+    const g = document.getElementById('navgrid');
+    g.innerHTML = '';
+    questions.forEach((_, i) => {
+        const d = document.createElement('div');
+        let c = 'nb';
+        if (i === curQ) c += ' current';
+        if (answers[i] !== null) c += ' answered';
+        d.className = c;
+        d.textContent = i + 1;
+        d.onclick = () => jumpTo(i);
+        g.appendChild(d);
+    });
+}
+
+/* ════════════════════════════════════════
+   SUBMIT
+════════════════════════════════════════ */
+async function submit(auto = false) {
+    if (!auto) {
+        const unanswered = answers.filter(a => a === null).length;
+        if (unanswered > 0 && !confirm(`${unanswered} question(s) unanswered. Submit anyway?`)) return;
+    }
+    clearInterval(timerInt);
+
+    let raw = 0;
+    const topicMap = {};
+    const missedQs = [];
+    let revHTML = '';
+
+    questions.forEach((q, i) => {
+        const ok = answers[i] === q.ans;
+        if (ok) raw++;
+        else missedQs.push('Q' + (i + 1));
+
+        const skillKey = q.topic + ' > ' + q.subtopic;
+        if (!topicMap[skillKey]) topicMap[skillKey] = { total:0, correct:0, failedQ:[], subj:(q.subj||SUBJ) };
+        topicMap[skillKey].total++;
+        if (ok) topicMap[skillKey].correct++;
+        else topicMap[skillKey].failedQ.push(i + 1);
+
+        const uAns = answers[i] !== null ? q.options[answers[i]] : 'Skipped';
+        revHTML += `<div class="rcard ${ok ? 'ok' : ''}">
+            <div class="rq">Q${i+1}: ${q.q}</div>
+            <div class="al">Your Answer: <span class="${ok ? 'ac' : 'aw'}">${uAns}</span></div>
+            <div class="al">Correct Answer: <span class="ac">${q.options[q.ans]}</span></div>
+            <div class="exp">💡 ${q.explain}</div>
+        </div>`;
+    });
+
+    const marks    = raw * MARKS_PER_Q;
+    const scoreStr = `${marks}/${TOTAL_MARKS}`;
+    const wrongStr = missedQs.length ? missedQs.join(', ') : 'None';
+
+    show('pg-res');
+    document.getElementById('res-name').textContent  = sName;
+    document.getElementById('res-score').textContent = marks;
+
+    const pct = (marks / TOTAL_MARKS) * 100;
+    const gEl = document.getElementById('res-grade');
+    if (pct >= 90)      { gEl.style.cssText='background:#2f8f7d;color:#fff'; gEl.textContent='⭐ Excellent!'; }
+    else if (pct >= 70) { gEl.style.cssText='background:#c9a84a;color:#1a1508'; gEl.textContent='👍 Good'; }
+    else if (pct >= 50) { gEl.style.cssText='background:#d98a4a;color:#fff'; gEl.textContent='📚 Average'; }
+    else                { gEl.style.cssText='background:#e2685f;color:#fff'; gEl.textContent='❗ Needs Improvement'; }
+
+    // AI feedback
+    let fbHTML = '';
+    for (const t in topicMap) {
+        const d = topicMap[t];
+        const p = (d.correct / d.total) * 100;
+        let icon, cls, msg;
+        if (p === 100)    { icon='✓'; cls='fi-m'; msg=`<strong>${t}</strong> — Mastery! All ${d.total} question(s) correct.`; }
+        else if (p >= 60) { icon='~'; cls='fi-s'; msg=`<strong>${t}</strong> — Good, but review Question(s) <strong>${d.failedQ.join(', ')}</strong>.`; }
+        else              { icon='✗'; cls='fi-w'; msg=`<strong>${t}</strong> — Needs practice. Focus on Question(s) <strong>${d.failedQ.join(', ')}</strong>.`; }
+        fbHTML += `<div class="fb-row"><div class="fb-icon ${cls}">${icon}</div><div style="font-size:0.88rem;color:var(--text);line-height:1.6;">${msg}</div></div>`;
+    }
+    document.getElementById('ai-content').innerHTML = fbHTML;
+    document.getElementById('rev-cards').innerHTML  = revHTML;
+    if (window.MathJax) MathJax.typesetPromise();
+
+    localStorage.setItem('done_' + EXAM_KEY, JSON.stringify({ sName, answers, marks, topicMap }));
+    sessionStorage.clear();
+    window.scrollTo(0, 0);
+
+    // SkillLedger breakdown string
+    const parts = [], weak = [];
+    for (const t in topicMap) {
+        const d = topicMap[t];
+        const p = Math.round((d.correct / d.total) * 100);
+        const fail = d.failedQ.length ? ` [failed Q: ${d.failedQ.join(',')}]` : '';
+        parts.push(`${d.subj} :: ${t}: ${d.correct}/${d.total}${fail}`);
+        if (p < 60) weak.push(`${d.subj} :: ${t}`);
+    }
+
+    // proctoring summary
+    const examSec  = Math.min(TIME_LIMIT, Math.max(0, TIME_LIMIT - timeLeft));
+    const wallSec  = startTs ? Math.round((Date.now() - startTs) / 1000) : examSec;
+    const swStr    = switchLog.length
+        ? switchLog.map(s => s.away + 's@Q' + s.q + '(' + s.cls + ')').join(', ')
+        : 'None';
+
+    try {
+        fetch(WEB_APP_URL, {
+            method: 'POST', mode: 'no-cors',
+            body: JSON.stringify({
+                studentName:    sName,
+                standard:       STD,
+                examName:       EXAM_NAME,
+                examFile:       window.location.pathname.split('/').pop(),
+                subject:        SUBJ,
+                score:          scoreStr,
+                marksScored:    marks,
+                totalMarks:     TOTAL_MARKS,
+                wrongAnswers:   wrongStr,
+                topicBreakdown: parts.join(' | '),
+                weakTopics:     weak.length ? weak.join(', ') : 'None',
+                tabSwitchCount: switchLog.length,
+                tabSwitchLog:   swStr,
+                copyEvents:     copyCount,
+                timeTaken:      fmtDur(examSec),
+                wallClock:      fmtDur(wallSec),
+                securityVerdict: buildVerdict()
+            })
+        });
+    } catch(e) { /* silent */ }
+}
+
+/* ════════════════════════════════════════
+   HELPERS
+════════════════════════════════════════ */
+function show(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+
+window.onload = () => {
+    applyConfig();
+    const done = localStorage.getItem('done_' + EXAM_KEY);
+    if (done) { restoreResult(JSON.parse(done)); return; }
+    if (sessionStorage.getItem('ip_' + EXAM_KEY)) {
+        sName    = sessionStorage.getItem('sn_' + EXAM_KEY) || '';
+        const sa = sessionStorage.getItem('ans_' + EXAM_KEY);
+        if (sa) answers = JSON.parse(sa);
+        curQ     = parseInt(sessionStorage.getItem('cq_' + EXAM_KEY)) || 0;
+        timeLeft = parseInt(sessionStorage.getItem('tl_' + EXAM_KEY)) || TIME_LIMIT;
+        loadSec();
+        show('pg-exam');
+        startTimer(); renderTimer(); renderGrid(); renderQ();
+        resyncTimer();
+    }
+};
+
+function restoreResult(d) {
+    sName   = d.sName;
+    answers = d.answers;
+    show('pg-res');
+    document.getElementById('res-name').textContent  = d.sName;
+    document.getElementById('res-score').textContent = d.marks;
+
+    const pct = (d.marks / TOTAL_MARKS) * 100;
+    const gEl = document.getElementById('res-grade');
+    if (pct >= 90)      { gEl.style.cssText='background:#2f8f7d;color:#fff'; gEl.textContent='⭐ Excellent!'; }
+    else if (pct >= 70) { gEl.style.cssText='background:#c9a84a;color:#1a1508'; gEl.textContent='👍 Good'; }
+    else if (pct >= 50) { gEl.style.cssText='background:#d98a4a;color:#fff'; gEl.textContent='📚 Average'; }
+    else                { gEl.style.cssText='background:#e2685f;color:#fff'; gEl.textContent='❗ Needs Improvement'; }
+
+    let revHTML = '';
+    questions.forEach((q, i) => {
+        const ok   = answers[i] === q.ans;
+        const uAns = answers[i] !== null ? q.options[answers[i]] : 'Skipped';
+        revHTML += `<div class="rcard ${ok?'ok':''}">
+            <div class="rq">Q${i+1}: ${q.q}</div>
+            <div class="al">Your Answer: <span class="${ok?'ac':'aw'}">${uAns}</span></div>
+            <div class="al">Correct Answer: <span class="ac">${q.options[q.ans]}</span></div>
+            <div class="exp">💡 ${q.explain}</div>
+        </div>`;
+    });
+    document.getElementById('rev-cards').innerHTML = revHTML;
+
+    let fbHTML = '';
+    for (const t in d.topicMap) {
+        const td = d.topicMap[t];
+        const p  = (td.correct / td.total) * 100;
+        let icon, cls, msg;
+        if (p === 100)  { icon='✓'; cls='fi-m'; msg=`<strong>${t}</strong> — Mastery achieved!`; }
+        else if (p>=60) { icon='~'; cls='fi-s'; msg=`<strong>${t}</strong> — Good, review Q ${td.failedQ.join(', ')}.`; }
+        else            { icon='✗'; cls='fi-w'; msg=`<strong>${t}</strong> — Needs practice. Focus on Q ${td.failedQ.join(', ')}.`; }
+        fbHTML += `<div class="fb-row"><div class="fb-icon ${cls}">${icon}</div><div style="font-size:0.88rem;color:var(--text);line-height:1.6;">${msg}</div></div>`;
+    }
+    document.getElementById('ai-content').innerHTML = fbHTML;
+    if (window.MathJax) MathJax.typesetPromise();
+}
+</script>
+</body>
+</html>
