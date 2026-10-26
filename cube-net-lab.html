@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Fold cube nets in 3D and learn which faces are opposite. Bright Minds Academy.">
+<meta property="og:title" content="Cube Net Lab · Bright Minds Academy">
+<meta property="og:description" content="Fold the net, turn the cube, and find the opposite faces.">
+<meta property="og:type" content="website">
+<style>body{margin:0}img{max-width:100%}</style>
+<title>Cube Net Lab</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700;800&display=swap">
+</head>
+<body>
+<style>
+/* Layout: maths-notebook graph paper; 3D folding stage first, the lesson card beside it (stacks on phones). */
+:root{
+  --bg:#edf2fa; --grid:#d6e0ef; --panel:#ffffff; --line:#c9d5e8;
+  --ink:#1b2540; --muted:#5a6788; --accent:#2f56c9; --accent-ink:#ffffff;
+  --stage:#f7f9fd; --good:#1e8a5a; --good-bg:#dff4ea; --bad:#c2410c; --bad-bg:#fde8dc;
+  --p1:#ffd54a; --p2:#7fd8c4; --p3:#f7a6c8; --target:#a9c2ff;
+  --display:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
+  --body:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111726; --grid:#1b2438; --panel:#18203a; --line:#2a3656;
+  --ink:#e7ecf7; --muted:#9aa7c7; --accent:#86a3ff; --accent-ink:#0f1630;
+  --stage:#141c30; --good:#5fd39b; --good-bg:#173528; --bad:#ff9a6b; --bad-bg:#3a2218; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111726; --grid:#1b2438; --panel:#18203a; --line:#2a3656;
+  --ink:#e7ecf7; --muted:#9aa7c7; --accent:#86a3ff; --accent-ink:#0f1630;
+  --stage:#141c30; --good:#5fd39b; --good-bg:#173528; --bad:#ff9a6b; --bad-bg:#3a2218; color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:24px 24px}
+.wrap{max-width:1180px;margin:0 auto;padding-block:18px 40px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;flex-direction:column;gap:14px}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(28px,5vw,40px);line-height:1;margin:2px 0 0;text-wrap:balance}
+h1 span{color:var(--accent)}
+.intro{margin:4px 0 0;color:var(--muted);max-width:62ch}
+
+.netnav{display:flex;gap:8px;align-items:center}
+.nscroll{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 8px;scrollbar-width:thin;flex:1;min-width:0}
+.nchip{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 8px 4px;border-radius:10px;
+  border:1.5px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer;font:800 12px var(--body)}
+.nchip svg{display:block;height:30px;width:auto}
+.nchip svg rect{fill:var(--panel);stroke:var(--ink);stroke-width:1.4}
+.nchip[aria-current="true"]{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
+.nchip[aria-current="true"] svg rect{fill:var(--accent-ink);stroke:var(--accent-ink)}
+.arrow{flex:0 0 auto;width:38px;height:38px;border-radius:50%;border:1.5px solid var(--line);background:var(--panel);
+  color:var(--ink);font:800 18px var(--body);cursor:pointer}
+
+.main{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:820px){.main{grid-template-columns:1fr}}
+
+.stagebox{background:var(--panel);border:1.5px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.stage{position:relative;aspect-ratio:4/3.1;max-width:100%;background:var(--stage);touch-action:none;cursor:grab}
+.stage:active{cursor:grabbing}
+@media (max-width:520px){.stage{aspect-ratio:1/1}}
+.stage canvas{display:block;width:100%;height:100%}
+.caption{position:absolute;left:12px;right:12px;bottom:12px;pointer-events:none;display:flex;justify-content:center}
+.caption span{background:var(--panel);border:1.5px solid var(--line);border-radius:10px;padding:6px 12px;
+  font:700 clamp(15px,2.4vw,19px) var(--display);text-align:center;box-shadow:0 2px 8px rgb(0 0 0 / .08)}
+.caption span:empty{display:none}
+.caption span.good{border-color:var(--good);color:var(--good)}
+.caption span.bad{border-color:var(--bad);color:var(--bad)}
+.draghint{position:absolute;top:10px;right:12px;font-size:12px;font-weight:700;color:var(--muted);pointer-events:none}
+
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px;border-top:1.5px solid var(--line)}
+.btn{font:800 15px var(--body);padding:9px 16px;border-radius:10px;border:1.5px solid var(--line);background:var(--panel);
+  color:var(--ink);cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);min-width:118px}
+.btn[aria-pressed="true"]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.btn:focus-visible,.nchip:focus-visible,.arrow:focus-visible,.lchip:focus-visible,.tab:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.slider{display:flex;align-items:center;gap:8px;flex:1 1 180px;min-width:0;font-size:13px;font-weight:700;color:var(--muted)}
+.slider input{flex:1;min-width:0;accent-color:var(--accent)}
+
+.card{background:var(--panel);border:1.5px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border-radius:12px;background:var(--bg);border:1.5px solid var(--line)}
+.tab{font:800 15px var(--body);padding:8px;border-radius:9px;border:0;background:transparent;color:var(--muted);cursor:pointer}
+.tab[aria-selected="true"]{background:var(--panel);color:var(--ink);box-shadow:0 1px 4px rgb(0 0 0 / .12)}
+.nethead{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.netname{font:800 22px/1.1 var(--display);margin:0}
+.fam{font-size:13px;font-weight:800;color:var(--muted)}
+.prompt{font:700 clamp(18px,2.4vw,21px)/1.35 var(--display);margin:0;text-wrap:balance}
+.label{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.lchips{display:flex;flex-wrap:wrap;gap:8px}
+.lchip{width:48px;height:48px;border-radius:10px;border:2px solid var(--ink);background:#fff;color:#1b2540;
+  font:800 24px var(--display);cursor:pointer;line-height:1}
+.lchip:disabled{opacity:.35;cursor:default}
+.hint{border-left:4px solid var(--accent);background:var(--bg);border-radius:8px;padding:10px 12px;font-size:15px}
+.hint b{color:var(--accent)}
+.pairs{display:flex;flex-wrap:wrap;gap:8px}
+.pair{font:800 17px var(--display);padding:3px 12px;border-radius:8px;color:#1b2540;border:1.5px solid #1b254033}
+.score{font-weight:800;font-variant-numeric:tabular-nums}
+.rules{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:15px}
+.stack{display:flex;flex-direction:column;gap:8px}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Bright Minds Academy</div>
+    <h1>Cube Net <span>Lab</span></h1>
+    <p class="intro">A net is a flat shape that folds into a cube. Fold each net, turn the cube with your finger, and learn which faces end up opposite each other.</p>
+  </header>
+
+  <nav class="netnav" aria-label="Choose a net">
+    <button class="arrow" id="prev" aria-label="Previous net">‹</button>
+    <div class="nscroll" id="nlist"></div>
+    <button class="arrow" id="next" aria-label="Next net">›</button>
+  </nav>
+
+  <div class="main">
+    <section class="stagebox" aria-label="3D folding view">
+      <div class="stage" id="stage">
+        <div class="draghint">Drag to turn · Tap a face</div>
+        <div class="caption"><span id="caption"></span></div>
+      </div>
+      <div class="controls">
+        <button class="btn primary" id="fold">Fold ▸</button>
+        <label class="slider" for="tslider"><span>Flat</span><input id="tslider" type="range" min="0" max="100" value="0" aria-label="How much the net is folded"><span>Cube</span></label>
+        <button class="btn" id="allpairs" aria-pressed="false">Colour all pairs</button>
+        <button class="btn" id="see" aria-pressed="false">See-through</button>
+        <button class="btn" id="reset">Start again</button>
+      </div>
+    </section>
+
+    <section class="card" aria-live="polite">
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" id="tabLearn" aria-selected="true">Learn</button>
+        <button class="tab" role="tab" id="tabQuiz" aria-selected="false">Quiz me</button>
+      </div>
+      <div class="nethead"><h2 class="netname" id="netname"></h2><span class="fam" id="fam"></span></div>
+
+      <div id="learnBox" class="stack">
+        <p class="prompt">Tap a face to see which face is opposite it.</p>
+        <div class="lchips" id="lchipsL"></div>
+        <div class="hint" id="hint"></div>
+        <div id="pairbox" class="stack" hidden>
+          <span class="label">Opposite pairs</span>
+          <div class="pairs" id="pairs"></div>
+        </div>
+      </div>
+
+      <div id="quizBox" class="stack" hidden>
+        <p class="prompt" id="qprompt"></p>
+        <span class="label">Tap your answer</span>
+        <div class="lchips" id="lchipsQ"></div>
+        <div class="row" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <button class="btn primary" id="nextq" hidden>Next ▸</button>
+          <span class="score" id="score">Score: 0 / 0</span>
+        </div>
+      </div>
+
+      <div class="stack">
+        <span class="label">Remember</span>
+        <ol class="rules">
+          <li>In a straight line of squares, skip one. The two faces with one square between them are opposite.</li>
+          <li>Faces that touch in the net are never opposite.</li>
+          <li>Find two opposite pairs. The last two faces make the third pair.</li>
+        </ol>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+const FAMS={
+ '1-4-1':{name:'Long row of 4',hint:'<b>Tip:</b> Look at the long row of 4. Skip one square: the 1st and 3rd faces are opposite, and the 2nd and 4th faces are opposite. The square above the row and the square below the row are opposite.'},
+ '2-3-1':{name:'2 – 3 – 1 shape',hint:'<b>Tip:</b> Look at the row of 3. The two end faces are opposite. Faces that touch are never opposite, so find one more pair. The last two faces make the third pair.'},
+ '3-3':{name:'Two rows of 3',hint:'<b>Tip:</b> In each row of 3, the two end faces are opposite. The two faces left over make the third pair.'},
+ '2-2-2':{name:'Staircase',hint:'<b>Tip:</b> In a staircase, count 3 steps. Each face is opposite the face 3 steps after it.'}
+};
+// 11 different cube nets, each labelled with a 6-letter word in reading order
+const NETS=[
+ {fam:'1-4-1',net:{C:[1,0],L:[0,1],O:[1,1],U:[2,1],D:[3,1],Y:[1,2]}},
+ {fam:'1-4-1',net:{W:[1,0],I:[0,1],N:[1,1],T:[2,1],E:[3,1],R:[2,2]}},
+ {fam:'1-4-1',net:{P:[0,0],L:[0,1],A:[1,1],N:[2,1],E:[3,1],T:[0,2]}},
+ {fam:'1-4-1',net:{B:[0,0],R:[0,1],I:[1,1],G:[2,1],H:[3,1],T:[1,2]}},
+ {fam:'1-4-1',net:{G:[0,0],O:[0,1],L:[1,1],D:[2,1],E:[3,1],N:[2,2]}},
+ {fam:'1-4-1',net:{F:[0,0],A:[0,1],M:[1,1],O:[2,1],U:[3,1],S:[3,2]}},
+ {fam:'2-3-1',net:{J:[0,0],U:[1,0],M:[1,1],P:[2,1],E:[3,1],D:[1,2]}},
+ {fam:'2-3-1',net:{S:[0,0],P:[1,0],R:[1,1],I:[2,1],N:[3,1],G:[2,2]}},
+ {fam:'2-3-1',net:{H:[0,0],U:[1,0],N:[1,1],T:[2,1],E:[3,1],R:[3,2]}},
+ {fam:'3-3',net:{F:[0,0],R:[1,0],O:[2,0],S:[2,1],T:[3,1],Y:[4,1]}},
+ {fam:'2-2-2',net:{K:[0,0],I:[1,0],N:[1,1],D:[2,1],L:[2,2],Y:[3,2]}}
+];
+const PAPER='#ffffff', INK='#1b2540', BACK='#c9d3e3';
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const PAIRCOL=()=>[css('--p1')||'#ffd54a',css('--p2')||'#7fd8c4',css('--p3')||'#f7a6c8'];
+const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const SPEED=reduce?0.35:1;
+const $=id=>document.getElementById(id);
+
+/* ---------- three.js scene ---------- */
+const stage=$('stage');
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+renderer.outputEncoding=THREE.sRGBEncoding;
+stage.prepend(renderer.domElement);
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(32,1,0.1,100);
+scene.add(new THREE.AmbientLight(0xffffff,0.72));
+const dl=new THREE.DirectionalLight(0xffffff,0.42);dl.position.set(3,6,8);scene.add(dl);
+const container=new THREE.Group();scene.add(container);
+const inner=new THREE.Group();container.add(inner);
+const Y=new THREE.Vector3(0,1,0),X=new THREE.Vector3(1,0,0);
+const TILT=new THREE.Quaternion().setFromAxisAngle(Y,-0.58);
+const FRONT=new THREE.Vector3(0.5,0,1).normalize();
+const planeGeo=new THREE.PlaneGeometry(1,1);
+const edgeGeo=new THREE.EdgesGeometry(planeGeo);
+const raycaster=new THREE.Raycaster();
+
+const S={ni:0,t:0,viewQ:new THREE.Quaternion(),userMoved:false,all:false,sel:null,see:false,job:0,faces:{},pairs:[],opp:{},
+  netW:3,netH:4,axisLine:null,mode:'learn',quiz:{target:null,answered:false,last:null},right:0,total:0,pickables:[]};
+
+function makeFace(letter){
+  const cv=document.createElement('canvas');cv.width=cv.height=256;
+  const tex=new THREE.CanvasTexture(cv);tex.encoding=THREE.sRGBEncoding;tex.anisotropy=4;
+  const front=new THREE.MeshLambertMaterial({map:tex});
+  const back=new THREE.MeshLambertMaterial({color:BACK});
+  const g=new THREE.Group();
+  const fm=new THREE.Mesh(planeGeo,front);fm.userData.k=letter;
+  const bm=new THREE.Mesh(planeGeo,back);bm.rotation.y=Math.PI;bm.position.z=-0.004;bm.userData.k=letter;
+  const em=new THREE.LineSegments(edgeGeo,new THREE.LineBasicMaterial({color:INK}));em.position.z=0.003;
+  g.add(fm,bm,em);
+  return {g,cv,tex,front,back,fm,bm,letter};
+}
+function drawFace(f,color){
+  const c=f.cv.getContext('2d');
+  c.fillStyle=color;c.fillRect(0,0,256,256);
+  c.lineWidth=10;c.strokeStyle=INK;c.strokeRect(5,5,246,246);
+  c.fillStyle=INK;c.textAlign='center';c.textBaseline='middle';
+  c.font='800 170px "Baloo 2","Trebuchet MS",sans-serif';
+  c.fillText(f.letter,128,140);
+  f.tex.needsUpdate=true;
+}
+
+function build(){
+  const N=NETS[S.ni];
+  while(inner.children.length)inner.remove(inner.children[0]);
+  const cells={};for(const [k,[x,y]] of Object.entries(N.net))cells[x+','+y]=k;
+  const nb=(x,y)=>[[1,0],[-1,0],[0,1],[0,-1]].map(([dx,dy])=>[dx,dy,cells[(x+dx)+','+(y+dy)]]).filter(a=>a[2]);
+  let root=null,best=-1;
+  for(const [k,[x,y]] of Object.entries(N.net)){const n=nb(x,y).length;if(n>best){best=n;root=k}}
+  const faces={};S.pickables=[];
+  const mk=(k,parentPivot,pos,c,axis)=>{
+    const pivot=new THREE.Group();pivot.position.copy(pos);parentPivot.add(pivot);
+    const f=makeFace(k);f.g.position.copy(c);pivot.add(f.g);S.pickables.push(f.fm,f.bm);
+    Object.assign(f,{pivot,c,axis,p:new THREE.Vector3(),n:new THREE.Vector3()});faces[k]=f;return f;
+  };
+  mk(root,inner,new THREE.Vector3(),new THREE.Vector3(),null);
+  const queue=[root];
+  while(queue.length){
+    const k=queue.shift();const [x,y]=N.net[k];const pf=faces[k];
+    for(const [dx,dy,g] of nb(x,y)){
+      if(faces[g])continue;
+      const d=new THREE.Vector3(dx,-dy,0);
+      const axis=d.clone().cross(new THREE.Vector3(0,0,-1)).normalize();
+      mk(g,pf.pivot,pf.c.clone().addScaledVector(d,0.5),d.clone().multiplyScalar(0.5),axis);
+      queue.push(g);
+    }
+  }
+  S.faces=faces;
+  applyT(1,true);
+  const keys=Object.keys(faces),mean=new THREE.Vector3();
+  keys.forEach(k=>mean.add(faces[k].p));mean.divideScalar(6);
+  keys.forEach(k=>faces[k].n.copy(faces[k].p).sub(mean).normalize());
+  const opp={};
+  keys.forEach(a=>keys.forEach(b=>{if(faces[a].n.dot(faces[b].n)<-0.9)opp[a]=b}));
+  const seen=new Set(),pairs=[];
+  keys.forEach(a=>{if(!seen.has(a)){seen.add(a);seen.add(opp[a]);pairs.push([a,opp[a]])}});
+  S.pairs=pairs;S.opp=opp;
+  const lg=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(),new THREE.Vector3()]);
+  S.axisLine=new THREE.Line(lg,new THREE.LineDashedMaterial({color:INK,dashSize:0.08,gapSize:0.06,depthTest:false,transparent:true}));
+  S.axisLine.visible=false;S.axisLine.renderOrder=10;inner.add(S.axisLine);
+  const xs=Object.values(N.net).map(a=>a[0]),ys=Object.values(N.net).map(a=>a[1]);
+  S.netW=Math.max(...xs)-Math.min(...xs)+1;S.netH=Math.max(...ys)-Math.min(...ys)+1;
+  applyT(0);
+  paint();applySee();
+}
+
+function applyT(t,quiet){
+  S.t=t;
+  for(const f of Object.values(S.faces)){if(f.axis)f.pivot.setRotationFromAxisAngle(f.axis,t*Math.PI/2)}
+  inner.position.set(0,0,0);container.updateMatrixWorld(true);
+  const mean=new THREE.Vector3();
+  for(const f of Object.values(S.faces)){
+    const v=new THREE.Vector3().applyMatrix4(f.g.matrixWorld);inner.worldToLocal(v);f.p.copy(v);mean.add(v);
+  }
+  mean.divideScalar(6);inner.position.copy(mean).negate();
+  if(quiet)return;
+  if(!S.userMoved)S.viewQ.copy(new THREE.Quaternion()).slerp(TILT,t);
+  fit();
+  $('tslider').value=Math.round(t*100);
+  $('fold').textContent=t>0.5?'◂ Unfold':'Fold ▸';
+  updateAxis();
+}
+function updateAxis(){
+  if(!S.axisLine)return;
+  const a=S.sel,show=S.see&&a&&S.t>0.97;
+  S.axisLine.visible=!!show;
+  if(show){S.axisLine.geometry.setFromPoints([S.faces[a].p.clone(),S.faces[S.opp[a]].p.clone()]);S.axisLine.computeLineDistances();}
+}
+function colorOf(k){
+  const cols=PAIRCOL();
+  const idx=S.pairs.findIndex(p=>p.includes(k));
+  if(S.mode==='quiz'&&!S.quiz.answered){return k===S.quiz.target?(css('--target')||'#a9c2ff'):PAPER}
+  if(S.all)return cols[idx];
+  if(S.sel&&(S.sel===k||S.opp[S.sel]===k))return cols[idx];
+  return PAPER;
+}
+function paint(){
+  for(const [k,f] of Object.entries(S.faces))drawFace(f,colorOf(k));
+  document.querySelectorAll('.lchip').forEach(b=>{b.style.background=colorOf(b.dataset.k)});
+  const cols=PAIRCOL();
+  $('pairbox').hidden=!S.all;
+  $('pairs').innerHTML=S.pairs.map((p,i)=>`<span class="pair" style="background:${cols[i]}">${p[0]} ↔ ${p[1]}</span>`).join('');
+  $('allpairs').setAttribute('aria-pressed',S.all);
+  updateAxis();
+}
+function applySee(){
+  for(const f of Object.values(S.faces)){
+    [f.front,f.back].forEach(m=>{m.transparent=S.see;m.opacity=S.see?0.5:1;m.depthWrite=!S.see;m.side=S.see?THREE.DoubleSide:THREE.FrontSide;m.needsUpdate=true});
+  }
+  $('see').setAttribute('aria-pressed',S.see);updateAxis();
+}
+function fit(){
+  const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;
+  renderer.setSize(w,h,false);camera.aspect=w/h;
+  const tan=Math.tan(THREE.MathUtils.degToRad(camera.fov/2));
+  const t=S.t,eh=S.netH+(2.1-S.netH)*t,ew=S.netW+(2.1-S.netW)*t;
+  const need=Math.max(Math.max(eh,2.1)/2/tan,Math.max(ew,2.1)/2/(tan*camera.aspect))*1.28+0.6;
+  camera.position.set(0,need*0.28,need);camera.lookAt(0,0,0);camera.updateProjectionMatrix();
+}
+new ResizeObserver(fit).observe(stage);
+
+/* ---------- animation helpers ---------- */
+const ease=x=>x<.5?2*x*x:1-Math.pow(-2*x+2,2)/2;
+function tween(ms,fn,job){
+  return new Promise(res=>{
+    const t0=performance.now();ms*=SPEED;
+    const step=now=>{
+      if(job!==S.job)return res(false);
+      const x=Math.min(1,(now-t0)/ms);fn(ease(x));
+      if(x<1)requestAnimationFrame(step);else res(true);
+    };requestAnimationFrame(step);
+  });
+}
+const wait=(ms,job)=>new Promise(r=>setTimeout(()=>r(job===S.job),ms*SPEED));
+function caption(t,cls){const c=$('caption');c.textContent=t;c.className=cls||''}
+
+async function foldTo(target,job){
+  const from=S.t;if(Math.abs(target-from)<0.001)return true;
+  return tween(1900*Math.abs(target-from),e=>applyT(from+(target-from)*e),job);
+}
+async function onFold(){
+  const job=++S.job;const target=S.t>0.5?0:1;
+  caption(target?'Folding the net…':'Opening the net…');
+  const ok=await foldTo(target,job);
+  if(ok)caption(target?'Now it is a cube. Tap a face to find its opposite.':'This is the flat net.');
+}
+function frontQuat(k){
+  const n=S.faces[k].n.clone();
+  let up=null,best=-9;
+  for(const g of Object.values(S.faces)){
+    if(Math.abs(g.n.dot(n))>0.1)continue;
+    const y=g.n.clone().applyQuaternion(S.viewQ).y;if(y>best){best=y;up=g.n.clone()}
+  }
+  const src=new THREE.Matrix4().makeBasis(n,up,n.clone().cross(up));
+  const dst=new THREE.Matrix4().makeBasis(FRONT,Y,FRONT.clone().cross(Y));
+  return new THREE.Quaternion().setFromRotationMatrix(dst.multiply(src.transpose()));
+}
+async function showOpposite(k,endText,endCls){
+  const job=++S.job;
+  S.sel=k;paint();
+  const b=S.opp[k];
+  const r=stage.getBoundingClientRect();
+  if(r.top<0||r.bottom>window.innerHeight)stage.scrollIntoView({block:'nearest',behavior:reduce?'auto':'smooth'});
+  if(S.t<1){caption('Folding the net…');if(!await foldTo(1,job))return;}
+  S.userMoved=true;
+  caption(`Find ${k}…`);
+  const q0=S.viewQ.clone(),q1=frontQuat(k);
+  if(!await tween(900,e=>S.viewQ.copy(q0).slerp(q1,e),job))return;
+  caption(`This is ${k}. Now turn the cube around…`);
+  if(!await wait(900,job))return;
+  const turn=new THREE.Quaternion();
+  if(!await tween(1600,e=>{turn.setFromAxisAngle(Y,Math.PI*e);S.viewQ.copy(turn).multiply(q1)},job))return;
+  caption(endText||`${b} is on the opposite side of ${k}.`,endCls);
+}
+
+/* ---------- quiz ---------- */
+function newQuiz(){
+  S.job++;
+  const keys=Object.keys(S.faces).filter(k=>k!==S.quiz.last);
+  const k=keys[Math.floor(Math.random()*keys.length)];
+  S.quiz={target:k,answered:false,last:k};S.sel=null;S.all=false;S.userMoved=false;S.viewQ.identity();
+  applyT(0);paint();
+  $('qprompt').textContent=`Look at the flat net. Which face will be opposite ${k}?`;
+  $('nextq').hidden=true;
+  document.querySelectorAll('#lchipsQ .lchip').forEach(b=>{b.disabled=b.dataset.k===k});
+  caption(`Which face is opposite ${k}? Think first, then tap.`);
+}
+function answer(k){
+  const q=S.quiz;if(S.mode!=='quiz'||q.answered||k===q.target)return;
+  q.answered=true;S.total++;
+  const ok=S.opp[q.target]===k;if(ok)S.right++;
+  $('score').textContent=`Score: ${S.right} / ${S.total}`;
+  document.querySelectorAll('#lchipsQ .lchip').forEach(b=>{b.disabled=true});
+  $('nextq').hidden=false;
+  const b=S.opp[q.target];
+  showOpposite(q.target,ok?`Well done! ${b} is opposite ${q.target}.`:`Not ${k}. Look: ${b} is opposite ${q.target}.`,ok?'good':'bad');
+}
+
+/* ---------- drag and tap ---------- */
+let drag=null;
+stage.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,sx:e.clientX,sy:e.clientY,moved:false};stage.setPointerCapture(e.pointerId)});
+stage.addEventListener('pointermove',e=>{
+  if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;drag.x=e.clientX;drag.y=e.clientY;
+  if(!drag.moved&&Math.hypot(e.clientX-drag.sx,e.clientY-drag.sy)<6)return;
+  if(!drag.moved){drag.moved=true;S.job++;}
+  S.userMoved=true;
+  S.viewQ.premultiply(new THREE.Quaternion().setFromAxisAngle(Y,dx*0.011));
+  S.viewQ.premultiply(new THREE.Quaternion().setFromAxisAngle(X,dy*0.011));
+});
+stage.addEventListener('pointerup',e=>{
+  if(drag&&!drag.moved){
+    const r=renderer.domElement.getBoundingClientRect();
+    const v=new THREE.Vector2(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1);
+    raycaster.setFromCamera(v,camera);
+    const hit=raycaster.intersectObjects(S.pickables,false)[0];
+    if(hit)tapFace(hit.object.userData.k);
+  }
+  drag=null;
+});
+stage.addEventListener('pointercancel',()=>{drag=null});
+function tapFace(k){if(S.mode==='quiz')answer(k);else showOpposite(k)}
+
+function loop(){container.quaternion.copy(S.viewQ);renderer.render(scene,camera);requestAnimationFrame(loop)}
+
+/* ---------- UI ---------- */
+function thumb(net){
+  const pts=Object.values(net),w=Math.max(...pts.map(p=>p[0]))+1,h=Math.max(...pts.map(p=>p[1]))+1,s=10;
+  return `<svg viewBox="-1 -1 ${w*s+2} ${h*s+2}" width="${w*s+2}" height="${h*s+2}" aria-hidden="true">${pts.map(([x,y])=>`<rect x="${x*s}" y="${y*s}" width="${s}" height="${s}"/>`).join('')}</svg>`;
+}
+function renderList(){
+  $('nlist').innerHTML=NETS.map((n,i)=>`<button class="nchip" data-i="${i}" aria-current="${i===S.ni}" aria-label="Net ${i+1}">${thumb(n.net)}<span>Net ${i+1}</span></button>`).join('');
+  const cur=$('nlist').querySelector('[aria-current="true"]');
+  if(cur)cur.scrollIntoView({block:'nearest',inline:'center',behavior:reduce?'auto':'smooth'});
+}
+function renderCard(){
+  const N=NETS[S.ni];
+  $('netname').textContent=`Net ${S.ni+1} of ${NETS.length}`;
+  $('fam').textContent=FAMS[N.fam].name;
+  $('hint').innerHTML=FAMS[N.fam].hint;
+  const chips=Object.keys(N.net).map(k=>`<button class="lchip" data-k="${k}" aria-label="Face ${k}">${k}</button>`).join('');
+  $('lchipsL').innerHTML=chips;$('lchipsQ').innerHTML=chips;
+}
+function setMode(m){
+  S.mode=m;
+  $('tabLearn').setAttribute('aria-selected',m==='learn');$('tabQuiz').setAttribute('aria-selected',m==='quiz');
+  $('learnBox').hidden=m!=='learn';$('quizBox').hidden=m!=='quiz';
+  $('allpairs').hidden=m==='quiz';
+  if(m==='quiz'){newQuiz()}
+  else{S.job++;S.sel=null;S.all=false;S.userMoved=false;applyT(0);paint();caption('Press Fold to fold this net into a cube.')}
+}
+function load(i,keepHash){
+  S.job++;S.ni=(i+NETS.length)%NETS.length;
+  Object.assign(S,{t:0,userMoved:false,all:false,sel:null,see:false});
+  S.quiz.last=null;S.viewQ.identity();
+  renderList();renderCard();build();
+  setMode(S.mode);
+  if(!keepHash){try{history.replaceState(null,'','#net'+(S.ni+1))}catch(e){}}
+}
+
+$('nlist').addEventListener('click',e=>{const b=e.target.closest('.nchip');if(b)load(+b.dataset.i)});
+$('prev').onclick=()=>load(S.ni-1);$('next').onclick=()=>load(S.ni+1);
+$('fold').onclick=onFold;
+$('tslider').addEventListener('input',e=>{S.job++;applyT(e.target.value/100);caption('')});
+$('allpairs').onclick=()=>{S.all=!S.all;paint()};
+$('see').onclick=()=>{S.see=!S.see;applySee()};
+$('reset').onclick=()=>{S.see=false;applySee();setMode(S.mode)};
+$('tabLearn').onclick=()=>setMode('learn');$('tabQuiz').onclick=()=>setMode('quiz');
+$('nextq').onclick=newQuiz;
+$('lchipsL').addEventListener('click',e=>{const b=e.target.closest('.lchip');if(b)showOpposite(b.dataset.k)});
+$('lchipsQ').addEventListener('click',e=>{const b=e.target.closest('.lchip');if(b&&!b.disabled)answer(b.dataset.k)});
+document.addEventListener('keydown',e=>{
+  if(e.target.matches('input'))return;
+  if(e.key==='ArrowRight')load(S.ni+1);else if(e.key==='ArrowLeft')load(S.ni-1);
+});
+
+const m=/^#net(\d+)$/.exec(location.hash||'');
+load(m?Math.min(NETS.length,Math.max(1,+m[1]))-1:0,true);
+loop();
+if(document.fonts&&document.fonts.load){document.fonts.load('800 170px "Baloo 2"').then(()=>paint()).catch(()=>{})}
+})();
+</script>
+
+</body>
+</html>
