@@ -91,8 +91,8 @@ h1 span{color:var(--accent)}
 .fam{font-size:13px;font-weight:800;color:var(--muted)}
 .prompt{font:700 clamp(18px,2.4vw,21px)/1.35 var(--display);margin:0;text-wrap:balance}
 .label{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.lchips{display:flex;flex-wrap:wrap;gap:8px}
-.lchip{width:48px;height:48px;border-radius:10px;border:2px solid var(--ink);background:#fff;color:#1b2540;
+.lchips{display:grid;grid-template-columns:repeat(var(--cols,6),52px);grid-auto-rows:52px;gap:6px;justify-content:start;max-width:100%}
+.lchip{width:52px;height:52px;border-radius:10px;border:2px solid var(--ink);background:#fff;color:#1b2540;
   font:800 24px var(--display);cursor:pointer;line-height:1}
 .lchip:disabled{opacity:.35;cursor:default}
 .hint{border-left:4px solid var(--accent);background:var(--bg);border-radius:8px;padding:10px 12px;font-size:15px}
@@ -462,8 +462,9 @@ function renderCard(){
   $('netname').textContent=`Net ${S.ni+1} of ${NETS.length}`;
   $('fam').textContent=FAMS[N.fam].name;
   $('hint').innerHTML=FAMS[N.fam].hint;
-  const chips=Object.keys(N.net).map(k=>`<button class="lchip" data-k="${k}" aria-label="Face ${k}">${k}</button>`).join('');
-  $('lchipsL').innerHTML=chips;$('lchipsQ').innerHTML=chips;
+  const chips=Object.entries(N.net).map(([k,[x,y]])=>`<button class="lchip" data-k="${k}" style="grid-column:${x+1};grid-row:${y+1}" aria-label="Face ${k}">${k}</button>`).join('');
+  const cols=Math.max(...Object.values(N.net).map(a=>a[0]))+1;
+  ['lchipsL','lchipsQ'].forEach(id=>{$(id).innerHTML=chips;$(id).style.setProperty('--cols',cols)});
 }
 function setMode(m){
   S.mode=m;
